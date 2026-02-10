@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>어디아파 - 와이어프레임</title>
+    <title>어디아파 - 와이어프레임 v2.0</title>
     <style>
         * {
             margin: 0;
@@ -31,12 +31,22 @@
             margin-bottom: 30px;
         }
 
+        .version-badge {
+            display: inline-block;
+            background: #4CAF50;
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
         .wireframe-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 30px;
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
@@ -89,6 +99,14 @@
 
         .screen-title.purple {
             background: #9C27B0;
+        }
+
+        .screen-title.red {
+            background: #D32F2F;
+        }
+
+        .screen-title.teal {
+            background: #00897B;
         }
 
         .screen-content {
@@ -209,6 +227,10 @@
 
         .btn.blue {
             background: #2196F3;
+        }
+
+        .btn.red {
+            background: #D32F2F;
         }
 
         .btn.outline {
@@ -351,6 +373,11 @@
             font-weight: 600;
         }
 
+        .interaction-badge.critical {
+            background: #B71C1C;
+            color: #fff;
+        }
+
         .interaction-badge.danger {
             background: #FFEBEE;
             color: #D32F2F;
@@ -361,9 +388,19 @@
             color: #FF9800;
         }
 
+        .interaction-badge.caution {
+            background: #FFF8E1;
+            color: #F9A825;
+        }
+
         .interaction-badge.safe {
             background: #E8F5E9;
             color: #4CAF50;
+        }
+
+        .interaction-badge.unknown {
+            background: #ECEFF1;
+            color: #607D8B;
         }
 
         .urgency-box {
@@ -382,6 +419,21 @@
         .urgency-box.danger {
             background: #FFEBEE;
             border-left-color: #D32F2F;
+        }
+
+        .urgency-box.info {
+            background: #E3F2FD;
+            border-left-color: #2196F3;
+        }
+
+        .disclaimer {
+            background: #ECEFF1;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            color: #607D8B;
+            margin: 10px 0;
+            text-align: center;
         }
 
         .chat-bubble {
@@ -499,6 +551,91 @@
             align-self: center;
         }
 
+        .onboarding-step {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .step-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+
+        .step-dot.active {
+            background: #4CAF50;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .form-select {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .select-option {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .select-option.selected {
+            background: #4CAF50;
+            color: #fff;
+            border-color: #4CAF50;
+        }
+
+        .emergency-icon {
+            font-size: 60px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .emergency-text {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: #D32F2F;
+            margin-bottom: 15px;
+        }
+
+        .risk-levels {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .risk-level {
+            flex: 1;
+            text-align: center;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 9px;
+        }
+
         @media (max-width: 768px) {
             .wireframe-container {
                 flex-direction: column;
@@ -512,11 +649,181 @@
     </style>
 </head>
 <body>
-    <h1>🏥 어디아파</h1>
-    <p class="subtitle">헬스케어 앱 와이어프레임 v1.0</p>
+    <h1>어디아파 <span class="version-badge">v2.0</span></h1>
+    <p class="subtitle">헬스케어 앱 와이어프레임 (전문가 검토 반영)</p>
+
+    <!-- Flow 0: 온보딩 -->
+    <h2 style="color:#fff; text-align:center; margin: 30px 0 20px;">신규 사용자 온보딩</h2>
+
+    <div class="wireframe-container">
+        <!-- Onboarding 1: 앱 소개 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:40</span>
+                        <span></span>
+                    </div>
+                    <div class="screen-content" style="height: calc(100% - 35px); display:flex; flex-direction:column; justify-content:center;">
+                        <div class="onboarding-step">
+                            <div class="step-dot active"></div>
+                            <div class="step-dot"></div>
+                            <div class="step-dot"></div>
+                        </div>
+
+                        <div style="text-align:center; font-size:60px; margin:20px 0;">
+
+                        </div>
+
+                        <h2 style="text-align:center; font-size:22px; margin-bottom:10px;">어디아파</h2>
+                        <p style="text-align:center; color:#666; font-size:14px; margin-bottom:20px;">
+                            증상 확인부터 병원 연결까지<br>건강 정보 가이드
+                        </p>
+
+                        <div class="disclaimer" style="margin:20px 15px;">
+                            본 앱은 건강 정보 검색 서비스입니다.<br>
+                            의료 전문가의 진단이나 처방을 대체하지 않습니다.
+                        </div>
+
+                        <div style="padding:0 15px;">
+                            <button class="btn">시작하기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">온보딩 1. 앱 소개</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- Onboarding 2: 기본 정보 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:40</span>
+                        <span></span>
+                    </div>
+                    <div class="screen-title teal">기본 정보 입력</div>
+                    <div class="screen-content">
+                        <div class="onboarding-step">
+                            <div class="step-dot"></div>
+                            <div class="step-dot active"></div>
+                            <div class="step-dot"></div>
+                        </div>
+
+                        <p style="font-size:13px; color:#666; margin-bottom:20px;">
+                            맞춤 정보 제공을 위해 기본 정보를 입력해주세요.
+                        </p>
+
+                        <div class="form-group">
+                            <label class="form-label">연령대 *</label>
+                            <div class="form-select">
+                                <span class="select-option">10대</span>
+                                <span class="select-option">20대</span>
+                                <span class="select-option selected">30대</span>
+                                <span class="select-option">40대</span>
+                                <span class="select-option">50대</span>
+                                <span class="select-option">60대+</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">성별 *</label>
+                            <div class="form-select">
+                                <span class="select-option selected">남성</span>
+                                <span class="select-option">여성</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">임부/수유부 여부</label>
+                            <div class="form-select">
+                                <span class="select-option selected">해당없음</span>
+                                <span class="select-option">임신중</span>
+                                <span class="select-option">수유중</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">기저질환 (복수 선택)</label>
+                            <div class="form-select">
+                                <span class="select-option">없음</span>
+                                <span class="select-option selected">고혈압</span>
+                                <span class="select-option selected">당뇨</span>
+                                <span class="select-option">심장질환</span>
+                                <span class="select-option">간질환</span>
+                                <span class="select-option">신장질환</span>
+                            </div>
+                        </div>
+
+                        <button class="btn" style="background:#00897B;">다음</button>
+                        <button class="btn outline" style="color:#888; border-color:#ddd;">나중에 입력</button>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">온보딩 2. 기본 정보</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- Onboarding 3: 알림 설정 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:40</span>
+                        <span></span>
+                    </div>
+                    <div class="screen-title teal">알림 설정</div>
+                    <div class="screen-content">
+                        <div class="onboarding-step">
+                            <div class="step-dot"></div>
+                            <div class="step-dot"></div>
+                            <div class="step-dot active"></div>
+                        </div>
+
+                        <p style="font-size:13px; color:#666; margin-bottom:20px;">
+                            복약 알림 등 유용한 알림을 받아보세요.
+                        </p>
+
+                        <div class="card">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div class="card-title">복약 알림</div>
+                                    <div class="card-subtitle">약 복용 시간에 알려드려요</div>
+                                </div>
+                                <div class="toggle"></div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div class="card-title">건강 팁 알림</div>
+                                    <div class="card-subtitle">계절별 건강 정보를 보내드려요</div>
+                                </div>
+                                <div class="toggle" style="background:#ccc;"></div>
+                            </div>
+                        </div>
+
+                        <div class="urgency-box info" style="margin-top:30px;">
+                            <strong>오프라인에서도 작동해요</strong>
+                            <p style="font-size:12px; margin-top:5px;">
+                                복약 알림은 인터넷 연결 없이도<br>정상적으로 작동합니다.
+                            </p>
+                        </div>
+
+                        <button class="btn" style="background:#00897B; margin-top:30px;">완료</button>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">온보딩 3. 알림 설정</div>
+        </div>
+    </div>
 
     <!-- Flow 1: 메인 화면 -->
-    <h2 style="color:#fff; text-align:center; margin: 30px 0 20px;">📱 메인 플로우</h2>
+    <h2 style="color:#fff; text-align:center; margin: 50px 0 20px;">메인 플로우</h2>
 
     <div class="wireframe-container">
         <!-- Screen 1: 홈 -->
@@ -525,66 +832,69 @@
                 <div class="phone-screen">
                     <div class="status-bar">
                         <span>9:41</span>
-                        <span>📶 🔋</span>
+                        <span></span>
                     </div>
                     <div class="screen-title">어디아파</div>
                     <div class="screen-content">
                         <div class="search-box">
-                            <span>🔍</span>
+                            <span></span>
                             <input type="text" placeholder="어디가 불편하세요?">
-                            <span>🎤</span>
+                            <span></span>
                         </div>
 
                         <div class="quick-menu">
                             <div class="quick-item">
-                                <div class="quick-icon">🩺</div>
+                                <div class="quick-icon"></div>
                                 <div class="quick-text">증상체크</div>
                             </div>
                             <div class="quick-item">
-                                <div class="quick-icon">🏥</div>
+                                <div class="quick-icon"></div>
                                 <div class="quick-text">병원찾기</div>
                             </div>
                             <div class="quick-item">
-                                <div class="quick-icon">💊</div>
-                                <div class="quick-text">약체크</div>
+                                <div class="quick-icon"></div>
+                                <div class="quick-text">약정보</div>
                             </div>
                             <div class="quick-item">
-                                <div class="quick-icon">⏰</div>
+                                <div class="quick-icon"></div>
                                 <div class="quick-text">복약알림</div>
                             </div>
                         </div>
 
-                        <div class="section-title">💡 오늘의 건강 팁</div>
+                        <div class="section-title">오늘의 건강 팁</div>
                         <div class="card">
                             <div class="card-title">환절기 감기 예방법</div>
                             <div class="card-subtitle">손씻기와 충분한 수면이 중요해요</div>
                         </div>
 
-                        <div class="section-title">📍 내 주변 병원</div>
+                        <div class="section-title">내 주변 병원</div>
                         <div class="hospital-card">
                             <div class="hospital-name">서울내과의원</div>
-                            <div class="hospital-info">📍 350m · 내과 · 영업중</div>
+                            <div class="hospital-info">350m · 내과 · 영업중</div>
                             <div class="hospital-tags">
-                                <span class="hospital-tag">⭐ 4.8</span>
-                                <span class="hospital-tag wait">대기 3명</span>
+                                <span class="hospital-tag">4.8</span>
                             </div>
+                        </div>
+
+                        <div class="disclaimer">
+                            본 앱은 건강 정보 제공 목적이며<br>의료 진단을 대체하지 않습니다
                         </div>
                     </div>
                     <div class="nav-bar">
                         <div class="nav-item active">
-                            <div class="nav-icon">🏠</div>
+                            <div class="nav-icon"></div>
                             <div>홈</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">🩺</div>
+                            <div class="nav-icon"></div>
                             <div>증상</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">💊</div>
+                            <div class="nav-icon"></div>
                             <div>내 약</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">👤</div>
+                            <div class="nav-icon"></div>
                             <div>MY</div>
                         </div>
                     </div>
@@ -601,7 +911,7 @@
                 <div class="phone-screen">
                     <div class="status-bar">
                         <span>9:41</span>
-                        <span>📶 🔋</span>
+                        <span></span>
                     </div>
                     <div class="screen-title">증상 체크</div>
                     <div class="screen-content" style="height: calc(100% - 170px);">
@@ -610,13 +920,13 @@
                         <div class="body-map">
                             <div class="body-head"></div>
                         </div>
-                        <p style="text-align:center; font-size:12px; color:#888;">👆 아픈 부위를 터치하세요</p>
+                        <p style="text-align:center; font-size:12px; color:#888;">아픈 부위를 터치하세요</p>
 
                         <div class="section-title">선택된 증상</div>
                         <div>
-                            <span class="symptom-tag">🤕 두통</span>
-                            <span class="symptom-tag">🤧 콧물</span>
-                            <span class="symptom-tag">🌡️ 발열</span>
+                            <span class="symptom-tag">두통</span>
+                            <span class="symptom-tag">콧물</span>
+                            <span class="symptom-tag">발열</span>
                         </div>
 
                         <div class="section-title">자주 검색되는 증상</div>
@@ -633,19 +943,19 @@
                     </div>
                     <div class="nav-bar">
                         <div class="nav-item">
-                            <div class="nav-icon">🏠</div>
+                            <div class="nav-icon"></div>
                             <div>홈</div>
                         </div>
                         <div class="nav-item active">
-                            <div class="nav-icon">🩺</div>
+                            <div class="nav-icon"></div>
                             <div>증상</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">💊</div>
+                            <div class="nav-icon"></div>
                             <div>내 약</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">👤</div>
+                            <div class="nav-icon"></div>
                             <div>MY</div>
                         </div>
                     </div>
@@ -662,12 +972,12 @@
                 <div class="phone-screen">
                     <div class="status-bar">
                         <span>9:42</span>
-                        <span>📶 🔋</span>
+                        <span></span>
                     </div>
-                    <div class="screen-title blue">AI 문진</div>
+                    <div class="screen-title blue">AI 정보 검색</div>
                     <div class="screen-content" style="height: calc(100% - 170px);">
                         <div class="chat-bubble">
-                            안녕하세요! 증상을 더 정확히 파악하기 위해 몇 가지 질문드릴게요. 🤖
+                            안녕하세요! 더 정확한 정보 검색을 위해 몇 가지 질문드릴게요.
                         </div>
 
                         <div class="chat-bubble">
@@ -697,7 +1007,7 @@
                         </div>
 
                         <div class="chat-bubble">
-                            알겠습니다! 분석 중입니다... 🔍
+                            알겠습니다! 정보를 검색 중입니다...
                         </div>
                     </div>
                     <div class="input-area">
@@ -706,25 +1016,25 @@
                     </div>
                     <div class="nav-bar">
                         <div class="nav-item">
-                            <div class="nav-icon">🏠</div>
+                            <div class="nav-icon"></div>
                             <div>홈</div>
                         </div>
                         <div class="nav-item active">
-                            <div class="nav-icon">🩺</div>
+                            <div class="nav-icon"></div>
                             <div>증상</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">💊</div>
+                            <div class="nav-icon"></div>
                             <div>내 약</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">👤</div>
+                            <div class="nav-icon"></div>
                             <div>MY</div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="screen-label">3. AI 문진</div>
+            <div class="screen-label">3. AI 정보 검색</div>
         </div>
 
         <div class="flow-arrow">→</div>
@@ -735,71 +1045,128 @@
                 <div class="phone-screen">
                     <div class="status-bar">
                         <span>9:43</span>
-                        <span>📶 🔋</span>
+                        <span></span>
                     </div>
-                    <div class="screen-title">분석 결과</div>
+                    <div class="screen-title">정보 검색 결과</div>
                     <div class="screen-content">
                         <div class="urgency-box warning">
-                            <strong>⚠️ 진료 권장</strong>
+                            <strong>의료기관 방문 권장</strong>
                             <p style="font-size:12px; margin-top:5px;">1~2일 내 병원 방문을 권장합니다</p>
                         </div>
 
-                        <div class="section-title">예상 증상</div>
+                        <div class="section-title">관련 가능 상태 (참고용)</div>
                         <div class="card">
                             <div class="result-item">
                                 <span class="result-name">감기 (급성 상기도 감염)</span>
-                                <span class="result-percent high">78%</span>
+                                <span class="result-percent">참고</span>
                             </div>
                             <div class="result-item">
                                 <span class="result-name">독감 (인플루엔자)</span>
-                                <span class="result-percent">62%</span>
+                                <span class="result-percent">참고</span>
                             </div>
                             <div class="result-item">
                                 <span class="result-name">편도염</span>
-                                <span class="result-percent">35%</span>
+                                <span class="result-percent">참고</span>
                             </div>
                         </div>
 
-                        <div class="section-title">추천 진료과</div>
+                        <div class="section-title">관련 진료과 안내</div>
                         <div class="card">
                             <div style="display:flex; gap:10px; align-items:center;">
-                                <div style="font-size:30px;">🏥</div>
+                                <div style="font-size:30px;"></div>
                                 <div>
                                     <div class="card-title">내과</div>
-                                    <div class="card-subtitle">1순위 추천</div>
+                                    <div class="card-subtitle">관련 진료과</div>
                                 </div>
                             </div>
                         </div>
 
-                        <button class="btn">🏥 근처 내과 찾기</button>
-                        <button class="btn outline">💊 셀프케어 방법 보기</button>
+                        <div class="disclaimer">
+                            이 정보는 참고용이며, 정확한 진단을 위해<br>반드시 의료기관을 방문하세요
+                        </div>
+
+                        <button class="btn">근처 내과 찾기</button>
+                        <button class="btn outline">셀프케어 정보 보기</button>
                     </div>
                     <div class="nav-bar">
                         <div class="nav-item">
-                            <div class="nav-icon">🏠</div>
+                            <div class="nav-icon"></div>
                             <div>홈</div>
                         </div>
                         <div class="nav-item active">
-                            <div class="nav-icon">🩺</div>
+                            <div class="nav-icon"></div>
                             <div>증상</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">💊</div>
+                            <div class="nav-icon"></div>
                             <div>내 약</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">👤</div>
+                            <div class="nav-icon"></div>
                             <div>MY</div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="screen-label">4. 분석 결과</div>
+            <div class="screen-label">4. 정보 검색 결과</div>
+        </div>
+    </div>
+
+    <!-- Red Flag 화면 -->
+    <h2 style="color:#D32F2F; text-align:center; margin: 50px 0 20px;">Red Flag 응급 안내</h2>
+
+    <div class="wireframe-container">
+        <!-- Red Flag Screen -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:42</span>
+                        <span></span>
+                    </div>
+                    <div class="screen-title red">응급 상황 안내</div>
+                    <div class="screen-content" style="text-align:center;">
+                        <div class="emergency-icon"></div>
+
+                        <div class="emergency-text">
+                            입력하신 증상은<br>응급 상황일 수 있습니다
+                        </div>
+
+                        <div class="urgency-box danger">
+                            <strong>감지된 증상</strong>
+                            <p style="font-size:12px; margin-top:5px;">
+                                심한 두통 + 의식 변화
+                            </p>
+                        </div>
+
+                        <p style="font-size:13px; color:#666; margin:20px 0;">
+                            즉시 119에 연락하거나<br>가까운 응급실을 방문하세요
+                        </p>
+
+                        <button class="btn red" style="font-size:18px; padding:15px;">
+                            119 전화 연결
+                        </button>
+
+                        <button class="btn" style="background:#FF9800; margin-top:10px;">
+                            근처 응급실 찾기
+                        </button>
+
+                        <button class="btn outline" style="margin-top:20px; color:#888; border-color:#ddd;">
+                            응급 상황 아님 (계속 진행)
+                        </button>
+
+                        <p style="font-size:10px; color:#999; margin-top:15px;">
+                            응급 상황이 아니면 위 버튼을 눌러 계속 진행하세요
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">Red Flag 응급 안내</div>
         </div>
     </div>
 
     <!-- Flow 2: 병원 찾기 -->
-    <h2 style="color:#fff; text-align:center; margin: 50px 0 20px;">🏥 병원 찾기 플로우</h2>
+    <h2 style="color:#fff; text-align:center; margin: 50px 0 20px;">병원 찾기 플로우</h2>
 
     <div class="wireframe-container">
         <!-- Screen 5: 병원 목록 -->
@@ -808,70 +1175,66 @@
                 <div class="phone-screen">
                     <div class="status-bar">
                         <span>9:44</span>
-                        <span>📶 🔋</span>
+                        <span></span>
                     </div>
                     <div class="screen-title blue">내과 병원 찾기</div>
                     <div class="screen-content">
                         <div class="search-box">
-                            <span>🔍</span>
+                            <span></span>
                             <input type="text" placeholder="병원명 검색">
                         </div>
 
                         <div style="display:flex; gap:8px; margin-bottom:15px; overflow-x:auto;">
                             <span class="symptom-tag" style="background:#4CAF50; color:#fff;">거리순</span>
                             <span class="symptom-tag">평점순</span>
-                            <span class="symptom-tag">대기적음</span>
                             <span class="symptom-tag">영업중</span>
                         </div>
 
                         <div class="hospital-card">
                             <div class="hospital-name">서울내과의원</div>
-                            <div class="hospital-info">📍 350m · ⭐ 4.8 (리뷰 238)</div>
-                            <div class="hospital-info">🕐 09:00~18:00 · 영업중</div>
+                            <div class="hospital-info">350m · 4.8 (리뷰 238)</div>
+                            <div class="hospital-info">09:00~18:00 · 영업중</div>
                             <div class="hospital-tags">
                                 <span class="hospital-tag">주차가능</span>
-                                <span class="hospital-tag wait">대기 3명</span>
                             </div>
-                            <button class="btn" style="margin-top:10px; padding:8px;">예약하기</button>
+                            <button class="btn" style="margin-top:10px; padding:8px;">예약 문의</button>
                         </div>
 
                         <div class="hospital-card">
                             <div class="hospital-name">강남베스트내과</div>
-                            <div class="hospital-info">📍 520m · ⭐ 4.6 (리뷰 182)</div>
-                            <div class="hospital-info">🕐 09:00~21:00 · 야간진료</div>
+                            <div class="hospital-info">520m · 4.6 (리뷰 182)</div>
+                            <div class="hospital-info">09:00~21:00 · 야간진료</div>
                             <div class="hospital-tags">
                                 <span class="hospital-tag">야간진료</span>
-                                <span class="hospital-tag wait">대기 7명</span>
                             </div>
-                            <button class="btn" style="margin-top:10px; padding:8px;">예약하기</button>
+                            <button class="btn" style="margin-top:10px; padding:8px;">예약 문의</button>
                         </div>
 
                         <div class="hospital-card">
                             <div class="hospital-name">연세가정의학과</div>
-                            <div class="hospital-info">📍 780m · ⭐ 4.9 (리뷰 456)</div>
-                            <div class="hospital-info">🕐 08:30~17:30 · 영업중</div>
+                            <div class="hospital-info">780m · 4.9 (리뷰 456)</div>
+                            <div class="hospital-info">08:30~17:30 · 영업중</div>
                             <div class="hospital-tags">
                                 <span class="hospital-tag">인기</span>
-                                <span class="hospital-tag wait">대기 12명</span>
                             </div>
-                            <button class="btn" style="margin-top:10px; padding:8px;">예약하기</button>
+                            <button class="btn" style="margin-top:10px; padding:8px;">예약 문의</button>
                         </div>
                     </div>
                     <div class="nav-bar">
                         <div class="nav-item">
-                            <div class="nav-icon">🏠</div>
+                            <div class="nav-icon"></div>
                             <div>홈</div>
                         </div>
                         <div class="nav-item active">
-                            <div class="nav-icon">🩺</div>
+                            <div class="nav-icon"></div>
                             <div>증상</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">💊</div>
+                            <div class="nav-icon"></div>
                             <div>내 약</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">👤</div>
+                            <div class="nav-icon"></div>
                             <div>MY</div>
                         </div>
                     </div>
@@ -888,21 +1251,21 @@
                 <div class="phone-screen">
                     <div class="status-bar">
                         <span>9:45</span>
-                        <span>📶 🔋</span>
+                        <span></span>
                     </div>
                     <div class="screen-title blue">서울내과의원</div>
                     <div class="screen-content">
                         <div style="background:#E3F2FD; height:120px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:15px;">
-                            🗺️ 지도 영역
+                            지도 영역
                         </div>
 
                         <div class="card">
-                            <div class="card-title">📍 서울시 강남구 테헤란로 123</div>
+                            <div class="card-title">서울시 강남구 테헤란로 123</div>
                             <div class="card-subtitle">강남역 3번 출구 도보 5분</div>
                         </div>
 
                         <div class="card">
-                            <div class="card-title">🕐 진료시간</div>
+                            <div class="card-title">진료시간</div>
                             <div style="font-size:12px; margin-top:8px;">
                                 <div>평일: 09:00 ~ 18:00</div>
                                 <div>토요일: 09:00 ~ 13:00</div>
@@ -911,30 +1274,30 @@
                         </div>
 
                         <div class="card">
-                            <div class="card-title">💰 예상 진료비</div>
+                            <div class="card-title">예상 진료비 (심평원 기준)</div>
                             <div class="card-subtitle">초진 기준 약 15,000원 ~ 20,000원</div>
                         </div>
 
                         <div style="display:flex; gap:10px; margin-top:10px;">
-                            <button class="btn" style="flex:1;">📞 전화</button>
-                            <button class="btn blue" style="flex:1;">📅 예약</button>
+                            <button class="btn" style="flex:1;">전화</button>
+                            <button class="btn blue" style="flex:1;">예약 문의</button>
                         </div>
                     </div>
                     <div class="nav-bar">
                         <div class="nav-item">
-                            <div class="nav-icon">🏠</div>
+                            <div class="nav-icon"></div>
                             <div>홈</div>
                         </div>
                         <div class="nav-item active">
-                            <div class="nav-icon">🩺</div>
+                            <div class="nav-icon"></div>
                             <div>증상</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">💊</div>
+                            <div class="nav-icon"></div>
                             <div>내 약</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">👤</div>
+                            <div class="nav-icon"></div>
                             <div>MY</div>
                         </div>
                     </div>
@@ -945,7 +1308,7 @@
     </div>
 
     <!-- Flow 3: 약 체크 -->
-    <h2 style="color:#fff; text-align:center; margin: 50px 0 20px;">💊 약 체크 플로우</h2>
+    <h2 style="color:#fff; text-align:center; margin: 50px 0 20px;">약 정보 플로우</h2>
 
     <div class="wireframe-container">
         <!-- Screen 7: 내 약 목록 -->
@@ -954,15 +1317,15 @@
                 <div class="phone-screen">
                     <div class="status-bar">
                         <span>9:46</span>
-                        <span>📶 🔋</span>
+                        <span></span>
                     </div>
                     <div class="screen-title orange">내 약 관리</div>
                     <div class="screen-content">
                         <div class="card" style="background:#FFF3E0;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div>
-                                    <div class="card-title">💊 등록된 약 4개</div>
-                                    <div class="card-subtitle">상호작용 체크 완료</div>
+                                    <div class="card-title">등록된 약 4개</div>
+                                    <div class="card-subtitle">상호작용 정보 확인 완료</div>
                                 </div>
                                 <span class="interaction-badge safe">안전</span>
                             </div>
@@ -971,7 +1334,7 @@
                         <div class="section-title">복용 중인 약</div>
 
                         <div class="drug-item">
-                            <div class="drug-icon">💊</div>
+                            <div class="drug-icon"></div>
                             <div class="drug-info">
                                 <div class="drug-name">아모잘탄플러스정</div>
                                 <div class="drug-desc">고혈압 · 아침 식후</div>
@@ -979,7 +1342,7 @@
                         </div>
 
                         <div class="drug-item">
-                            <div class="drug-icon">💊</div>
+                            <div class="drug-icon"></div>
                             <div class="drug-info">
                                 <div class="drug-name">메트포르민정 500mg</div>
                                 <div class="drug-desc">당뇨 · 아침/저녁 식후</div>
@@ -987,7 +1350,7 @@
                         </div>
 
                         <div class="drug-item">
-                            <div class="drug-icon">💊</div>
+                            <div class="drug-icon"></div>
                             <div class="drug-info">
                                 <div class="drug-name">오메가3</div>
                                 <div class="drug-desc">건강기능식품 · 아침 식후</div>
@@ -995,7 +1358,7 @@
                         </div>
 
                         <div class="drug-item">
-                            <div class="drug-icon">💊</div>
+                            <div class="drug-icon"></div>
                             <div class="drug-info">
                                 <div class="drug-name">종합비타민</div>
                                 <div class="drug-desc">건강기능식품 · 아침 식후</div>
@@ -1003,23 +1366,27 @@
                         </div>
 
                         <button class="btn" style="background:#FF9800;">+ 약 추가하기</button>
-                        <button class="btn outline" style="color:#FF9800; border-color:#FF9800;">📷 처방전 스캔</button>
+                        <button class="btn outline" style="color:#FF9800; border-color:#FF9800;">처방전 스캔</button>
+
+                        <div class="disclaimer">
+                            식약처 공공데이터 기반 정보입니다
+                        </div>
                     </div>
                     <div class="nav-bar">
                         <div class="nav-item">
-                            <div class="nav-icon">🏠</div>
+                            <div class="nav-icon"></div>
                             <div>홈</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">🩺</div>
+                            <div class="nav-icon"></div>
                             <div>증상</div>
                         </div>
                         <div class="nav-item active">
-                            <div class="nav-icon">💊</div>
+                            <div class="nav-icon"></div>
                             <div>내 약</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">👤</div>
+                            <div class="nav-icon"></div>
                             <div>MY</div>
                         </div>
                     </div>
@@ -1036,18 +1403,27 @@
                 <div class="phone-screen">
                     <div class="status-bar">
                         <span>9:47</span>
-                        <span>📶 🔋</span>
+                        <span></span>
                     </div>
-                    <div class="screen-title orange">상호작용 체크</div>
+                    <div class="screen-title orange">상호작용 정보</div>
                     <div class="screen-content">
                         <div class="search-box">
-                            <span>🔍</span>
+                            <span></span>
                             <input type="text" placeholder="확인할 약 이름 입력">
-                            <span>📷</span>
+                            <span></span>
                         </div>
 
-                        <div class="card" style="background:#FFEBEE; border-left:4px solid #D32F2F;">
-                            <div class="card-title" style="color:#D32F2F;">⚠️ 주의 필요!</div>
+                        <div class="section-title">위험도 5단계</div>
+                        <div class="risk-levels">
+                            <div class="risk-level" style="background:#B71C1C; color:#fff;">매우위험</div>
+                            <div class="risk-level" style="background:#FFEBEE; color:#D32F2F;">위험</div>
+                            <div class="risk-level" style="background:#FFF3E0; color:#FF9800;">주의</div>
+                            <div class="risk-level" style="background:#E8F5E9; color:#4CAF50;">낮음</div>
+                            <div class="risk-level" style="background:#ECEFF1; color:#607D8B;">정보없음</div>
+                        </div>
+
+                        <div class="card" style="background:#FFF3E0; border-left:4px solid #FF9800;">
+                            <div class="card-title" style="color:#FF9800;">주의 필요</div>
                             <div style="font-size:12px; margin-top:8px;">
                                 <strong>타이레놀콜드</strong>와 현재 복용 중인 약 사이에 주의가 필요합니다.
                             </div>
@@ -1064,45 +1440,49 @@
                         </div>
 
                         <div class="urgency-box warning">
-                            <strong>💡 권장사항</strong>
+                            <strong>약사 상담 권장</strong>
                             <p style="font-size:12px; margin-top:5px;">
-                                - 복용 간격을 2시간 이상 두세요<br>
-                                - 혈당 모니터링을 더 자주 하세요<br>
-                                - 약사와 상담을 권장합니다
+                                복용 전 반드시 약사와 상담하세요
                             </p>
                         </div>
 
-                        <div class="section-title">대체 약품 추천</div>
+                        <div class="section-title">대체 약품 정보</div>
                         <div class="drug-item" style="border-left:4px solid #4CAF50;">
-                            <div class="drug-icon" style="background:#E8F5E9;">💊</div>
+                            <div class="drug-icon" style="background:#E8F5E9;"></div>
                             <div class="drug-info">
                                 <div class="drug-name">판콜에이</div>
-                                <div class="drug-desc">현재 약과 상호작용 없음</div>
+                                <div class="drug-desc">상호작용 정보 없음</div>
                             </div>
-                            <span class="interaction-badge safe">안전</span>
+                            <span class="interaction-badge safe">낮음</span>
+                        </div>
+
+                        <div class="disclaimer">
+                            이 정보는 식약처 공공데이터 기반이며<br>
+                            모든 상호작용을 포함하지 않을 수 있습니다<br>
+                            <strong>반드시 약사와 상담하세요</strong>
                         </div>
                     </div>
                     <div class="nav-bar">
                         <div class="nav-item">
-                            <div class="nav-icon">🏠</div>
+                            <div class="nav-icon"></div>
                             <div>홈</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">🩺</div>
+                            <div class="nav-icon"></div>
                             <div>증상</div>
                         </div>
                         <div class="nav-item active">
-                            <div class="nav-icon">💊</div>
+                            <div class="nav-icon"></div>
                             <div>내 약</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">👤</div>
+                            <div class="nav-icon"></div>
                             <div>MY</div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="screen-label">8. 상호작용 체크</div>
+            <div class="screen-label">8. 상호작용 정보</div>
         </div>
 
         <div class="flow-arrow">→</div>
@@ -1113,14 +1493,14 @@
                 <div class="phone-screen">
                     <div class="status-bar">
                         <span>9:48</span>
-                        <span>📶 🔋</span>
+                        <span></span>
                     </div>
                     <div class="screen-title purple">복약 알림</div>
                     <div class="screen-content">
                         <div class="card" style="background:#F3E5F5;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div>
-                                    <div class="card-title">📊 이번 주 복약률</div>
+                                    <div class="card-title">이번 주 복약률</div>
                                     <div style="font-size:28px; font-weight:bold; color:#9C27B0;">92%</div>
                                 </div>
                                 <div style="text-align:right;">
@@ -1142,7 +1522,7 @@
                                 <span class="alarm-pill">메트포르민</span>
                                 <span class="alarm-pill">오메가3</span>
                             </div>
-                            <div style="color:#4CAF50; font-size:20px;">✓</div>
+                            <div style="color:#4CAF50; font-size:20px;"></div>
                         </div>
 
                         <div class="alarm-item" style="background:#FFF3E0;">
@@ -1167,23 +1547,30 @@
                             <div class="toggle" style="background:#ccc;"></div>
                         </div>
 
+                        <div class="urgency-box info">
+                            <strong>오프라인에서도 작동</strong>
+                            <p style="font-size:11px; margin-top:3px;">
+                                인터넷 연결 없이도 알림이 정상 작동합니다
+                            </p>
+                        </div>
+
                         <button class="btn" style="background:#9C27B0;">+ 알림 추가</button>
                     </div>
                     <div class="nav-bar">
                         <div class="nav-item">
-                            <div class="nav-icon">🏠</div>
+                            <div class="nav-icon"></div>
                             <div>홈</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">🩺</div>
+                            <div class="nav-icon"></div>
                             <div>증상</div>
                         </div>
                         <div class="nav-item active">
-                            <div class="nav-icon">💊</div>
+                            <div class="nav-icon"></div>
                             <div>내 약</div>
                         </div>
                         <div class="nav-item">
-                            <div class="nav-icon">👤</div>
+                            <div class="nav-icon"></div>
                             <div>MY</div>
                         </div>
                     </div>
@@ -1193,8 +1580,146 @@
         </div>
     </div>
 
+    <!-- 접근성 모드 -->
+    <h2 style="color:#fff; text-align:center; margin: 50px 0 20px;">접근성 지원 (WCAG 2.1 AA)</h2>
+
+    <div class="wireframe-container">
+        <!-- 큰 글씨 모드 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span style="font-size:14px;">9:41</span>
+                        <span></span>
+                    </div>
+                    <div class="screen-title" style="font-size:22px;">어디아파</div>
+                    <div class="screen-content">
+                        <div class="card" style="background:#E8F5E9; padding:20px;">
+                            <div style="font-size:18px; font-weight:700; margin-bottom:10px;">
+                                큰 글씨 모드 활성화
+                            </div>
+                            <div style="font-size:16px; color:#666;">
+                                글씨가 더 크게 표시됩니다
+                            </div>
+                        </div>
+
+                        <div class="quick-menu" style="grid-template-columns: repeat(2, 1fr); gap:15px;">
+                            <div class="quick-item" style="padding:25px;">
+                                <div style="font-size:40px; margin-bottom:10px;"></div>
+                                <div style="font-size:16px; font-weight:600;">증상체크</div>
+                            </div>
+                            <div class="quick-item" style="padding:25px;">
+                                <div style="font-size:40px; margin-bottom:10px;"></div>
+                                <div style="font-size:16px; font-weight:600;">병원찾기</div>
+                            </div>
+                            <div class="quick-item" style="padding:25px;">
+                                <div style="font-size:40px; margin-bottom:10px;"></div>
+                                <div style="font-size:16px; font-weight:600;">약정보</div>
+                            </div>
+                            <div class="quick-item" style="padding:25px;">
+                                <div style="font-size:40px; margin-bottom:10px;"></div>
+                                <div style="font-size:16px; font-weight:600;">복약알림</div>
+                            </div>
+                        </div>
+
+                        <button class="btn" style="font-size:18px; padding:18px;">
+                            음성으로 증상 말하기
+                        </button>
+                    </div>
+                    <div class="nav-bar" style="height:70px;">
+                        <div class="nav-item active" style="font-size:14px;">
+                            <div style="font-size:28px;"></div>
+                            <div>홈</div>
+                        </div>
+                        <div class="nav-item" style="font-size:14px;">
+                            <div style="font-size:28px;"></div>
+                            <div>증상</div>
+                        </div>
+                        <div class="nav-item" style="font-size:14px;">
+                            <div style="font-size:28px;"></div>
+                            <div>내 약</div>
+                        </div>
+                        <div class="nav-item" style="font-size:14px;">
+                            <div style="font-size:28px;"></div>
+                            <div>MY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">접근성: 큰 글씨 모드</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- 고대비 모드 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen" style="background:#000;">
+                    <div class="status-bar" style="background:#000; color:#fff;">
+                        <span>9:41</span>
+                        <span></span>
+                    </div>
+                    <div class="screen-title" style="background:#fff; color:#000; font-size:20px;">어디아파</div>
+                    <div class="screen-content">
+                        <div class="card" style="background:#000; border:2px solid #fff; padding:20px;">
+                            <div style="font-size:16px; font-weight:700; margin-bottom:10px; color:#fff;">
+                                고대비 모드 활성화
+                            </div>
+                            <div style="font-size:14px; color:#fff;">
+                                대비가 높아져 더 잘 보입니다
+                            </div>
+                        </div>
+
+                        <div class="quick-menu" style="grid-template-columns: repeat(2, 1fr); gap:15px;">
+                            <div class="quick-item" style="background:#000; border:2px solid #fff; padding:20px;">
+                                <div style="font-size:32px; margin-bottom:8px;"></div>
+                                <div style="font-size:14px; font-weight:600; color:#fff;">증상체크</div>
+                            </div>
+                            <div class="quick-item" style="background:#000; border:2px solid #fff; padding:20px;">
+                                <div style="font-size:32px; margin-bottom:8px;"></div>
+                                <div style="font-size:14px; font-weight:600; color:#fff;">병원찾기</div>
+                            </div>
+                            <div class="quick-item" style="background:#000; border:2px solid #fff; padding:20px;">
+                                <div style="font-size:32px; margin-bottom:8px;"></div>
+                                <div style="font-size:14px; font-weight:600; color:#fff;">약정보</div>
+                            </div>
+                            <div class="quick-item" style="background:#000; border:2px solid #fff; padding:20px;">
+                                <div style="font-size:32px; margin-bottom:8px;"></div>
+                                <div style="font-size:14px; font-weight:600; color:#fff;">복약알림</div>
+                            </div>
+                        </div>
+
+                        <button class="btn" style="background:#fff; color:#000; font-size:16px; padding:15px; border:none;">
+                            증상 입력하기
+                        </button>
+                    </div>
+                    <div class="nav-bar" style="background:#000; border-top:2px solid #fff;">
+                        <div class="nav-item active" style="color:#fff;">
+                            <div class="nav-icon"></div>
+                            <div>홈</div>
+                        </div>
+                        <div class="nav-item" style="color:#888;">
+                            <div class="nav-icon"></div>
+                            <div>증상</div>
+                        </div>
+                        <div class="nav-item" style="color:#888;">
+                            <div class="nav-icon"></div>
+                            <div>내 약</div>
+                        </div>
+                        <div class="nav-item" style="color:#888;">
+                            <div class="nav-icon"></div>
+                            <div>MY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">접근성: 고대비 모드</div>
+        </div>
+    </div>
+
     <div style="text-align:center; color:#888; margin-top:50px; padding-bottom:30px;">
-        <p>어디아파 앱 와이어프레임 v1.0</p>
+        <p>어디아파 앱 와이어프레임 v2.0</p>
+        <p>전문가 검토 반영 (앱개발자, 의사, 약사, 기획자, QA테스터, 마케터)</p>
         <p>2026.02.10</p>
     </div>
 </body>
