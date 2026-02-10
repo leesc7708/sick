@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어디아파 - 와이어프레임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+        }
+
+        body {
+            background: #1a1a2e;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        .wireframe-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .phone-frame {
+            width: 320px;
+            height: 640px;
+            background: #fff;
+            border-radius: 30px;
+            padding: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #f5f5f5;
+            border-radius: 22px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 35px;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .screen-title {
+            text-align: center;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            background: #4CAF50;
+            color: #fff;
+        }
+
+        .screen-title.blue {
+            background: #2196F3;
+        }
+
+        .screen-title.orange {
+            background: #FF9800;
+        }
+
+        .screen-title.purple {
+            background: #9C27B0;
+        }
+
+        .screen-content {
+            padding: 15px;
+            height: calc(100% - 120px);
+            overflow-y: auto;
+        }
+
+        .nav-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #fff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-item {
+            text-align: center;
+            font-size: 10px;
+            color: #888;
+        }
+
+        .nav-item.active {
+            color: #4CAF50;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+
+        .screen-label {
+            text-align: center;
+            color: #fff;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        /* Components */
+        .search-box {
+            background: #fff;
+            border-radius: 25px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            border: none;
+            flex: 1;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .quick-menu {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quick-item {
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px 5px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .quick-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .quick-text {
+            font-size: 11px;
+            color: #333;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .card-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .card-subtitle {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 14px;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn.blue {
+            background: #2196F3;
+        }
+
+        .btn.outline {
+            background: #fff;
+            color: #4CAF50;
+            border: 2px solid #4CAF50;
+        }
+
+        .symptom-tag {
+            display: inline-block;
+            background: #E8F5E9;
+            color: #4CAF50;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin: 3px;
+        }
+
+        .body-map {
+            width: 120px;
+            height: 200px;
+            background: linear-gradient(180deg, #FFE0B2 0%, #FFCC80 100%);
+            border-radius: 60px 60px 30px 30px;
+            margin: 20px auto;
+            position: relative;
+        }
+
+        .body-head {
+            width: 60px;
+            height: 60px;
+            background: #FFE0B2;
+            border-radius: 50%;
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .result-name {
+            font-weight: 600;
+        }
+
+        .result-percent {
+            background: #E3F2FD;
+            color: #1976D2;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        .result-percent.high {
+            background: #FFEBEE;
+            color: #D32F2F;
+        }
+
+        .hospital-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .hospital-name {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .hospital-info {
+            font-size: 11px;
+            color: #888;
+            margin: 5px 0;
+        }
+
+        .hospital-tags {
+            display: flex;
+            gap: 5px;
+        }
+
+        .hospital-tag {
+            background: #E8F5E9;
+            color: #4CAF50;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+        }
+
+        .hospital-tag.wait {
+            background: #FFF3E0;
+            color: #FF9800;
+        }
+
+        .drug-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #fff;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .drug-icon {
+            width: 40px;
+            height: 40px;
+            background: #E3F2FD;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .drug-info {
+            flex: 1;
+        }
+
+        .drug-name {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .drug-desc {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .interaction-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .interaction-badge.danger {
+            background: #FFEBEE;
+            color: #D32F2F;
+        }
+
+        .interaction-badge.warning {
+            background: #FFF3E0;
+            color: #FF9800;
+        }
+
+        .interaction-badge.safe {
+            background: #E8F5E9;
+            color: #4CAF50;
+        }
+
+        .urgency-box {
+            background: #E8F5E9;
+            border-left: 4px solid #4CAF50;
+            padding: 12px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .urgency-box.warning {
+            background: #FFF3E0;
+            border-left-color: #FF9800;
+        }
+
+        .urgency-box.danger {
+            background: #FFEBEE;
+            border-left-color: #D32F2F;
+        }
+
+        .chat-bubble {
+            background: #E3F2FD;
+            padding: 12px 15px;
+            border-radius: 18px 18px 18px 4px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            max-width: 85%;
+        }
+
+        .chat-bubble.user {
+            background: #4CAF50;
+            color: #fff;
+            border-radius: 18px 18px 4px 18px;
+            margin-left: auto;
+        }
+
+        .input-area {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            padding: 10px 15px;
+            background: #fff;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 13px;
+        }
+
+        .input-area button {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+        }
+
+        .alarm-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .alarm-time {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .alarm-label {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .alarm-pills {
+            flex: 1;
+        }
+
+        .alarm-pill {
+            display: inline-block;
+            background: #E3F2FD;
+            color: #1976D2;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin: 2px;
+        }
+
+        .toggle {
+            width: 50px;
+            height: 28px;
+            background: #4CAF50;
+            border-radius: 14px;
+            position: relative;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            right: 2px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 15px 0 10px;
+            color: #333;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            font-size: 30px;
+            color: #4CAF50;
+            margin: 0 -10px;
+            align-self: center;
+        }
+
+        @media (max-width: 768px) {
+            .wireframe-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .flow-arrow {
+                transform: rotate(90deg);
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🏥 어디아파</h1>
+    <p class="subtitle">헬스케어 앱 와이어프레임 v1.0</p>
+
+    <!-- Flow 1: 메인 화면 -->
+    <h2 style="color:#fff; text-align:center; margin: 30px 0 20px;">📱 메인 플로우</h2>
+
+    <div class="wireframe-container">
+        <!-- Screen 1: 홈 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="screen-title">어디아파</div>
+                    <div class="screen-content">
+                        <div class="search-box">
+                            <span>🔍</span>
+                            <input type="text" placeholder="어디가 불편하세요?">
+                            <span>🎤</span>
+                        </div>
+
+                        <div class="quick-menu">
+                            <div class="quick-item">
+                                <div class="quick-icon">🩺</div>
+                                <div class="quick-text">증상체크</div>
+                            </div>
+                            <div class="quick-item">
+                                <div class="quick-icon">🏥</div>
+                                <div class="quick-text">병원찾기</div>
+                            </div>
+                            <div class="quick-item">
+                                <div class="quick-icon">💊</div>
+                                <div class="quick-text">약체크</div>
+                            </div>
+                            <div class="quick-item">
+                                <div class="quick-icon">⏰</div>
+                                <div class="quick-text">복약알림</div>
+                            </div>
+                        </div>
+
+                        <div class="section-title">💡 오늘의 건강 팁</div>
+                        <div class="card">
+                            <div class="card-title">환절기 감기 예방법</div>
+                            <div class="card-subtitle">손씻기와 충분한 수면이 중요해요</div>
+                        </div>
+
+                        <div class="section-title">📍 내 주변 병원</div>
+                        <div class="hospital-card">
+                            <div class="hospital-name">서울내과의원</div>
+                            <div class="hospital-info">📍 350m · 내과 · 영업중</div>
+                            <div class="hospital-tags">
+                                <span class="hospital-tag">⭐ 4.8</span>
+                                <span class="hospital-tag wait">대기 3명</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nav-bar">
+                        <div class="nav-item active">
+                            <div class="nav-icon">🏠</div>
+                            <div>홈</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">🩺</div>
+                            <div>증상</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">💊</div>
+                            <div>내 약</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">👤</div>
+                            <div>MY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">1. 홈 화면</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- Screen 2: 증상 입력 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="screen-title">증상 체크</div>
+                    <div class="screen-content" style="height: calc(100% - 170px);">
+                        <p style="font-size:13px; color:#666; margin-bottom:15px;">어디가 불편하신가요? 부위를 선택하거나 직접 입력해주세요.</p>
+
+                        <div class="body-map">
+                            <div class="body-head"></div>
+                        </div>
+                        <p style="text-align:center; font-size:12px; color:#888;">👆 아픈 부위를 터치하세요</p>
+
+                        <div class="section-title">선택된 증상</div>
+                        <div>
+                            <span class="symptom-tag">🤕 두통</span>
+                            <span class="symptom-tag">🤧 콧물</span>
+                            <span class="symptom-tag">🌡️ 발열</span>
+                        </div>
+
+                        <div class="section-title">자주 검색되는 증상</div>
+                        <div>
+                            <span class="symptom-tag">기침</span>
+                            <span class="symptom-tag">복통</span>
+                            <span class="symptom-tag">어지러움</span>
+                            <span class="symptom-tag">피로감</span>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <input type="text" placeholder="증상을 입력하세요...">
+                        <button>→</button>
+                    </div>
+                    <div class="nav-bar">
+                        <div class="nav-item">
+                            <div class="nav-icon">🏠</div>
+                            <div>홈</div>
+                        </div>
+                        <div class="nav-item active">
+                            <div class="nav-icon">🩺</div>
+                            <div>증상</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">💊</div>
+                            <div>내 약</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">👤</div>
+                            <div>MY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">2. 증상 입력</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- Screen 3: AI 문진 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:42</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="screen-title blue">AI 문진</div>
+                    <div class="screen-content" style="height: calc(100% - 170px);">
+                        <div class="chat-bubble">
+                            안녕하세요! 증상을 더 정확히 파악하기 위해 몇 가지 질문드릴게요. 🤖
+                        </div>
+
+                        <div class="chat-bubble">
+                            두통이 있으시군요. 언제부터 아프셨나요?
+                        </div>
+
+                        <div class="chat-bubble user">
+                            어제 저녁부터요
+                        </div>
+
+                        <div class="chat-bubble">
+                            통증의 강도는 1~10 중 어느 정도인가요?
+                        </div>
+
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;">
+                            <span class="symptom-tag">1~3 (약함)</span>
+                            <span class="symptom-tag" style="background:#4CAF50; color:#fff;">4~6 (보통)</span>
+                            <span class="symptom-tag">7~10 (심함)</span>
+                        </div>
+
+                        <div class="chat-bubble">
+                            열은 몇 도 정도인가요?
+                        </div>
+
+                        <div class="chat-bubble user">
+                            38도 정도요
+                        </div>
+
+                        <div class="chat-bubble">
+                            알겠습니다! 분석 중입니다... 🔍
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <input type="text" placeholder="메시지를 입력하세요...">
+                        <button>→</button>
+                    </div>
+                    <div class="nav-bar">
+                        <div class="nav-item">
+                            <div class="nav-icon">🏠</div>
+                            <div>홈</div>
+                        </div>
+                        <div class="nav-item active">
+                            <div class="nav-icon">🩺</div>
+                            <div>증상</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">💊</div>
+                            <div>내 약</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">👤</div>
+                            <div>MY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">3. AI 문진</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- Screen 4: 분석 결과 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:43</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="screen-title">분석 결과</div>
+                    <div class="screen-content">
+                        <div class="urgency-box warning">
+                            <strong>⚠️ 진료 권장</strong>
+                            <p style="font-size:12px; margin-top:5px;">1~2일 내 병원 방문을 권장합니다</p>
+                        </div>
+
+                        <div class="section-title">예상 증상</div>
+                        <div class="card">
+                            <div class="result-item">
+                                <span class="result-name">감기 (급성 상기도 감염)</span>
+                                <span class="result-percent high">78%</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-name">독감 (인플루엔자)</span>
+                                <span class="result-percent">62%</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-name">편도염</span>
+                                <span class="result-percent">35%</span>
+                            </div>
+                        </div>
+
+                        <div class="section-title">추천 진료과</div>
+                        <div class="card">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <div style="font-size:30px;">🏥</div>
+                                <div>
+                                    <div class="card-title">내과</div>
+                                    <div class="card-subtitle">1순위 추천</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn">🏥 근처 내과 찾기</button>
+                        <button class="btn outline">💊 셀프케어 방법 보기</button>
+                    </div>
+                    <div class="nav-bar">
+                        <div class="nav-item">
+                            <div class="nav-icon">🏠</div>
+                            <div>홈</div>
+                        </div>
+                        <div class="nav-item active">
+                            <div class="nav-icon">🩺</div>
+                            <div>증상</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">💊</div>
+                            <div>내 약</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">👤</div>
+                            <div>MY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">4. 분석 결과</div>
+        </div>
+    </div>
+
+    <!-- Flow 2: 병원 찾기 -->
+    <h2 style="color:#fff; text-align:center; margin: 50px 0 20px;">🏥 병원 찾기 플로우</h2>
+
+    <div class="wireframe-container">
+        <!-- Screen 5: 병원 목록 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:44</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="screen-title blue">내과 병원 찾기</div>
+                    <div class="screen-content">
+                        <div class="search-box">
+                            <span>🔍</span>
+                            <input type="text" placeholder="병원명 검색">
+                        </div>
+
+                        <div style="display:flex; gap:8px; margin-bottom:15px; overflow-x:auto;">
+                            <span class="symptom-tag" style="background:#4CAF50; color:#fff;">거리순</span>
+                            <span class="symptom-tag">평점순</span>
+                            <span class="symptom-tag">대기적음</span>
+                            <span class="symptom-tag">영업중</span>
+                        </div>
+
+                        <div class="hospital-card">
+                            <div class="hospital-name">서울내과의원</div>
+                            <div class="hospital-info">📍 350m · ⭐ 4.8 (리뷰 238)</div>
+                            <div class="hospital-info">🕐 09:00~18:00 · 영업중</div>
+                            <div class="hospital-tags">
+                                <span class="hospital-tag">주차가능</span>
+                                <span class="hospital-tag wait">대기 3명</span>
+                            </div>
+                            <button class="btn" style="margin-top:10px; padding:8px;">예약하기</button>
+                        </div>
+
+                        <div class="hospital-card">
+                            <div class="hospital-name">강남베스트내과</div>
+                            <div class="hospital-info">📍 520m · ⭐ 4.6 (리뷰 182)</div>
+                            <div class="hospital-info">🕐 09:00~21:00 · 야간진료</div>
+                            <div class="hospital-tags">
+                                <span class="hospital-tag">야간진료</span>
+                                <span class="hospital-tag wait">대기 7명</span>
+                            </div>
+                            <button class="btn" style="margin-top:10px; padding:8px;">예약하기</button>
+                        </div>
+
+                        <div class="hospital-card">
+                            <div class="hospital-name">연세가정의학과</div>
+                            <div class="hospital-info">📍 780m · ⭐ 4.9 (리뷰 456)</div>
+                            <div class="hospital-info">🕐 08:30~17:30 · 영업중</div>
+                            <div class="hospital-tags">
+                                <span class="hospital-tag">인기</span>
+                                <span class="hospital-tag wait">대기 12명</span>
+                            </div>
+                            <button class="btn" style="margin-top:10px; padding:8px;">예약하기</button>
+                        </div>
+                    </div>
+                    <div class="nav-bar">
+                        <div class="nav-item">
+                            <div class="nav-icon">🏠</div>
+                            <div>홈</div>
+                        </div>
+                        <div class="nav-item active">
+                            <div class="nav-icon">🩺</div>
+                            <div>증상</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">💊</div>
+                            <div>내 약</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">👤</div>
+                            <div>MY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">5. 병원 목록</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- Screen 6: 병원 상세 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:45</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="screen-title blue">서울내과의원</div>
+                    <div class="screen-content">
+                        <div style="background:#E3F2FD; height:120px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:15px;">
+                            🗺️ 지도 영역
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">📍 서울시 강남구 테헤란로 123</div>
+                            <div class="card-subtitle">강남역 3번 출구 도보 5분</div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">🕐 진료시간</div>
+                            <div style="font-size:12px; margin-top:8px;">
+                                <div>평일: 09:00 ~ 18:00</div>
+                                <div>토요일: 09:00 ~ 13:00</div>
+                                <div>일요일/공휴일: 휴진</div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">💰 예상 진료비</div>
+                            <div class="card-subtitle">초진 기준 약 15,000원 ~ 20,000원</div>
+                        </div>
+
+                        <div style="display:flex; gap:10px; margin-top:10px;">
+                            <button class="btn" style="flex:1;">📞 전화</button>
+                            <button class="btn blue" style="flex:1;">📅 예약</button>
+                        </div>
+                    </div>
+                    <div class="nav-bar">
+                        <div class="nav-item">
+                            <div class="nav-icon">🏠</div>
+                            <div>홈</div>
+                        </div>
+                        <div class="nav-item active">
+                            <div class="nav-icon">🩺</div>
+                            <div>증상</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">💊</div>
+                            <div>내 약</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">👤</div>
+                            <div>MY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">6. 병원 상세</div>
+        </div>
+    </div>
+
+    <!-- Flow 3: 약 체크 -->
+    <h2 style="color:#fff; text-align:center; margin: 50px 0 20px;">💊 약 체크 플로우</h2>
+
+    <div class="wireframe-container">
+        <!-- Screen 7: 내 약 목록 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:46</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="screen-title orange">내 약 관리</div>
+                    <div class="screen-content">
+                        <div class="card" style="background:#FFF3E0;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div class="card-title">💊 등록된 약 4개</div>
+                                    <div class="card-subtitle">상호작용 체크 완료</div>
+                                </div>
+                                <span class="interaction-badge safe">안전</span>
+                            </div>
+                        </div>
+
+                        <div class="section-title">복용 중인 약</div>
+
+                        <div class="drug-item">
+                            <div class="drug-icon">💊</div>
+                            <div class="drug-info">
+                                <div class="drug-name">아모잘탄플러스정</div>
+                                <div class="drug-desc">고혈압 · 아침 식후</div>
+                            </div>
+                        </div>
+
+                        <div class="drug-item">
+                            <div class="drug-icon">💊</div>
+                            <div class="drug-info">
+                                <div class="drug-name">메트포르민정 500mg</div>
+                                <div class="drug-desc">당뇨 · 아침/저녁 식후</div>
+                            </div>
+                        </div>
+
+                        <div class="drug-item">
+                            <div class="drug-icon">💊</div>
+                            <div class="drug-info">
+                                <div class="drug-name">오메가3</div>
+                                <div class="drug-desc">건강기능식품 · 아침 식후</div>
+                            </div>
+                        </div>
+
+                        <div class="drug-item">
+                            <div class="drug-icon">💊</div>
+                            <div class="drug-info">
+                                <div class="drug-name">종합비타민</div>
+                                <div class="drug-desc">건강기능식품 · 아침 식후</div>
+                            </div>
+                        </div>
+
+                        <button class="btn" style="background:#FF9800;">+ 약 추가하기</button>
+                        <button class="btn outline" style="color:#FF9800; border-color:#FF9800;">📷 처방전 스캔</button>
+                    </div>
+                    <div class="nav-bar">
+                        <div class="nav-item">
+                            <div class="nav-icon">🏠</div>
+                            <div>홈</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">🩺</div>
+                            <div>증상</div>
+                        </div>
+                        <div class="nav-item active">
+                            <div class="nav-icon">💊</div>
+                            <div>내 약</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">👤</div>
+                            <div>MY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">7. 내 약 목록</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- Screen 8: 상호작용 체크 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:47</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="screen-title orange">상호작용 체크</div>
+                    <div class="screen-content">
+                        <div class="search-box">
+                            <span>🔍</span>
+                            <input type="text" placeholder="확인할 약 이름 입력">
+                            <span>📷</span>
+                        </div>
+
+                        <div class="card" style="background:#FFEBEE; border-left:4px solid #D32F2F;">
+                            <div class="card-title" style="color:#D32F2F;">⚠️ 주의 필요!</div>
+                            <div style="font-size:12px; margin-top:8px;">
+                                <strong>타이레놀콜드</strong>와 현재 복용 중인 약 사이에 주의가 필요합니다.
+                            </div>
+                        </div>
+
+                        <div class="section-title">상호작용 상세</div>
+
+                        <div class="drug-item" style="border-left:4px solid #FF9800;">
+                            <div class="drug-info">
+                                <div class="drug-name">타이레놀콜드 + 메트포르민</div>
+                                <div class="drug-desc">혈당 수치에 영향을 줄 수 있음</div>
+                            </div>
+                            <span class="interaction-badge warning">주의</span>
+                        </div>
+
+                        <div class="urgency-box warning">
+                            <strong>💡 권장사항</strong>
+                            <p style="font-size:12px; margin-top:5px;">
+                                - 복용 간격을 2시간 이상 두세요<br>
+                                - 혈당 모니터링을 더 자주 하세요<br>
+                                - 약사와 상담을 권장합니다
+                            </p>
+                        </div>
+
+                        <div class="section-title">대체 약품 추천</div>
+                        <div class="drug-item" style="border-left:4px solid #4CAF50;">
+                            <div class="drug-icon" style="background:#E8F5E9;">💊</div>
+                            <div class="drug-info">
+                                <div class="drug-name">판콜에이</div>
+                                <div class="drug-desc">현재 약과 상호작용 없음</div>
+                            </div>
+                            <span class="interaction-badge safe">안전</span>
+                        </div>
+                    </div>
+                    <div class="nav-bar">
+                        <div class="nav-item">
+                            <div class="nav-icon">🏠</div>
+                            <div>홈</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">🩺</div>
+                            <div>증상</div>
+                        </div>
+                        <div class="nav-item active">
+                            <div class="nav-icon">💊</div>
+                            <div>내 약</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">👤</div>
+                            <div>MY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">8. 상호작용 체크</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <!-- Screen 9: 복약 알림 -->
+        <div>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:48</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="screen-title purple">복약 알림</div>
+                    <div class="screen-content">
+                        <div class="card" style="background:#F3E5F5;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div class="card-title">📊 이번 주 복약률</div>
+                                    <div style="font-size:28px; font-weight:bold; color:#9C27B0;">92%</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:12px; color:#888;">놓친 횟수</div>
+                                    <div style="font-size:20px; font-weight:bold;">2회</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-title">오늘의 복약</div>
+
+                        <div class="alarm-item">
+                            <div>
+                                <div class="alarm-time">08:00</div>
+                                <div class="alarm-label">아침 식후</div>
+                            </div>
+                            <div class="alarm-pills">
+                                <span class="alarm-pill">아모잘탄</span>
+                                <span class="alarm-pill">메트포르민</span>
+                                <span class="alarm-pill">오메가3</span>
+                            </div>
+                            <div style="color:#4CAF50; font-size:20px;">✓</div>
+                        </div>
+
+                        <div class="alarm-item" style="background:#FFF3E0;">
+                            <div>
+                                <div class="alarm-time">13:00</div>
+                                <div class="alarm-label">점심 식후</div>
+                            </div>
+                            <div class="alarm-pills">
+                                <span class="alarm-pill">소화제</span>
+                            </div>
+                            <div class="toggle"></div>
+                        </div>
+
+                        <div class="alarm-item">
+                            <div>
+                                <div class="alarm-time">19:00</div>
+                                <div class="alarm-label">저녁 식후</div>
+                            </div>
+                            <div class="alarm-pills">
+                                <span class="alarm-pill">메트포르민</span>
+                            </div>
+                            <div class="toggle" style="background:#ccc;"></div>
+                        </div>
+
+                        <button class="btn" style="background:#9C27B0;">+ 알림 추가</button>
+                    </div>
+                    <div class="nav-bar">
+                        <div class="nav-item">
+                            <div class="nav-icon">🏠</div>
+                            <div>홈</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">🩺</div>
+                            <div>증상</div>
+                        </div>
+                        <div class="nav-item active">
+                            <div class="nav-icon">💊</div>
+                            <div>내 약</div>
+                        </div>
+                        <div class="nav-item">
+                            <div class="nav-icon">👤</div>
+                            <div>MY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">9. 복약 알림</div>
+        </div>
+    </div>
+
+    <div style="text-align:center; color:#888; margin-top:50px; padding-bottom:30px;">
+        <p>어디아파 앱 와이어프레임 v1.0</p>
+        <p>2026.02.10</p>
+    </div>
+</body>
+</html>
