@@ -64,8 +64,17 @@ export function HealthRecordsScreen({ navigation }: Props) {
     await addRecord('검진결과 사진', 'image', res.assets[0].uri);
   };
 
+  const addCamera = async () => {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) { Alert.alert('권한 필요', '카메라 권한을 허용해 주세요.'); return; }
+    const res = await ImagePicker.launchCameraAsync({ quality: 0.7 });
+    if (res.canceled || !res.assets?.[0]) return;
+    await addRecord('검진결과 촬영', 'image', res.assets[0].uri);
+  };
+
   const onAdd = () =>
     Alert.alert(`'${pickType}' 추가`, '추가할 방법을 선택하세요', [
+      { text: '카메라 촬영', onPress: addCamera },
       { text: 'PDF·파일 선택', onPress: addFile },
       { text: '사진 보관함', onPress: addPhoto },
       { text: '취소', style: 'cancel' },

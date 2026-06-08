@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import * as ImagePicker from 'expo-image-picker';
 import { AppBar } from '../components/AppBar';
 import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -21,9 +22,18 @@ export function SymptomInputScreen({ navigation }: Props) {
   const [atWork, setAtWork] = useState(true);
   const [workType, setWorkType] = useState<string>('');
   const [concern, setConcern] = useState('');
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const toggle = (arr: string[], set: (v: string[]) => void, v: string) =>
     set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
+
+  const addPhoto = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) return;
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.6 });
+    if (res.canceled || !res.assets?.[0]) return;
+    setPhotos((p) => [...p, res.assets[0].uri]);
+  };
 
   const save = async () => {
     const id = `memo_${Date.now()}`;
@@ -37,6 +47,7 @@ export function SymptomInputScreen({ navigation }: Props) {
       atWork,
       workType: atWork ? workType || undefined : undefined,
       concern: concern.trim() || undefined,
+      photos: photos.length ? photos : undefined,
       createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
     };
     await storage.addSymptomMemo(memo);
@@ -86,6 +97,12 @@ export function SymptomInputScreen({ navigation }: Props) {
 
         <Text style={styles.label}>걱정되는 점(선택)</Text>
         <TextInput value={concern} onChangeText={setConcern} placeholder="예: 가스를 마신 것 같아 걱정돼요" placeholderTextColor={colors.g400} style={[styles.input, { minHeight: 56 }]} multiline />
+
+        <Text style={styles.label}>사진 첨부(선택) — 피부·상처 등</Text>
+        <View style={styles.photoRow}>
+          {photos.map((uri, i) => <Image key={i} source={{ uri }} style={styles.thumb} />)}
+          <Pressable onPress={addPhoto} style={styles.addPhoto}><Text style={{ fontSize: 28, color: colors.g400 }}>＋</Text></Pressable>
+        </View>
       </ScrollView>
 
       <View style={styles.footer}>
@@ -104,5 +121,8 @@ const styles = StyleSheet.create({
   stepper: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 6 },
   stepBtn: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.g100, alignItems: 'center', justifyContent: 'center' },
   stepTxt: { fontSize: 24, fontWeight: '700', color: colors.g800 },
+  photoRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  thumb: { width: 72, height: 72, borderRadius: 12, backgroundColor: colors.g100 },
+  addPhoto: { width: 72, height: 72, borderRadius: 12, borderWidth: 1.5, borderColor: colors.border, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.card },
   footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.divider },
 });

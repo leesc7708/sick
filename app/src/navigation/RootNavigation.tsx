@@ -28,6 +28,29 @@ import { SettingsScreen } from '../screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+// 웹에서 브라우저 주소/히스토리(마우스 뒤로가기) 연동
+const linking = {
+  prefixes: ['safecall://', 'https://wheresick-5617a.web.app'],
+  config: {
+    screens: {
+      Onboarding: 'onboarding',
+      Home: 'home',
+      RedFlag: 'red-flag',
+      SymptomInput: 'symptom',
+      SymptomSummary: 'summary',
+      HospitalFinder: 'hospitals',
+      HealthRecords: 'health-records',
+      HealthRecordShare: 'health-records/share/:recordId',
+      WorkCheck: 'work-check',
+      IncidentReport: 'incident',
+      ManagerDashboard: 'manager',
+      MyMedicines: 'medicines',
+      History: 'history',
+      Settings: 'settings',
+    },
+  },
+};
+
 export function RootNavigation() {
   const [ready, setReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('Onboarding');
@@ -49,7 +72,7 @@ export function RootNavigation() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator
         initialRouteName={initialRoute}
         screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}

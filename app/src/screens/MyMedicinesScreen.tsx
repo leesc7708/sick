@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
@@ -15,8 +15,13 @@ export function MyMedicinesScreen({ navigation }: Props) {
   const [list, setList] = useState<MyMedicine[]>([]);
   const [name, setName] = useState('');
   const [time, setTime] = useState('');
+  const [allergies, setAllergies] = useState('');
 
-  const reload = useCallback(async () => setList(await storage.getMyMedicines()), []);
+  const reload = useCallback(async () => {
+    setList(await storage.getMyMedicines());
+    const p = await storage.getProfile();
+    setAllergies((p?.allergies ?? []).join(', '));
+  }, []);
   useFocusEffect(useCallback(() => { reload(); }, [reload]));
 
   const add = async () => {
@@ -27,6 +32,12 @@ export function MyMedicinesScreen({ navigation }: Props) {
     reload();
   };
   const remove = async (id: string) => { await storage.deleteMyMedicine(id); reload(); };
+  const saveAllergies = async () => {
+    const p = await storage.getProfile();
+    if (!p) return;
+    await storage.setProfile({ ...p, allergies: allergies.split(',').map((x) => x.trim()).filter(Boolean) });
+    Alert.alert('저장됨', '알레르기 정보가 저장되었습니다.');
+  };
 
   return (
     <View style={styles.wrap}>
@@ -50,6 +61,12 @@ export function MyMedicinesScreen({ navigation }: Props) {
           <TextInput value={name} onChangeText={setName} placeholder="약 이름 (예: 혈압약)" placeholderTextColor={colors.g400} style={styles.input} />
           <TextInput value={time} onChangeText={setTime} placeholder="복용 시간(선택) (예: 아침 08:00)" placeholderTextColor={colors.g400} style={[styles.input, { marginTop: spacing.sm }]} />
           <PrimaryButton title="추가" icon="＋" variant="primary" onPress={add} style={{ marginTop: spacing.sm }} />
+        </View>
+
+        <View style={[styles.addBox, shadow.card]}>
+          <Text style={[typography.captionBold, { color: colors.textSecondary, marginBottom: spacing.sm }]}>알레르기 메모</Text>
+          <TextInput value={allergies} onChangeText={setAllergies} placeholder="예: 페니실린, 아스피린" placeholderTextColor={colors.g400} style={styles.input} />
+          <PrimaryButton title="알레르기 저장" variant="outline" onPress={saveAllergies} style={{ marginTop: spacing.sm }} />
         </View>
 
         <View style={[styles.v15, shadow.card]}>

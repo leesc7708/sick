@@ -21,7 +21,8 @@ export function HomeScreen({ navigation }: Props) {
     useCallback(() => {
       (async () => {
         const p = await storage.getProfile();
-        if (p) setMode(p.mode);
+        // 구버전 프로필(mode 없음)은 현장 모드로 폴백
+        setMode(p?.mode === 'general' ? 'general' : 'work');
       })();
     }, []),
   );
@@ -64,11 +65,12 @@ export function HomeScreen({ navigation }: Props) {
             <ListTile icon="✅" title="작업 전 건강체크" desc="오늘 컨디션 점검 → 관리자 전송" tone="work"
               badge={<Tag label="@work" tone="work" />}
               onPress={() => navigation.navigate('WorkCheck')} />
-            <ListTile icon="📋" title="건강검진기록" desc="한 번 올려두면 QR로 즉시 제출" tone="work"
-              badge={<Tag label="NEW" tone="new" />}
-              onPress={() => navigation.navigate('HealthRecords')} />
           </>
         )}
+
+        <ListTile icon="📋" title="건강검진기록" desc="한 번 올려두면 QR로 즉시 제출" tone="work"
+          badge={<Tag label="NEW" tone="new" />}
+          onPress={() => navigation.navigate('HealthRecords')} />
 
         <ListTile icon="💊" title="내 복용약" desc="병원·약국에 보여줄 목록"
           onPress={() => navigation.navigate('MyMedicines')} />
