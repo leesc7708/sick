@@ -13,11 +13,13 @@ import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
 import { useRegisterScrollTop } from '../utils/scrollTop';
+import { useLang } from '../i18n/LanguageContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
   const [mode, setMode] = useState<AppMode>('work');
+  const { t } = useLang();
   const scrollRef = useRef<ScrollView>(null);
   const toTop = useCallback(() => scrollRef.current?.scrollTo({ y: 0, animated: true }), []);
   useRegisterScrollTop(toTop);
@@ -44,13 +46,13 @@ export function HomeScreen({ navigation }: Props) {
               라이프라인 {isWork && <Text style={{ color: colors.work }}>@work</Text>}
             </Text>
             <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 2 }]}>
-              {isWork ? '아플 때·다쳤을 때, 현장에서 가장 먼저' : '증상 정리부터 병원 연결까지'}
+              {isWork ? t('tagline_work') : t('tagline_general')}
             </Text>
           </View>
         </View>
 
         <PrimaryButton
-          title="응급 신호 먼저 확인"
+          title={t('emergency_check')}
           icon="🚨"
           variant="emergency"
           size="lg"
@@ -58,41 +60,41 @@ export function HomeScreen({ navigation }: Props) {
           style={{ marginBottom: spacing.md }}
         />
 
-        <ListTile icon="📝" title="지금 증상 정리하기" desc="병원에서 보여줄 요약 카드"
+        <ListTile icon="📝" title={t('symptom_organize')} desc={t('symptom_desc')}
           onPress={() => navigation.navigate('SymptomInput')} />
-        <ListTile icon="🏥" title="병원·약국·응급실 찾기" desc="실시간 가용병상 확인"
+        <ListTile icon="🏥" title={t('find_hospital')} desc={t('find_hospital_desc')}
           onPress={() => navigation.navigate('HospitalFinder')} />
 
         {isWork && (
           <>
-            <ListTile icon="⚠️" title="사고·이상 보고" desc="1초 보고 + 응급처치 안내" tone="emergency"
+            <ListTile icon="⚠️" title={t('incident_report')} desc={t('incident_desc')} tone="emergency"
               badge={<Tag label="@work" tone="work" />}
               onPress={() => navigation.navigate('IncidentReport')} />
-            <ListTile icon="✅" title="작업 전 건강체크" desc="오늘 컨디션 점검 → 관리자 전송" tone="work"
+            <ListTile icon="✅" title={t('workcheck')} desc={t('workcheck_desc')} tone="work"
               badge={<Tag label="@work" tone="work" />}
               onPress={() => navigation.navigate('WorkCheck')} />
           </>
         )}
 
-        <ListTile icon="📋" title="현장 서류함" desc="검진·건설기초·화관법 등 QR 제출" tone="work"
+        <ListTile icon="📋" title={t('docs')} desc={t('docs_desc')} tone="work"
           badge={<Tag label="NEW" tone="new" />}
           onPress={() => navigation.navigate('HealthRecords')} />
 
-        <ListTile icon="💊" title="내 복용약" desc="병원·약국에 보여줄 목록"
+        <ListTile icon="💊" title={t('meds')} desc={t('meds_desc')}
           onPress={() => navigation.navigate('MyMedicines')} />
 
         {isWork && (
-          <ListTile icon="📊" title="관리자 대시보드" desc="현장 체크·사고·검진 현황" tone="work"
+          <ListTile icon="📊" title={t('manager')} desc={t('manager_desc')} tone="work"
             badge={<Tag label="@work" tone="work" />}
             onPress={() => navigation.navigate('ManagerDashboard')} />
         )}
 
-        <ListTile icon="🕐" title="지난 기록" desc="증상·사고·체크 이력"
+        <ListTile icon="🕐" title={t('history')} desc={t('history_desc')}
           onPress={() => navigation.navigate('History')} />
-        <ListTile icon="⚙️" title="설정" desc="모드 전환 · 데이터 관리"
+        <ListTile icon="⚙️" title={t('settings')} desc={t('settings_desc')}
           onPress={() => navigation.navigate('Settings')} />
 
-        <Disclaimer />
+        <Disclaimer text={t('disclaimer')} />
       </ScrollView>
     </SafeAreaView>
   );

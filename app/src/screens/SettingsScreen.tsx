@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
+import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
@@ -10,11 +11,14 @@ import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
 import { seedDemo } from '../services/demoSeed';
+import { useLang } from '../i18n/LanguageContext';
+import { LANGS } from '../i18n/translations';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 export function SettingsScreen({ navigation }: Props) {
   const [mode, setMode] = useState<AppMode>('work');
+  const { lang, setLang, t } = useLang();
 
   useFocusEffect(
     useCallback(() => {
@@ -77,11 +81,11 @@ export function SettingsScreen({ navigation }: Props) {
         </View>
 
         <View style={[styles.card, shadow.card]}>
-          <Text style={[typography.bodyBold, { color: colors.text }]}>🌐 언어 <Text style={[typography.small, { color: colors.primary }]}>v1.5</Text></Text>
+          <Text style={[typography.bodyBold, { color: colors.text }]}>🌐 {t('lang_label')}</Text>
           <View style={styles.chips}>
-            <Chip label="한국어" selected onPress={() => {}} />
-            <Chip label="English" onPress={() => Alert.alert('준비 중', '다국어는 v1.5에서 제공됩니다.')} />
-            <Chip label="Tiếng Việt" onPress={() => Alert.alert('준비 중', '다국어는 v1.5에서 제공됩니다.')} />
+            {LANGS.map((l) => (
+              <Chip key={l.code} label={l.label} tone="primary" selected={lang === l.code} onPress={() => setLang(l.code)} />
+            ))}
           </View>
         </View>
 

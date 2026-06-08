@@ -7,6 +7,7 @@ import {
   IncidentReport,
   MyMedicine,
 } from '../types';
+import { Lang } from '../i18n/translations';
 
 const KEYS = {
   profile: 'eodi:profile',
@@ -17,6 +18,7 @@ const KEYS = {
   workChecks: 'safecall:workChecks',
   incidents: 'safecall:incidents',
   myMedicines: 'safecall:myMedicines',
+  lang: 'lifeline:lang',
 };
 
 async function getList<T>(key: string): Promise<T[]> {
@@ -28,6 +30,14 @@ async function saveList<T>(key: string, list: T[]): Promise<void> {
 }
 
 export const storage = {
+  // ── 언어 ──
+  async getLang(): Promise<Lang | null> {
+    return (await AsyncStorage.getItem(KEYS.lang)) as Lang | null;
+  },
+  async setLang(l: Lang): Promise<void> {
+    await AsyncStorage.setItem(KEYS.lang, l);
+  },
+
   // ── 프로필 ──
   async getProfile(): Promise<UserProfile | null> {
     const raw = await AsyncStorage.getItem(KEYS.profile);

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
 import { PrimaryButton } from '../components/PrimaryButton';
