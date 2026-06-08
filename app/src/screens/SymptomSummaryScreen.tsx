@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Share, StyleSheet, Text, View } from 'react-native';
+import { Linking, Share, StyleSheet, Text, View } from 'react-native';
 import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
@@ -10,6 +10,7 @@ import { typography } from '../theme/typography';
 import { RootStackParamList, SymptomMemo } from '../types';
 import { storage } from '../services/storage';
 import { AiSummary, summarizeSymptom } from '../services/aiSummary';
+import { assessUrgency, careActions } from '../data/careGuide';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
@@ -40,9 +41,20 @@ export function SymptomSummaryScreen({ navigation, route }: Props) {
       ]
     : [];
 
+  const urgency = memo ? assessUrgency(memo) : null;
+  const actions = memo ? careActions(memo) : [];
+  const U = {
+    red: { c: colors.emergency, bg: '#FFF5F5', e: '🔴' },
+    yellow: { c: colors.warning, bg: '#FFFAEC', e: '🟡' },
+    gray: { c: colors.g500, bg: colors.g50, e: '⚪' },
+  };
+  const u = urgency ? U[urgency.level] : null;
+
   const share = () => {
     const text = rows.map(([k, v]) => `• ${k}: ${v}`).join('\n');
-    Share.share({ message: `[라이프라인] 진료 요약\n${text}\n\n※ 진단이 아닌 정리 자료입니다.` });
+    const care = actions.map((a) => `- ${a}`).join('\n');
+    const head = urgency ? `[${urgency.title}] ${urgency.message}\n\n` : '';
+    Share.share({ message: `[라이프라인] 응급 정리\n${head}■ 증상\n${text}\n\n■ 지금 할 수 있는 대처\n${care}\n\n※ 진단이 아닌 정리·안내 자료입니다.` });
   };
 
   const savePdf = async () => {
@@ -62,6 +74,33 @@ export function SymptomSummaryScreen({ navigation, route }: Props) {
       <AppBar title="진료 요약 카드" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[typography.h2, { color: colors.text }]}>병원에서 이 화면을{'\n'}보여주세요</Text>
+
+        {urgency && u && (
+          <View style={[styles.urgent, { borderColor: u.c, backgroundColor: u.bg }]}>
+            <Text style={[typography.h3, { color: u.c }]}>{u.e} {urgency.title}</Text>
+            <Text style={[typography.body, { color: colors.text, marginTop: 4 }]}>{urgency.message}</Text>
+            {urgency.level === 'red' && (
+              <View style={[styles.rowBtns, { marginTop: spacing.sm }]}>
+                <View style={{ flex: 1 }}><PrimaryButton title="119 전화" icon="📞" variant="emergency" onPress={() => Linking.openURL('tel:119')} /></View>
+                <View style={{ width: spacing.sm }} />
+                <View style={{ flex: 1 }}><PrimaryButton title="응급실" icon="🏥" variant="primary" onPress={() => navigation.navigate('HospitalFinder', { kind: 'er' })} /></View>
+              </View>
+            )}
+          </View>
+        )}
+
+        {actions.length > 0 && (
+          <View style={[styles.careCard, shadow.card]}>
+            <Text style={[typography.h3, { color: colors.text }]}>🤖 AI 의견 · 지금 할 수 있는 대처</Text>
+            <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>AI 의견은 참고사항입니다. 정확한 판단은 의료진에게 받으세요.</Text>
+            {actions.map((a, i) => (
+              <View key={i} style={styles.careRow}>
+                <Text style={styles.careDot}>•</Text>
+                <Text style={[typography.body, { color: colors.text, flex: 1 }]}>{a}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         <View style={[styles.card, shadow.card]}>
           {rows.map(([k, v]) => (
@@ -109,4 +148,8 @@ const styles = StyleSheet.create({
   aiCard: { backgroundColor: '#F4F9FF', borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md, borderWidth: 1, borderColor: '#D8E9FF' },
   footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.divider },
   rowBtns: { flexDirection: 'row' },
+  urgent: { borderWidth: 1.5, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md },
+  careCard: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md },
+  careRow: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 8 },
+  careDot: { color: colors.work, fontSize: 16, fontWeight: '900', marginRight: 8, lineHeight: 22 },
 });

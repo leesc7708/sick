@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -7,6 +7,7 @@ import { ListTile } from '../components/ListTile';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Disclaimer } from '../components/Disclaimer';
 import { Tag } from '../components/Tag';
+import { Chip } from '../components/Chip';
 import { LogoMark } from '../components/LogoMark';
 import { colors, spacing } from '../theme/colors';
 import { typography } from '../theme/typography';
@@ -21,7 +22,10 @@ export function HomeScreen({ navigation }: Props) {
   const [mode, setMode] = useState<AppMode>('work');
   const { t } = useLang();
   const scrollRef = useRef<ScrollView>(null);
-  const toTop = useCallback(() => scrollRef.current?.scrollTo({ y: 0, animated: true }), []);
+  const toTop = useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+    if (Platform.OS === 'web' && typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
   useRegisterScrollTop(toTop);
 
   useFocusEffect(
@@ -34,6 +38,19 @@ export function HomeScreen({ navigation }: Props) {
     }, []),
   );
 
+  const changeMode = async (m: AppMode) => {
+    setMode(m);
+    const p = await storage.getProfile();
+    await storage.setProfile({
+      mode: m,
+      age: p?.age,
+      gender: p?.gender,
+      conditions: p?.conditions ?? [],
+      allergies: p?.allergies ?? [],
+      currentMedicines: p?.currentMedicines ?? [],
+      onboardingDone: true,
+    });
+  };
   const isWork = mode === 'work';
 
   return (
@@ -49,6 +66,11 @@ export function HomeScreen({ navigation }: Props) {
               {isWork ? t('tagline_work') : t('tagline_general')}
             </Text>
           </View>
+        </View>
+
+        <View style={styles.modeToggle}>
+          <Chip label={t('mode_work')} tone="work" selected={isWork} onPress={() => changeMode('work')} />
+          <Chip label={t('mode_general')} tone="primary" selected={!isWork} onPress={() => changeMode('general')} />
         </View>
 
         <PrimaryButton
@@ -104,4 +126,5 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md, marginTop: spacing.xs },
+  modeToggle: { flexDirection: 'row', marginBottom: spacing.md },
 });
