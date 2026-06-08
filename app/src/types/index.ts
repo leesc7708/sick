@@ -114,8 +114,8 @@ export interface Hospital {
 // ── 응급처치 카드 ──
 export interface FirstAidCard {
   type: IncidentType;
-  title: string;
-  steps: string[];
+  title: Record<Lang, string>;
+  steps: Record<Lang, string[]>;
 }
 
 // ── 지난 기록 통합 ──

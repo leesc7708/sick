@@ -11,10 +11,12 @@ import { INCIDENT_TYPES } from '../data/options';
 import { firstAidFor } from '../data/firstAid';
 import { IncidentType, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
+import { useLang } from '../i18n/LanguageContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'IncidentReport'>;
 
 export function IncidentReportScreen({ navigation }: Props) {
+  const { lang } = useLang();
   const [type, setType] = useState<IncidentType | null>(null);
   const [memo, setMemo] = useState('');
 
@@ -67,8 +69,8 @@ export function IncidentReportScreen({ navigation }: Props) {
 
         {card && (
           <View style={[styles.aidCard, shadow.card]}>
-            <Text style={[typography.h3, { color: colors.emergency }]}>🚑 {card.title} — 응급처치</Text>
-            {card.steps.map((s, i) => (
+            <Text style={[typography.h3, { color: colors.emergency }]}>🚑 {card.title[lang]}</Text>
+            {card.steps[lang].map((s, i) => (
               <View key={i} style={styles.step}>
                 <View style={styles.stepNo}><Text style={styles.stepNoTxt}>{i + 1}</Text></View>
                 <Text style={[typography.body, { color: colors.text, flex: 1 }]}>{s}</Text>
