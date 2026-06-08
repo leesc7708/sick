@@ -7,6 +7,7 @@ import { ListTile } from '../components/ListTile';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Disclaimer } from '../components/Disclaimer';
 import { Tag } from '../components/Tag';
+import { LogoMark } from '../components/LogoMark';
 import { colors, spacing } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
@@ -33,7 +34,8 @@ export function HomeScreen({ navigation }: Props) {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <View>
+          <LogoMark size={38} />
+          <View style={{ marginLeft: 10 }}>
             <Text style={[typography.h1, { color: colors.text }]}>
               라이프라인 {isWork && <Text style={{ color: colors.work }}>@work</Text>}
             </Text>
@@ -95,5 +97,5 @@ export function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
-  header: { marginBottom: spacing.md, marginTop: spacing.xs },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md, marginTop: spacing.xs },
 });

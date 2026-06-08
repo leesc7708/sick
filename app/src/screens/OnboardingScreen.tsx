@@ -5,6 +5,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Disclaimer } from '../components/Disclaimer';
+import { LogoMark } from '../components/LogoMark';
 import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
@@ -50,7 +51,8 @@ export function OnboardingScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.body}>
-        <Text style={[typography.display, { color: colors.text }]}>라이프라인</Text>
+        <LogoMark size={52} />
+        <Text style={[typography.display, { color: colors.text, marginTop: spacing.sm }]}>라이프라인</Text>
         <Text style={[typography.body, { color: colors.textSecondary, marginTop: spacing.xs }]}>
           아플 때·다쳤을 때, 현장에서 가장 먼저
         </Text>

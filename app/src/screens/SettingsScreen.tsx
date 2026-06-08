@@ -9,6 +9,7 @@ import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
+import { seedDemo } from '../services/demoSeed';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -51,6 +52,18 @@ export function SettingsScreen({ navigation }: Props) {
       },
     ]);
 
+  const fillDemo = () =>
+    Alert.alert('데모 데이터', '시연용 샘플(검진·사고·작업체크·증상)을 추가할까요?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '추가',
+        onPress: async () => {
+          await seedDemo();
+          Alert.alert('완료', '샘플이 추가되었습니다.\n홈·관리자 대시보드·지난 기록·건강검진기록에서 확인하세요.');
+        },
+      },
+    ]);
+
   return (
     <View style={styles.wrap}>
       <AppBar title="설정" onBack={() => navigation.goBack()} />
@@ -84,7 +97,8 @@ export function SettingsScreen({ navigation }: Props) {
           </Text>
         </View>
 
-        <PrimaryButton title="모든 데이터 삭제" variant="outline" onPress={clearAll} style={{ marginTop: spacing.lg }} />
+        <PrimaryButton title="🎬 데모 데이터 채우기" variant="secondary" onPress={fillDemo} style={{ marginTop: spacing.lg }} />
+        <PrimaryButton title="모든 데이터 삭제" variant="outline" onPress={clearAll} style={{ marginTop: spacing.sm }} />
 
         <Text style={[typography.small, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.lg }]}>
           라이프라인 Lifeline · 데모 빌드{'\n'}의료·약 정보 출처: E-Gen / 심평원 / 식약처
