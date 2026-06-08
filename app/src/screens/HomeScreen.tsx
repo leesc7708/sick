@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -12,11 +12,15 @@ import { colors, spacing } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
+import { useRegisterScrollTop } from '../utils/scrollTop';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
   const [mode, setMode] = useState<AppMode>('work');
+  const scrollRef = useRef<ScrollView>(null);
+  const toTop = useCallback(() => scrollRef.current?.scrollTo({ y: 0, animated: true }), []);
+  useRegisterScrollTop(toTop);
 
   useFocusEffect(
     useCallback(() => {
@@ -32,7 +36,7 @@ export function HomeScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <LogoMark size={38} />
           <View style={{ marginLeft: 10 }}>

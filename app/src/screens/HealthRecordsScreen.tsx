@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -12,6 +12,7 @@ import { typography } from '../theme/typography';
 import { DOC_INFO, HEALTH_CHECK_TYPES } from '../data/options';
 import { HealthCheckRecord, HealthCheckType, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
+import { useRegisterScrollTop } from '../utils/scrollTop';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HealthRecords'>;
 
@@ -24,6 +25,9 @@ function daysLeft(expire?: string): number | null {
 export function HealthRecordsScreen({ navigation }: Props) {
   const [records, setRecords] = useState<HealthCheckRecord[]>([]);
   const [pickType, setPickType] = useState<HealthCheckType>('특수건강진단');
+  const scrollRef = useRef<ScrollView>(null);
+  const toTop = useCallback(() => scrollRef.current?.scrollTo({ y: 0, animated: true }), []);
+  useRegisterScrollTop(toTop);
 
   const reload = useCallback(async () => setRecords(await storage.getHealthRecords()), []);
   useFocusEffect(useCallback(() => { reload(); }, [reload]));
@@ -89,7 +93,7 @@ export function HealthRecordsScreen({ navigation }: Props) {
   return (
     <View style={styles.wrap}>
       <AppBar title="현장 서류함" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
         <Text style={[typography.h2, { color: colors.text }]}>한 번 올려두면{'\n'}어디서든 제출</Text>
         <Text style={[typography.caption, { color: colors.textMuted, marginTop: 6 }]}>
           현장 입구에서 QR로 바로 보여줄 수 있어요. 민감 정보라 기기에 안전하게 보관됩니다.
