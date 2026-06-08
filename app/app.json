@@ -22,7 +22,16 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/android-icon-foreground.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#0A0F1A"
+        }
+      ]
     ]
   }
 }

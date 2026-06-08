@@ -48,8 +48,10 @@ export interface SymptomMemo {
   createdAt: string;
 }
 
-// ── 건강검진기록 (킬러 기능) ──
-export type HealthCheckType = '특수건강진단' | '일반건강검진' | '채용시건강검진' | '기타';
+// ── 현장 서류함: 검진·교육·자격 (킬러 기능) ──
+export type HealthCheckType =
+  | '특수건강진단' | '일반건강검진' | '채용시건강검진'
+  | '건설기초안전보건교육' | '화관법 안전교육' | '안전보건교육' | '밀폐공간 교육' | '기타';
 export interface HealthCheckRecord {
   id: string;
   type: HealthCheckType;

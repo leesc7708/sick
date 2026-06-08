@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as DocumentPicker from 'expo-document-picker';
@@ -9,7 +9,7 @@ import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
-import { HEALTH_CHECK_TYPES } from '../data/options';
+import { DOC_INFO, HEALTH_CHECK_TYPES } from '../data/options';
 import { HealthCheckRecord, HealthCheckType, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
 
@@ -88,7 +88,7 @@ export function HealthRecordsScreen({ navigation }: Props) {
 
   return (
     <View style={styles.wrap}>
-      <AppBar title="건강검진기록" onBack={() => navigation.goBack()} />
+      <AppBar title="현장 서류함" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[typography.h2, { color: colors.text }]}>한 번 올려두면{'\n'}어디서든 제출</Text>
         <Text style={[typography.caption, { color: colors.textMuted, marginTop: 6 }]}>
@@ -101,6 +101,7 @@ export function HealthRecordsScreen({ navigation }: Props) {
             <Chip key={t} label={t} tone="work" selected={pickType === t} onPress={() => setPickType(t as HealthCheckType)} />
           ))}
         </View>
+        <Text style={[typography.small, { color: colors.textSecondary, marginTop: 2, lineHeight: 18 }]}>ℹ️ {DOC_INFO[pickType]}</Text>
 
         {records.length === 0 && (
           <View style={[styles.empty, shadow.card]}>
@@ -114,7 +115,11 @@ export function HealthRecordsScreen({ navigation }: Props) {
           return (
             <View key={r.id} style={[styles.card, shadow.card]}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ fontSize: 22, marginRight: 10 }}>{r.fileType === 'pdf' ? '📄' : '🖼️'}</Text>
+                {r.fileType === 'image' && r.fileUri ? (
+                  <Image source={{ uri: r.fileUri }} style={styles.thumb} />
+                ) : (
+                  <Text style={{ fontSize: 22, marginRight: 10 }}>{r.fileType === 'pdf' ? '📄' : '🖼️'}</Text>
+                )}
                 <View style={{ flex: 1 }}>
                   <Text style={[typography.bodyBold, { color: colors.text }]}>{r.type}</Text>
                   <Text style={[typography.small, { color: colors.textMuted }]} numberOfLines={1}>{r.title}</Text>
@@ -156,6 +161,7 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
   empty: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.xl, alignItems: 'center', marginTop: spacing.md },
   card: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.sm },
+  thumb: { width: 38, height: 38, borderRadius: 8, marginRight: 10, backgroundColor: colors.g100 },
   rowBtns: { flexDirection: 'row', marginTop: spacing.md },
   footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.divider },
 });

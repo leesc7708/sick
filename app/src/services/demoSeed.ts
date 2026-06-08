@@ -13,6 +13,14 @@ export async function seedDemo() {
     id: 'hc_demo2', type: '일반건강검진', title: '일반건강검진 결과.jpg',
     fileType: 'image', fileUri: '', examDate: d(-120), createdAt: d(-120),
   });
+  await storage.addHealthRecord({
+    id: 'hc_demo3', type: '건설기초안전보건교육', title: '건설업 기초안전보건교육 이수증.pdf',
+    fileType: 'pdf', fileUri: '', examDate: d(-200), result: '이수', createdAt: d(-200),
+  });
+  await storage.addHealthRecord({
+    id: 'hc_demo4', type: '화관법 안전교육', title: '유해화학물질 안전교육 수료증.pdf',
+    fileType: 'pdf', fileUri: '', examDate: d(-60), expireDate: d(300), result: '수료', createdAt: d(-60),
+  });
   await storage.addWorkCheck({
     id: 'wc_demo1', workType: '밀폐공간', sleepOk: true, noAlcohol: true, tookMeds: true, noDizziness: true,
     completedAt: `${d(0)} 07:30`,

@@ -70,7 +70,7 @@ export function HomeScreen({ navigation }: Props) {
           </>
         )}
 
-        <ListTile icon="📋" title="건강검진기록" desc="한 번 올려두면 QR로 즉시 제출" tone="work"
+        <ListTile icon="📋" title="현장 서류함" desc="검진·건설기초·화관법 등 QR 제출" tone="work"
           badge={<Tag label="NEW" tone="new" />}
           onPress={() => navigation.navigate('HealthRecords')} />
 
