@@ -15,8 +15,12 @@ import { useLang } from '../i18n/LanguageContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'IncidentReport'>;
 
+const TYPE_KEY: Record<string, string> = {
+  '질식': 'it_choke', '화상': 'it_burn', '추락': 'it_fall', '중독': 'it_poison', '감전': 'it_shock', '기타': 'it_other',
+};
+
 export function IncidentReportScreen({ navigation }: Props) {
-  const { lang } = useLang();
+  const { lang, t } = useLang();
   const [type, setType] = useState<IncidentType | null>(null);
   const [memo, setMemo] = useState('');
 
@@ -40,28 +44,28 @@ export function IncidentReportScreen({ navigation }: Props) {
 
   return (
     <View style={styles.wrap}>
-      <AppBar title="사고·이상 보고" onBack={() => navigation.goBack()} />
+      <AppBar title={t('ir_title')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[typography.h2, { color: colors.text }]}>어떤 상황인가요?</Text>
+        <Text style={[typography.h2, { color: colors.text }]}>{t('ir_q')}</Text>
         <Text style={[typography.caption, { color: colors.textMuted, marginTop: 6, marginBottom: spacing.md }]}>
-          유형을 고르면 응급처치 안내와 가까운 응급실이 바로 나와요.
+          {t('ir_note')}
         </Text>
 
         <View style={styles.chips}>
-          {INCIDENT_TYPES.map((t) => (
-            <Chip key={t} label={t} tone="red" selected={type === t} onPress={() => setType(t as IncidentType)} />
+          {INCIDENT_TYPES.map((ty) => (
+            <Chip key={ty} label={t(TYPE_KEY[ty])} tone="red" selected={type === ty} onPress={() => setType(ty as IncidentType)} />
           ))}
         </View>
 
         <View style={[styles.gps, shadow.card]}>
-          <Text style={[typography.captionBold, { color: colors.text }]}>📍 현재 위치(GPS) 자동 첨부됨</Text>
-          <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>실제 서비스에서는 좌표·주소가 함께 전송됩니다.</Text>
+          <Text style={[typography.captionBold, { color: colors.text }]}>📍 {t('ir_gps')}</Text>
+          <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>{t('ir_gps_note')}</Text>
         </View>
 
         <TextInput
           value={memo}
           onChangeText={setMemo}
-          placeholder="상황 메모(선택) — 예: A구역 맨홀 내부"
+          placeholder={t('ir_memo_ph')}
           placeholderTextColor={colors.g400}
           style={styles.input}
           multiline
@@ -85,13 +89,13 @@ export function IncidentReportScreen({ navigation }: Props) {
 
       <View style={styles.footer}>
         <View style={styles.rowBtns}>
-          <View style={{ flex: 1 }}><PrimaryButton title="119 전화" icon="📞" variant="emergency" onPress={call119} /></View>
+          <View style={{ flex: 1 }}><PrimaryButton title={t('ef_call119')} icon="📞" variant="emergency" onPress={call119} /></View>
           <View style={{ width: spacing.sm }} />
           <View style={{ flex: 1 }}>
-            <PrimaryButton title="응급실 찾기" icon="🏥" variant="primary" onPress={() => navigation.navigate('HospitalFinder', { kind: 'er' })} />
+            <PrimaryButton title={t('ef_find_er')} icon="🏥" variant="primary" onPress={() => navigation.navigate('HospitalFinder', { kind: 'er' })} />
           </View>
         </View>
-        <PrimaryButton title="보고 전송" icon="🚨" variant="work" size="lg" disabled={!type} onPress={report} style={{ marginTop: spacing.sm }} />
+        <PrimaryButton title={t('ir_send')} icon="🚨" variant="work" size="lg" disabled={!type} onPress={report} style={{ marginTop: spacing.sm }} />
       </View>
     </View>
   );

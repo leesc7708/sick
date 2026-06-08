@@ -60,6 +60,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     ef_show_title: '🆘 구조대·병원에 보여주세요', ef_show_note: '말로 설명하기 어렵거나 한국어가 통하지 않을 때, 이 화면을 그대로 제시하세요.',
     ef_loc: '📍 위치', ef_symptom: '🩹 증상', ef_cond: '💊 기저질환', ef_meds: '💊 복용약', ef_alg: '⚠️ 알레르기',
     ef_first_title: '🧰 구급대 오기 전 대처', ef_find_hospital: '병원·약국 찾기', ef_organize: '증상 정리하기', ef_home: '홈으로',
+    it_choke: '질식', it_burn: '화상', it_fall: '추락', it_poison: '중독', it_shock: '감전', it_other: '기타',
+    ir_title: '사고·이상 보고', ir_q: '어떤 상황인가요?', ir_note: '유형을 고르면 응급처치 안내와 가까운 응급실이 바로 나와요.',
+    ir_gps: '현재 위치(GPS) 자동 첨부됨', ir_gps_note: '실제 서비스에서는 좌표·주소가 함께 전송됩니다.', ir_memo_ph: '상황 메모(선택)', ir_send: '보고 전송',
   },
   en: {
     tagline_work: 'When hurt or sick — the first step on site',
@@ -109,6 +112,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     ef_show_title: '🆘 Show this to responders/hospital', ef_show_note: 'When it is hard to explain or Korean is not understood, show this screen as is.',
     ef_loc: '📍 Location', ef_symptom: '🩹 Symptoms', ef_cond: '💊 Conditions', ef_meds: '💊 Medications', ef_alg: '⚠️ Allergies',
     ef_first_title: '🧰 Before the ambulance arrives', ef_find_hospital: 'Find hospital/pharmacy', ef_organize: 'Organize symptoms', ef_home: 'Home',
+    it_choke: 'Asphyxiation', it_burn: 'Burn', it_fall: 'Fall', it_poison: 'Poisoning', it_shock: 'Electric shock', it_other: 'Other',
+    ir_title: 'Report Incident', ir_q: 'What happened?', ir_note: 'Pick a type to see first aid and the nearest ER.',
+    ir_gps: 'Current location (GPS) attached', ir_gps_note: 'In the real service, coordinates/address are sent too.', ir_memo_ph: 'Note (optional)', ir_send: 'Send report',
   },
   zh: {
     tagline_work: '受伤或不适时，现场第一步',
@@ -158,6 +164,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     ef_show_title: '🆘 出示给救援队/医院', ef_show_note: '当难以说明或韩语不通时，请直接出示此屏幕。',
     ef_loc: '📍 位置', ef_symptom: '🩹 症状', ef_cond: '💊 基础疾病', ef_meds: '💊 用药', ef_alg: '⚠️ 过敏',
     ef_first_title: '🧰 救护车到达前处理', ef_find_hospital: '查找医院/药店', ef_organize: '整理症状', ef_home: '主页',
+    it_choke: '窒息', it_burn: '烧伤', it_fall: '坠落', it_poison: '中毒', it_shock: '触电', it_other: '其他',
+    ir_title: '事故报告', ir_q: '发生了什么？', ir_note: '选择类型即可看到急救和最近急诊。',
+    ir_gps: '已附加当前位置(GPS)', ir_gps_note: '实际服务中会一并发送坐标·地址。', ir_memo_ph: '情况备注(可选)', ir_send: '发送报告',
   },
   ja: {
     tagline_work: '痛い時・怪我した時、現場でまず最初に',
@@ -207,6 +216,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     ef_show_title: '🆘 救助隊・病院に見せてください', ef_show_note: '説明が難しい・韓国語が通じない時は、この画面をそのまま提示。',
     ef_loc: '📍 位置', ef_symptom: '🩹 症状', ef_cond: '💊 基礎疾患', ef_meds: '💊 服用薬', ef_alg: '⚠️ アレルギー',
     ef_first_title: '🧰 救急車が来る前の対処', ef_find_hospital: '病院・薬局を探す', ef_organize: '症状を整理', ef_home: 'ホーム',
+    it_choke: '窒息', it_burn: 'やけど', it_fall: '墜落', it_poison: '中毒', it_shock: '感電', it_other: 'その他',
+    ir_title: '事故・異常を報告', ir_q: 'どんな状況ですか？', ir_note: '種類を選ぶと応急処置と最寄りの救急が出ます。',
+    ir_gps: '現在位置(GPS)を添付', ir_gps_note: '実サービスでは座標・住所も送信されます。', ir_memo_ph: '状況メモ(任意)', ir_send: '報告を送信',
   },
   vi: {
     tagline_work: 'Khi đau hay bị thương — bước đầu tiên tại công trường',
@@ -256,6 +268,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     ef_show_title: '🆘 Cho đội cứu hộ/bệnh viện xem', ef_show_note: 'Khi khó giải thích hoặc không thông tiếng Hàn, hãy đưa màn hình này.',
     ef_loc: '📍 Vị trí', ef_symptom: '🩹 Triệu chứng', ef_cond: '💊 Bệnh nền', ef_meds: '💊 Thuốc', ef_alg: '⚠️ Dị ứng',
     ef_first_title: '🧰 Trước khi xe cứu thương đến', ef_find_hospital: 'Tìm bệnh viện/nhà thuốc', ef_organize: 'Ghi triệu chứng', ef_home: 'Trang chính',
+    it_choke: 'Ngạt thở', it_burn: 'Bỏng', it_fall: 'Ngã', it_poison: 'Ngộ độc', it_shock: 'Điện giật', it_other: 'Khác',
+    ir_title: 'Báo cáo sự cố', ir_q: 'Chuyện gì đã xảy ra?', ir_note: 'Chọn loại để xem sơ cứu và phòng cấp cứu gần nhất.',
+    ir_gps: 'Đã đính kèm vị trí (GPS)', ir_gps_note: 'Trong dịch vụ thật, tọa độ/địa chỉ cũng được gửi.', ir_memo_ph: 'Ghi chú (tùy chọn)', ir_send: 'Gửi báo cáo',
   },
   th: {
     tagline_work: 'เมื่อเจ็บป่วยหรือบาดเจ็บ — ก้าวแรกในไซต์งาน',
@@ -305,6 +320,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     ef_show_title: '🆘 แสดงให้หน่วยกู้ภัย/โรงพยาบาล', ef_show_note: 'เมื่ออธิบายยากหรือไม่เข้าใจภาษาเกาหลี ให้แสดงหน้าจอนี้',
     ef_loc: '📍 ตำแหน่ง', ef_symptom: '🩹 อาการ', ef_cond: '💊 โรคประจำตัว', ef_meds: '💊 ยา', ef_alg: '⚠️ ภูมิแพ้',
     ef_first_title: '🧰 ก่อนรถพยาบาลมาถึง', ef_find_hospital: 'หาโรงพยาบาล/ร้านยา', ef_organize: 'บันทึกอาการ', ef_home: 'หน้าหลัก',
+    it_choke: 'ขาดอากาศ', it_burn: 'แผลไหม้', it_fall: 'ตก', it_poison: 'พิษ', it_shock: 'ไฟดูด', it_other: 'อื่นๆ',
+    ir_title: 'รายงานอุบัติเหตุ', ir_q: 'เกิดอะไรขึ้น?', ir_note: 'เลือกประเภทเพื่อดูปฐมพยาบาลและห้องฉุกเฉินใกล้สุด',
+    ir_gps: 'แนบตำแหน่ง (GPS) แล้ว', ir_gps_note: 'ในบริการจริงจะส่งพิกัด·ที่อยู่ด้วย', ir_memo_ph: 'บันทึก (ไม่บังคับ)', ir_send: 'ส่งรายงาน',
   },
   es: {
     tagline_work: 'Cuando te lastimas o enfermas — el primer paso en obra',
@@ -354,5 +372,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     ef_show_title: '🆘 Muestre esto a rescatistas/hospital', ef_show_note: 'Cuando sea difícil explicar o no se entienda coreano, muestre esta pantalla.',
     ef_loc: '📍 Ubicación', ef_symptom: '🩹 Síntomas', ef_cond: '💊 Condiciones', ef_meds: '💊 Medicamentos', ef_alg: '⚠️ Alergias',
     ef_first_title: '🧰 Antes de que llegue la ambulancia', ef_find_hospital: 'Buscar hospital/farmacia', ef_organize: 'Organizar síntomas', ef_home: 'Inicio',
+    it_choke: 'Asfixia', it_burn: 'Quemadura', it_fall: 'Caída', it_poison: 'Intoxicación', it_shock: 'Descarga', it_other: 'Otro',
+    ir_title: 'Reportar incidente', ir_q: '¿Qué pasó?', ir_note: 'Elija un tipo para ver primeros auxilios y urgencias cercanas.',
+    ir_gps: 'Ubicación actual (GPS) adjunta', ir_gps_note: 'En el servicio real también se envían coordenadas/dirección.', ir_memo_ph: 'Nota (opcional)', ir_send: 'Enviar reporte',
   },
 };
