@@ -66,6 +66,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     hf_title: '병원·약국·응급실', hf_er: '응급실', hf_hospital: '병원', hf_pharmacy: '약국', hf_open: '지금 운영중', hf_night: '야간·주말', hf_beds_f: '가용병상 있음',
     hf_call: '전화', hf_route: '길찾기', hf_beds: '가용병상', hf_realtime: '실시간', hf_full: '병상 만실', hf_open_now: '운영중',
     hf_source: '출처: 국립중앙의료원 E-Gen(데모) · 방문 전 전화로 확인하세요', hf_empty: '조건에 맞는 곳이 없어요. 필터를 조정해 보세요.',
+    wc_title: '작업 전 건강체크', wc_today: '오늘 작업 전 체크', wc_work_type: '작업 종류', wc_q_sleep: '수면을 6시간 이상 잤나요?', wc_q_alcohol: '전날 음주를 안 했나요?', wc_q_meds: '필요한 약을 복용했나요?', wc_q_dizzy: '어지럼·심한 피로가 없나요?', wc_yes: '예', wc_no: '아니오',
+    wc_warn_t: '⚠️ 위험작업 컨디션 주의', wc_warn_m: '밀폐공간·화학물질·고소작업은 컨디션이 중요합니다. 관리자 확인 후 작업하세요.', wc_note: '※ 진단이 아닌 자가 점검 도구입니다. 결과는 동의에 따라 관리자에게 공유됩니다.', wc_submit: '체크 완료 → 관리자 전송',
+    wt_confined: '밀폐공간', wt_chem: '화학물질 취급', wt_height: '고소작업', wt_heavy: '중장비', wt_weld: '용접·화기', wt_general: '일반작업',
   },
   en: {
     tagline_work: 'When hurt or sick — the first step on site',
@@ -121,6 +124,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     hf_title: 'Hospital·Pharmacy·ER', hf_er: 'ER', hf_hospital: 'Hospital', hf_pharmacy: 'Pharmacy', hf_open: 'Open now', hf_night: 'Night·Weekend', hf_beds_f: 'Beds available',
     hf_call: 'Call', hf_route: 'Directions', hf_beds: 'Available beds', hf_realtime: 'real-time', hf_full: 'No beds', hf_open_now: 'Open',
     hf_source: 'Source: NMC E-Gen (demo) · Confirm by phone before visiting', hf_empty: 'No matches. Try adjusting filters.',
+    wc_title: 'Pre-work Health Check', wc_today: "Today's pre-work check", wc_work_type: 'Work type', wc_q_sleep: 'Did you sleep 6+ hours?', wc_q_alcohol: 'No alcohol last night?', wc_q_meds: 'Took needed medication?', wc_q_dizzy: 'No dizziness/severe fatigue?', wc_yes: 'Yes', wc_no: 'No',
+    wc_warn_t: '⚠️ Hazardous work — check condition', wc_warn_m: 'Confined space/chemical/height work needs good condition. Get manager approval first.', wc_note: '※ A self-check tool, not a diagnosis. Results are shared with the manager per consent.', wc_submit: 'Complete → send to manager',
+    wt_confined: 'Confined space', wt_chem: 'Chemical handling', wt_height: 'Height work', wt_heavy: 'Heavy equipment', wt_weld: 'Welding/fire', wt_general: 'General work',
   },
   zh: {
     tagline_work: '受伤或不适时，现场第一步',
@@ -176,6 +182,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     hf_title: '医院·药店·急诊', hf_er: '急诊', hf_hospital: '医院', hf_pharmacy: '药店', hf_open: '正在营业', hf_night: '夜间·周末', hf_beds_f: '有空床',
     hf_call: '电话', hf_route: '导航', hf_beds: '空床', hf_realtime: '实时', hf_full: '无空床', hf_open_now: '营业中',
     hf_source: '来源：国立中央医疗院 E-Gen(演示)·就诊前请电话确认', hf_empty: '无符合项。请调整筛选。',
+    wc_title: '工作前健康检查', wc_today: '今日工作前检查', wc_work_type: '工作类型', wc_q_sleep: '睡眠是否6小时以上？', wc_q_alcohol: '前一天没饮酒吗？', wc_q_meds: '是否服用了必要的药？', wc_q_dizzy: '没有头晕·严重疲劳吗？', wc_yes: '是', wc_no: '否',
+    wc_warn_t: '⚠️ 危险作业·注意状态', wc_warn_m: '密闭空间·化学品·高处作业状态很重要。请经管理者确认后作业。', wc_note: '※ 这是自我检查工具，非诊断。结果经同意后与管理者共享。', wc_submit: '完成检查 → 发送管理者',
+    wt_confined: '密闭空间', wt_chem: '化学品处理', wt_height: '高处作业', wt_heavy: '重型设备', wt_weld: '焊接·明火', wt_general: '一般作业',
   },
   ja: {
     tagline_work: '痛い時・怪我した時、現場でまず最初に',
@@ -231,6 +240,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     hf_title: '病院·薬局·救急', hf_er: '救急', hf_hospital: '病院', hf_pharmacy: '薬局', hf_open: '営業中', hf_night: '夜間·週末', hf_beds_f: '空きベッドあり',
     hf_call: '電話', hf_route: '経路', hf_beds: '空きベッド', hf_realtime: 'リアルタイム', hf_full: '満床', hf_open_now: '営業中',
     hf_source: '出典：国立中央医療院 E-Gen(デモ)·受診前に電話確認を', hf_empty: '該当なし。フィルターを調整してください。',
+    wc_title: '作業前の健康チェック', wc_today: '今日の作業前チェック', wc_work_type: '作業の種類', wc_q_sleep: '睡眠を6時間以上とりましたか？', wc_q_alcohol: '前日に飲酒していませんか？', wc_q_meds: '必要な薬を服用しましたか？', wc_q_dizzy: 'めまい・強い疲労はありませんか？', wc_yes: 'はい', wc_no: 'いいえ',
+    wc_warn_t: '⚠️ 危険作業・体調注意', wc_warn_m: '密閉空間・化学物質・高所作業は体調が重要。管理者の確認後に作業を。', wc_note: '※ 診断ではなく自己点検ツールです。結果は同意に基づき管理者へ共有。', wc_submit: 'チェック完了 → 管理者へ送信',
+    wt_confined: '密閉空間', wt_chem: '化学物質取扱', wt_height: '高所作業', wt_heavy: '重機', wt_weld: '溶接・火気', wt_general: '一般作業',
   },
   vi: {
     tagline_work: 'Khi đau hay bị thương — bước đầu tiên tại công trường',
@@ -286,6 +298,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     hf_title: 'Bệnh viện·Nhà thuốc·Cấp cứu', hf_er: 'Cấp cứu', hf_hospital: 'Bệnh viện', hf_pharmacy: 'Nhà thuốc', hf_open: 'Đang mở', hf_night: 'Đêm·Cuối tuần', hf_beds_f: 'Còn giường',
     hf_call: 'Gọi', hf_route: 'Chỉ đường', hf_beds: 'Giường trống', hf_realtime: 'thời gian thực', hf_full: 'Hết giường', hf_open_now: 'Đang mở',
     hf_source: 'Nguồn: NMC E-Gen (demo) · Gọi xác nhận trước khi đến', hf_empty: 'Không có kết quả. Hãy điều chỉnh bộ lọc.',
+    wc_title: 'Kiểm tra sức khỏe trước khi làm', wc_today: 'Kiểm tra trước khi làm hôm nay', wc_work_type: 'Loại công việc', wc_q_sleep: 'Bạn ngủ 6 tiếng trở lên chứ?', wc_q_alcohol: 'Tối qua không uống rượu chứ?', wc_q_meds: 'Đã uống thuốc cần thiết chưa?', wc_q_dizzy: 'Không chóng mặt/mệt nặng chứ?', wc_yes: 'Có', wc_no: 'Không',
+    wc_warn_t: '⚠️ Việc nguy hiểm — chú ý tình trạng', wc_warn_m: 'Việc trong không gian kín/hóa chất/trên cao cần tình trạng tốt. Hãy được quản lý duyệt trước.', wc_note: '※ Công cụ tự kiểm tra, không phải chẩn đoán. Kết quả chia sẻ với quản lý theo đồng ý.', wc_submit: 'Hoàn tất → gửi quản lý',
+    wt_confined: 'Không gian kín', wt_chem: 'Xử lý hóa chất', wt_height: 'Làm trên cao', wt_heavy: 'Thiết bị nặng', wt_weld: 'Hàn/lửa', wt_general: 'Việc chung',
   },
   th: {
     tagline_work: 'เมื่อเจ็บป่วยหรือบาดเจ็บ — ก้าวแรกในไซต์งาน',
@@ -341,6 +356,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     hf_title: 'โรงพยาบาล·ร้านยา·ฉุกเฉิน', hf_er: 'ฉุกเฉิน', hf_hospital: 'โรงพยาบาล', hf_pharmacy: 'ร้านยา', hf_open: 'เปิดอยู่', hf_night: 'กลางคืน·สุดสัปดาห์', hf_beds_f: 'มีเตียงว่าง',
     hf_call: 'โทร', hf_route: 'นำทาง', hf_beds: 'เตียงว่าง', hf_realtime: 'เรียลไทม์', hf_full: 'เตียงเต็ม', hf_open_now: 'เปิด',
     hf_source: 'ที่มา: NMC E-Gen (เดโม) · โทรยืนยันก่อนไป', hf_empty: 'ไม่พบ ลองปรับตัวกรอง',
+    wc_title: 'ตรวจสุขภาพก่อนทำงาน', wc_today: 'ตรวจก่อนทำงานวันนี้', wc_work_type: 'ประเภทงาน', wc_q_sleep: 'นอน 6 ชั่วโมงขึ้นไปไหม?', wc_q_alcohol: 'เมื่อคืนไม่ดื่มแอลกอฮอล์ใช่ไหม?', wc_q_meds: 'กินยาที่จำเป็นแล้วไหม?', wc_q_dizzy: 'ไม่เวียนหัว/อ่อนเพลียมากใช่ไหม?', wc_yes: 'ใช่', wc_no: 'ไม่',
+    wc_warn_t: '⚠️ งานอันตราย — ระวังสภาพร่างกาย', wc_warn_m: 'งานในที่อับอากาศ·สารเคมี·ที่สูง สภาพร่างกายสำคัญ ขออนุมัติหัวหน้าก่อน', wc_note: '※ เครื่องมือตรวจตนเอง ไม่ใช่การวินิจฉัย ผลจะแบ่งปันกับหัวหน้าตามความยินยอม', wc_submit: 'เสร็จ → ส่งหัวหน้า',
+    wt_confined: 'ที่อับอากาศ', wt_chem: 'จัดการสารเคมี', wt_height: 'งานที่สูง', wt_heavy: 'เครื่องจักรหนัก', wt_weld: 'เชื่อม/ไฟ', wt_general: 'งานทั่วไป',
   },
   es: {
     tagline_work: 'Cuando te lastimas o enfermas — el primer paso en obra',
@@ -396,5 +414,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     hf_title: 'Hospital·Farmacia·Urgencias', hf_er: 'Urgencias', hf_hospital: 'Hospital', hf_pharmacy: 'Farmacia', hf_open: 'Abierto ahora', hf_night: 'Noche·Fin de semana', hf_beds_f: 'Camas disponibles',
     hf_call: 'Llamar', hf_route: 'Cómo llegar', hf_beds: 'Camas disponibles', hf_realtime: 'en tiempo real', hf_full: 'Sin camas', hf_open_now: 'Abierto',
     hf_source: 'Fuente: NMC E-Gen (demo) · Confirme por teléfono antes de ir', hf_empty: 'Sin resultados. Ajuste los filtros.',
+    wc_title: 'Chequeo de salud antes del trabajo', wc_today: 'Chequeo de hoy antes del trabajo', wc_work_type: 'Tipo de trabajo', wc_q_sleep: '¿Durmió 6+ horas?', wc_q_alcohol: '¿No bebió anoche?', wc_q_meds: '¿Tomó la medicación necesaria?', wc_q_dizzy: '¿Sin mareo/fatiga severa?', wc_yes: 'Sí', wc_no: 'No',
+    wc_warn_t: '⚠️ Trabajo peligroso — revise su estado', wc_warn_m: 'El trabajo en espacio confinado/químico/altura requiere buen estado. Obtenga aprobación del gestor.', wc_note: '※ Herramienta de autochequeo, no diagnóstico. Los resultados se comparten con el gestor según consentimiento.', wc_submit: 'Completar → enviar al gestor',
+    wt_confined: 'Espacio confinado', wt_chem: 'Manejo químico', wt_height: 'Trabajo en altura', wt_heavy: 'Maquinaria pesada', wt_weld: 'Soldadura/fuego', wt_general: 'Trabajo general',
   },
 };
