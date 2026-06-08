@@ -63,6 +63,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     it_choke: '질식', it_burn: '화상', it_fall: '추락', it_poison: '중독', it_shock: '감전', it_other: '기타',
     ir_title: '사고·이상 보고', ir_q: '어떤 상황인가요?', ir_note: '유형을 고르면 응급처치 안내와 가까운 응급실이 바로 나와요.',
     ir_gps: '현재 위치(GPS) 자동 첨부됨', ir_gps_note: '실제 서비스에서는 좌표·주소가 함께 전송됩니다.', ir_memo_ph: '상황 메모(선택)', ir_send: '보고 전송',
+    hf_title: '병원·약국·응급실', hf_er: '응급실', hf_hospital: '병원', hf_pharmacy: '약국', hf_open: '지금 운영중', hf_night: '야간·주말', hf_beds_f: '가용병상 있음',
+    hf_call: '전화', hf_route: '길찾기', hf_beds: '가용병상', hf_realtime: '실시간', hf_full: '병상 만실', hf_open_now: '운영중',
+    hf_source: '출처: 국립중앙의료원 E-Gen(데모) · 방문 전 전화로 확인하세요', hf_empty: '조건에 맞는 곳이 없어요. 필터를 조정해 보세요.',
   },
   en: {
     tagline_work: 'When hurt or sick — the first step on site',
@@ -115,6 +118,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     it_choke: 'Asphyxiation', it_burn: 'Burn', it_fall: 'Fall', it_poison: 'Poisoning', it_shock: 'Electric shock', it_other: 'Other',
     ir_title: 'Report Incident', ir_q: 'What happened?', ir_note: 'Pick a type to see first aid and the nearest ER.',
     ir_gps: 'Current location (GPS) attached', ir_gps_note: 'In the real service, coordinates/address are sent too.', ir_memo_ph: 'Note (optional)', ir_send: 'Send report',
+    hf_title: 'Hospital·Pharmacy·ER', hf_er: 'ER', hf_hospital: 'Hospital', hf_pharmacy: 'Pharmacy', hf_open: 'Open now', hf_night: 'Night·Weekend', hf_beds_f: 'Beds available',
+    hf_call: 'Call', hf_route: 'Directions', hf_beds: 'Available beds', hf_realtime: 'real-time', hf_full: 'No beds', hf_open_now: 'Open',
+    hf_source: 'Source: NMC E-Gen (demo) · Confirm by phone before visiting', hf_empty: 'No matches. Try adjusting filters.',
   },
   zh: {
     tagline_work: '受伤或不适时，现场第一步',
@@ -167,6 +173,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     it_choke: '窒息', it_burn: '烧伤', it_fall: '坠落', it_poison: '中毒', it_shock: '触电', it_other: '其他',
     ir_title: '事故报告', ir_q: '发生了什么？', ir_note: '选择类型即可看到急救和最近急诊。',
     ir_gps: '已附加当前位置(GPS)', ir_gps_note: '实际服务中会一并发送坐标·地址。', ir_memo_ph: '情况备注(可选)', ir_send: '发送报告',
+    hf_title: '医院·药店·急诊', hf_er: '急诊', hf_hospital: '医院', hf_pharmacy: '药店', hf_open: '正在营业', hf_night: '夜间·周末', hf_beds_f: '有空床',
+    hf_call: '电话', hf_route: '导航', hf_beds: '空床', hf_realtime: '实时', hf_full: '无空床', hf_open_now: '营业中',
+    hf_source: '来源：国立中央医疗院 E-Gen(演示)·就诊前请电话确认', hf_empty: '无符合项。请调整筛选。',
   },
   ja: {
     tagline_work: '痛い時・怪我した時、現場でまず最初に',
@@ -219,6 +228,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     it_choke: '窒息', it_burn: 'やけど', it_fall: '墜落', it_poison: '中毒', it_shock: '感電', it_other: 'その他',
     ir_title: '事故・異常を報告', ir_q: 'どんな状況ですか？', ir_note: '種類を選ぶと応急処置と最寄りの救急が出ます。',
     ir_gps: '現在位置(GPS)を添付', ir_gps_note: '実サービスでは座標・住所も送信されます。', ir_memo_ph: '状況メモ(任意)', ir_send: '報告を送信',
+    hf_title: '病院·薬局·救急', hf_er: '救急', hf_hospital: '病院', hf_pharmacy: '薬局', hf_open: '営業中', hf_night: '夜間·週末', hf_beds_f: '空きベッドあり',
+    hf_call: '電話', hf_route: '経路', hf_beds: '空きベッド', hf_realtime: 'リアルタイム', hf_full: '満床', hf_open_now: '営業中',
+    hf_source: '出典：国立中央医療院 E-Gen(デモ)·受診前に電話確認を', hf_empty: '該当なし。フィルターを調整してください。',
   },
   vi: {
     tagline_work: 'Khi đau hay bị thương — bước đầu tiên tại công trường',
@@ -271,6 +283,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     it_choke: 'Ngạt thở', it_burn: 'Bỏng', it_fall: 'Ngã', it_poison: 'Ngộ độc', it_shock: 'Điện giật', it_other: 'Khác',
     ir_title: 'Báo cáo sự cố', ir_q: 'Chuyện gì đã xảy ra?', ir_note: 'Chọn loại để xem sơ cứu và phòng cấp cứu gần nhất.',
     ir_gps: 'Đã đính kèm vị trí (GPS)', ir_gps_note: 'Trong dịch vụ thật, tọa độ/địa chỉ cũng được gửi.', ir_memo_ph: 'Ghi chú (tùy chọn)', ir_send: 'Gửi báo cáo',
+    hf_title: 'Bệnh viện·Nhà thuốc·Cấp cứu', hf_er: 'Cấp cứu', hf_hospital: 'Bệnh viện', hf_pharmacy: 'Nhà thuốc', hf_open: 'Đang mở', hf_night: 'Đêm·Cuối tuần', hf_beds_f: 'Còn giường',
+    hf_call: 'Gọi', hf_route: 'Chỉ đường', hf_beds: 'Giường trống', hf_realtime: 'thời gian thực', hf_full: 'Hết giường', hf_open_now: 'Đang mở',
+    hf_source: 'Nguồn: NMC E-Gen (demo) · Gọi xác nhận trước khi đến', hf_empty: 'Không có kết quả. Hãy điều chỉnh bộ lọc.',
   },
   th: {
     tagline_work: 'เมื่อเจ็บป่วยหรือบาดเจ็บ — ก้าวแรกในไซต์งาน',
@@ -323,6 +338,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     it_choke: 'ขาดอากาศ', it_burn: 'แผลไหม้', it_fall: 'ตก', it_poison: 'พิษ', it_shock: 'ไฟดูด', it_other: 'อื่นๆ',
     ir_title: 'รายงานอุบัติเหตุ', ir_q: 'เกิดอะไรขึ้น?', ir_note: 'เลือกประเภทเพื่อดูปฐมพยาบาลและห้องฉุกเฉินใกล้สุด',
     ir_gps: 'แนบตำแหน่ง (GPS) แล้ว', ir_gps_note: 'ในบริการจริงจะส่งพิกัด·ที่อยู่ด้วย', ir_memo_ph: 'บันทึก (ไม่บังคับ)', ir_send: 'ส่งรายงาน',
+    hf_title: 'โรงพยาบาล·ร้านยา·ฉุกเฉิน', hf_er: 'ฉุกเฉิน', hf_hospital: 'โรงพยาบาล', hf_pharmacy: 'ร้านยา', hf_open: 'เปิดอยู่', hf_night: 'กลางคืน·สุดสัปดาห์', hf_beds_f: 'มีเตียงว่าง',
+    hf_call: 'โทร', hf_route: 'นำทาง', hf_beds: 'เตียงว่าง', hf_realtime: 'เรียลไทม์', hf_full: 'เตียงเต็ม', hf_open_now: 'เปิด',
+    hf_source: 'ที่มา: NMC E-Gen (เดโม) · โทรยืนยันก่อนไป', hf_empty: 'ไม่พบ ลองปรับตัวกรอง',
   },
   es: {
     tagline_work: 'Cuando te lastimas o enfermas — el primer paso en obra',
@@ -375,5 +393,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     it_choke: 'Asfixia', it_burn: 'Quemadura', it_fall: 'Caída', it_poison: 'Intoxicación', it_shock: 'Descarga', it_other: 'Otro',
     ir_title: 'Reportar incidente', ir_q: '¿Qué pasó?', ir_note: 'Elija un tipo para ver primeros auxilios y urgencias cercanas.',
     ir_gps: 'Ubicación actual (GPS) adjunta', ir_gps_note: 'En el servicio real también se envían coordenadas/dirección.', ir_memo_ph: 'Nota (opcional)', ir_send: 'Enviar reporte',
+    hf_title: 'Hospital·Farmacia·Urgencias', hf_er: 'Urgencias', hf_hospital: 'Hospital', hf_pharmacy: 'Farmacia', hf_open: 'Abierto ahora', hf_night: 'Noche·Fin de semana', hf_beds_f: 'Camas disponibles',
+    hf_call: 'Llamar', hf_route: 'Cómo llegar', hf_beds: 'Camas disponibles', hf_realtime: 'en tiempo real', hf_full: 'Sin camas', hf_open_now: 'Abierto',
+    hf_source: 'Fuente: NMC E-Gen (demo) · Confirme por teléfono antes de ir', hf_empty: 'Sin resultados. Ajuste los filtros.',
   },
 };

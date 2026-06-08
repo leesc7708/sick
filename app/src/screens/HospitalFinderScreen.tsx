@@ -9,6 +9,7 @@ import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { FACILITIES } from '../data/facilities';
 import { FacilityKind, Hospital, RootStackParamList } from '../types';
+import { useLang } from '../i18n/LanguageContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HospitalFinder'>;
 
@@ -19,6 +20,7 @@ const TABS: { k: FacilityKind; label: string }[] = [
 ];
 
 export function HospitalFinderScreen({ navigation, route }: Props) {
+  const { t } = useLang();
   const [kind, setKind] = useState<FacilityKind>(route.params?.kind ?? 'er');
   const [openOnly, setOpenOnly] = useState(false);
   const [nightOnly, setNightOnly] = useState(false);
@@ -35,22 +37,22 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.wrap}>
-      <AppBar title="병원·약국·응급실" onBack={() => navigation.goBack()} />
+      <AppBar title={t('hf_title')} onBack={() => navigation.goBack()} />
 
       <View style={styles.tabs}>
-        {TABS.map((t) => (
-          <Chip key={t.k} label={t.label} tone="primary" selected={kind === t.k} onPress={() => setKind(t.k)} />
+        {TABS.map((tab) => (
+          <Chip key={tab.k} label={t(`hf_${tab.k}`)} tone="primary" selected={kind === tab.k} onPress={() => setKind(tab.k)} />
         ))}
       </View>
       <View style={styles.filters}>
-        <Chip label="지금 운영중" selected={openOnly} onPress={() => setOpenOnly((v) => !v)} />
-        <Chip label="야간·주말" selected={nightOnly} onPress={() => setNightOnly((v) => !v)} />
-        {kind === 'er' && <Chip label="가용병상 있음" tone="primary" selected={bedsOnly} onPress={() => setBedsOnly((v) => !v)} />}
+        <Chip label={t('hf_open')} selected={openOnly} onPress={() => setOpenOnly((v) => !v)} />
+        <Chip label={t('hf_night')} selected={nightOnly} onPress={() => setNightOnly((v) => !v)} />
+        {kind === 'er' && <Chip label={t('hf_beds_f')} tone="primary" selected={bedsOnly} onPress={() => setBedsOnly((v) => !v)} />}
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         {list.length === 0 && (
-          <Text style={[typography.body, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.xl }]}>조건에 맞는 곳이 없어요. 필터를 조정해 보세요.</Text>
+          <Text style={[typography.body, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.xl }]}>{t('hf_empty')}</Text>
         )}
         {list.map((h) => (
           <View key={h.id} style={[styles.card, shadow.card]}>
@@ -61,23 +63,23 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
 
             {kind === 'er' && typeof h.availableBeds === 'number' && (
               <Text style={[typography.captionBold, { marginTop: 4, color: h.availableBeds > 0 ? colors.success : colors.emergency }]}>
-                {h.availableBeds > 0 ? `🟢 가용병상 ${h.availableBeds} (실시간)` : '🔴 병상 만실'}
+                {h.availableBeds > 0 ? `🟢 ${t('hf_beds')} ${h.availableBeds} (${t('hf_realtime')})` : `🔴 ${t('hf_full')}`}
               </Text>
             )}
             {h.departments.length > 0 && (
-              <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 4 }]}>{h.departments.join(' · ')}{h.isOpenNow ? ' · 운영중' : ''}</Text>
+              <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 4 }]}>{h.departments.join(' · ')}{h.isOpenNow ? ` · ${t('hf_open_now')}` : ''}</Text>
             )}
 
             <View style={styles.rowBtns}>
-              <View style={{ flex: 1 }}><PrimaryButton title="전화" icon="📞" variant="primary" size="sm" onPress={() => call(h)} /></View>
+              <View style={{ flex: 1 }}><PrimaryButton title={t('hf_call')} icon="📞" variant="primary" size="sm" onPress={() => call(h)} /></View>
               <View style={{ width: spacing.sm }} />
-              <View style={{ flex: 1 }}><PrimaryButton title="길찾기" icon="🗺️" variant="outline" size="sm" onPress={() => route2(h)} /></View>
+              <View style={{ flex: 1 }}><PrimaryButton title={t('hf_route')} icon="🗺️" variant="outline" size="sm" onPress={() => route2(h)} /></View>
             </View>
           </View>
         ))}
 
         <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.md, textAlign: 'center' }]}>
-          출처: 국립중앙의료원 E-Gen(데모 데이터) · 운영시간은 방문 전 전화로 확인하세요
+          {t('hf_source')}
         </Text>
       </ScrollView>
     </View>
