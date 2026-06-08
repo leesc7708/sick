@@ -1,11 +1,11 @@
-# 세이프콜 (SafeCall)
+# 라이프라인 (Lifeline)
 
 > 📌 **프로젝트/저장소명 변경 안내 (2026-06-08)**
-> 기존 **`sick` (어디아파 / WhereHurts)** 는 **`safecall` (세이프콜)** 로 변경되었습니다.
-> - 로컬 폴더: `sick/` → `safecall/`
-> - GitHub 저장소: `leesc7708/sick` → 세이프콜(SafeCall) 프로젝트
-> - Firebase 표시명: safecall (프로젝트 ID는 `wheresick-5617a` 그대로 — 변경 불가)
-> 방향도 일반 헬스케어에서 **산업현장 근로자 안전·응급(@work)** 으로 재정의되었습니다. (상세: `세이프콜_상세기획서_2026-06-08.md`)
+> 기존 **`sick` (어디아파 / WhereHurts)** 는 **`Lifeline` (라이프라인)** 로 변경되었습니다.
+> - 로컬 폴더: `sick/` → `Lifeline/`
+> - GitHub 저장소: `leesc7708/sick` → 라이프라인(Lifeline) 프로젝트
+> - Firebase 표시명: Lifeline (프로젝트 ID는 `wheresick-5617a` 그대로 — 변경 불가)
+> 방향도 일반 헬스케어에서 **산업현장 근로자 안전·응급(@work)** 으로 재정의되었습니다. (상세: `라이프라인_상세기획서_2026-06-08.md`)
 
 > 산업현장 근로자 안전·응급 + 병원 연결 도우미 앱 (구 "어디아파")
 
