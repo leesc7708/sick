@@ -7,6 +7,7 @@ import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Disclaimer } from '../components/Disclaimer';
 import { LogoMark } from '../components/LogoMark';
+import { useLang } from '../i18n/LanguageContext';
 import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
@@ -31,6 +32,7 @@ const AGE_BANDS: { label: string; value: number }[] = [
 const splitCsv = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean);
 
 export function OnboardingScreen({ navigation }: Props) {
+  const { t } = useLang();
   const [mode, setMode] = useState<AppMode | null>(null);
   const [ageBand, setAgeBand] = useState<string | null>(null);
   const [conditions, setConditions] = useState('');
@@ -55,10 +57,10 @@ export function OnboardingScreen({ navigation }: Props) {
         <LogoMark size={52} />
         <Text style={[typography.display, { color: colors.text, marginTop: spacing.sm }]}>라이프라인</Text>
         <Text style={[typography.body, { color: colors.textSecondary, marginTop: spacing.xs }]}>
-          아플 때·다쳤을 때, 현장에서 가장 먼저
+          {t('tagline_work')}
         </Text>
 
-        <Text style={styles.sectionLabel}>사용 환경을 선택하세요</Text>
+        <Text style={styles.sectionLabel}>{t('choose_mode')}</Text>
         {MODES.map((m) => {
           const on = mode === m.key;
           return (
@@ -69,31 +71,31 @@ export function OnboardingScreen({ navigation }: Props) {
             >
               <Text style={styles.modeEmoji}>{m.emoji}</Text>
               <View style={{ flex: 1 }}>
-                <Text style={[typography.h3, { color: colors.text }]}>{m.title}</Text>
-                <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>{m.desc}</Text>
+                <Text style={[typography.h3, { color: colors.text }]}>{t(m.key === 'work' ? 'mode_work' : 'mode_general')}</Text>
+                <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>{t(m.key === 'work' ? 'mode_work_desc' : 'mode_general_desc')}</Text>
               </View>
               <View style={[styles.radio, on && { borderColor: colors.primary }]}>{on && <View style={styles.radioDot} />}</View>
             </Pressable>
           );
         })}
 
-        <Text style={styles.sectionLabel}>간단 프로필 <Text style={[typography.caption, { color: colors.textMuted }]}>(선택)</Text></Text>
-        <Text style={styles.fieldLabel}>연령대</Text>
+        <Text style={styles.sectionLabel}>{t('profile_optional')}</Text>
+        <Text style={styles.fieldLabel}>{t('age_band')}</Text>
         <View style={styles.chips}>
           {AGE_BANDS.map((b) => <Chip key={b.label} label={b.label} selected={ageBand === b.label} onPress={() => setAgeBand(b.label)} />)}
         </View>
-        <Text style={styles.fieldLabel}>기저질환 (쉼표로 구분)</Text>
+        <Text style={styles.fieldLabel}>{t('conditions')}</Text>
         <TextInput value={conditions} onChangeText={setConditions} placeholder="예: 고혈압, 당뇨" placeholderTextColor={colors.g400} style={styles.input} />
-        <Text style={styles.fieldLabel}>알레르기</Text>
+        <Text style={styles.fieldLabel}>{t('allergies')}</Text>
         <TextInput value={allergies} onChangeText={setAllergies} placeholder="예: 페니실린" placeholderTextColor={colors.g400} style={styles.input} />
-        <Text style={styles.fieldLabel}>복용 중인 약</Text>
+        <Text style={styles.fieldLabel}>{t('current_meds')}</Text>
         <TextInput value={meds} onChangeText={setMeds} placeholder="예: 혈압약" placeholderTextColor={colors.g400} style={styles.input} />
 
-        <Disclaimer compact />
+        <Disclaimer compact text={t('disclaimer')} />
       </ScrollView>
 
       <View style={styles.footer}>
-        <PrimaryButton title="시작하기" size="lg" disabled={!mode} onPress={start} />
+        <PrimaryButton title={t('start')} size="lg" disabled={!mode} onPress={start} />
       </View>
     </SafeAreaView>
   );
