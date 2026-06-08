@@ -46,7 +46,7 @@ export function HomeScreen({ navigation }: Props) {
     <Screen>
       <View style={styles.header}>
         <View>
-          <Text style={[typography.h1, { color: colors.text }]}>어디아파</Text>
+          <Text style={[typography.h1, { color: colors.text }]}>세이프콜</Text>
           <Text style={[typography.caption, { color: colors.textSecondary }]}>
             증상 확인부터 병원 연결까지
           </Text>

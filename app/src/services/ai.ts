@@ -5,7 +5,7 @@ import { storage } from './storage';
 const DISCLAIMER =
   '⚠️ 본 정보는 참고용이며 의료 전문가의 진단을 대체하지 않습니다. 정확한 진단을 위해 의료기관을 방문하세요.';
 
-const SYSTEM_PROMPT = `당신은 "어디아파" 앱의 건강 정보 가이드입니다.
+const SYSTEM_PROMPT = `당신은 "세이프콜" 앱의 건강 정보 가이드입니다.
 
 중요한 규칙:
 1. 절대 "진단", "처방", "추천" 같은 표현을 쓰지 마세요.

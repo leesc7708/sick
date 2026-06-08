@@ -61,7 +61,7 @@ export function OnboardingScreen({ navigation }: Props) {
         <View>
           <Text style={[typography.h1, styles.title]}>안녕하세요! 👋</Text>
           <Text style={[typography.body, styles.subtitle]}>
-            "어디아파"는 증상 정보와 병원 안내를 도와드립니다.
+            "세이프콜"은 증상 정보와 병원 안내를 도와드립니다.
             의료 전문가의 진단을 대체하지 않으며, 모든 정보는 참고용입니다.
           </Text>
           <Disclaimer />
