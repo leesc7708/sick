@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>세이프콜 (SafeCall) — 와이어프레임 v1</title>
+<style>
+  :root{
+    --navy:#1B3A5B; --blue:#2E7DD1; --red:#FF3B30; --green:#34C759;
+    --yellow:#FFB800; --gray:#8A97A6; --line:#D9E0E8; --bg:#EEF2F6;
+    --card:#FFFFFF; --text:#1A2230; --sub:#6B7886;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;}
+  body{background:var(--bg);color:var(--text);padding:32px 24px 80px;}
+  header.top{max-width:1280px;margin:0 auto 28px;}
+  header.top h1{font-size:30px;color:var(--navy);letter-spacing:-.5px;}
+  header.top h1 .en{color:var(--blue);font-weight:800;}
+  header.top p{color:var(--sub);margin-top:8px;font-size:15px;line-height:1.6;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--sub);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block;}
+  .grid{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:26px;}
+  /* phone frame */
+  .phone{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;
+         box-shadow:0 6px 22px rgba(27,58,91,.08);display:flex;flex-direction:column;min-height:560px;}
+  .phone .titlebar{background:var(--navy);color:#fff;padding:9px 14px;font-size:12px;display:flex;justify-content:space-between;align-items:center;}
+  .phone .titlebar b{font-weight:700;}
+  .phone .scr-no{background:rgba(255,255,255,.18);border-radius:20px;padding:2px 9px;font-size:11px;}
+  .phone .body{padding:14px;flex:1;display:flex;flex-direction:column;gap:10px;}
+  .phone .note{background:#F6F8FB;border-top:1px dashed var(--line);padding:9px 13px;font-size:11px;color:var(--sub);line-height:1.5;}
+  /* ui atoms */
+  .h{font-size:19px;font-weight:800;color:var(--navy);}
+  .sub{font-size:12px;color:var(--sub);line-height:1.5;}
+  .btn{border-radius:12px;padding:13px;text-align:center;font-weight:700;font-size:14px;color:#fff;background:var(--blue);}
+  .btn.red{background:var(--red);} .btn.navy{background:var(--navy);} .btn.green{background:var(--green);}
+  .btn.ghost{background:#fff;color:var(--navy);border:1.5px solid var(--navy);}
+  .btn.big{padding:18px;font-size:16px;}
+  .tile{border:1px solid var(--line);border-radius:12px;padding:13px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;}
+  .tile .ico{font-size:20px;}
+  .tile.alert{border-color:var(--red);background:#FFF2F1;color:var(--red);}
+  .card{border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12.5px;line-height:1.6;}
+  .chip{display:inline-block;border:1px solid var(--line);border-radius:18px;padding:5px 11px;font-size:11.5px;color:var(--sub);margin:2px 3px 2px 0;}
+  .chip.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .chip.red{background:#FFF2F1;color:var(--red);border-color:#FFC9C5;}
+  .row{display:flex;gap:8px;} .row>*{flex:1;}
+  .tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;}
+  .tag.new{background:#E7F3FF;color:var(--blue);} .tag.work{background:#FFF6E0;color:#B8860B;}
+  .field{border:1px solid var(--line);border-radius:9px;padding:10px;font-size:12px;color:var(--sub);}
+  .bar{height:8px;background:#EAF0F6;border-radius:6px;overflow:hidden;} .bar > i{display:block;height:100%;background:var(--blue);}
+  .disclaimer{font-size:10px;color:var(--gray);text-align:center;border-top:1px solid var(--line);padding-top:8px;margin-top:auto;}
+  .src{font-size:10px;color:var(--gray);}
+  .qr{width:120px;height:120px;margin:6px auto;background:
+      repeating-linear-gradient(90deg,#1A2230 0 7px,#fff 7px 14px),
+      repeating-linear-gradient(0deg,rgba(26,34,48,.0) 0 7px,#fff 7px 14px);
+      border:6px solid #fff;border-radius:8px;box-shadow:0 0 0 1px var(--line);}
+  .navbtm{display:flex;justify-content:space-around;border-top:1px solid var(--line);padding-top:9px;font-size:10px;color:var(--gray);}
+  .navbtm b{display:block;font-size:16px;}
+  .sectit{grid-column:1/-1;font-size:15px;font-weight:800;color:var(--navy);margin:14px 0 -8px;padding-left:4px;border-left:4px solid var(--blue);}
+  .ok{color:var(--green);font-weight:700;} .warn{color:var(--yellow);font-weight:700;} .danger{color:var(--red);font-weight:700;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>세이프콜 <span class="en">SafeCall</span> — 와이어프레임 v1</h1>
+  <p>산업현장 근로자 안전·응급 + 병원 연결 도우미 앱 · 2026 디와이산업개발 AI 콘테스트 출품작<br>
+     ※ 앱은 진단·처방하지 않습니다. 응급신호 확인 + 증상 정리 + 의료기관 연결 + 건강검진기록 보관/공유.</p>
+  <div class="legend">
+    <span><i class="dot" style="background:var(--red)"></i>응급/위험</span>
+    <span><i class="dot" style="background:var(--blue)"></i>주요 액션</span>
+    <span><i class="dot" style="background:var(--green)"></i>가능/완료</span>
+    <span><span class="tag new">NEW</span>신규 화면</span>
+    <span><span class="tag work">@work</span>현장 전용</span>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- ============ 1. 진입 ============ -->
+  <div class="sectit">① 진입 · 홈</div>
+
+  <!-- S1 온보딩 -->
+  <div class="phone">
+    <div class="titlebar"><b>온보딩</b><span class="scr-no">S1</span></div>
+    <div class="body">
+      <div class="h">안녕하세요! 👋<br>세이프콜입니다</div>
+      <div class="sub">사용 환경을 선택하세요. 언제든 바꿀 수 있습니다.</div>
+      <div class="tile work"><span class="ico">🦺</span><div>현장 모드 <span class="tag work">@work</span><div class="sub" style="font-weight:400">작업 전 체크·사고보고·검진기록</div></div></div>
+      <div class="tile"><span class="ico">🙂</span><div>일반 모드<div class="sub" style="font-weight:400">증상정리·병원찾기 중심</div></div></div>
+      <div class="card sub">간단 프로필: 연령대 / 기저질환 / 알레르기 / 복용약 (선택, 로컬 저장)</div>
+      <div class="btn big">시작하기</div>
+      <div class="disclaimer">의료 참고 정보 제공 · 진단·처방을 대체하지 않습니다</div>
+    </div>
+    <div class="note">기존 5단계 온보딩 유지 + 맨 앞에 <b>모드 선택</b> 추가. 로그인 없이 시작(로컬).</div>
+  </div>
+
+  <!-- S2 홈 -->
+  <div class="phone">
+    <div class="titlebar"><b>홈 · 현장 모드</b><span class="scr-no">S2</span></div>
+    <div class="body">
+      <div class="h">세이프콜 @work</div>
+      <div class="sub">아플 때·다쳤을 때, 현장에서 가장 먼저</div>
+      <div class="btn red big">🔴 응급 신호 먼저 확인</div>
+      <div class="tile"><span class="ico">📝</span>지금 증상 정리하기</div>
+      <div class="tile"><span class="ico">🏥</span>병원·응급실 찾기</div>
+      <div class="tile alert"><span class="ico">⚠️</span>사고 보고하기 <span class="tag work">@work</span></div>
+      <div class="tile"><span class="ico">✅</span>작업 전 건강체크 <span class="tag work">@work</span></div>
+      <div class="tile"><span class="ico">📋</span>건강검진기록 <span class="tag new">NEW</span></div>
+      <div class="tile"><span class="ico">💊</span>내 복용약</div>
+      <div class="disclaimer">본 앱은 의료 참고 정보 제공 · 진단·처방 대체 아님</div>
+    </div>
+    <div class="note">현장 고려: <b>초대형 버튼·고대비·한 손 조작</b>. 응급 버튼 최상단 고정. WCAG 2.1 AA.</div>
+  </div>
+
+  <!-- ============ 2. 응급 · 증상 ============ -->
+  <div class="sectit">② 응급 신호 · 증상 정리 · 병원 연결</div>
+
+  <!-- S3 응급신호 -->
+  <div class="phone">
+    <div class="titlebar"><b>응급 신호 체크</b><span class="scr-no">S3</span></div>
+    <div class="body">
+      <div class="h">지금 해당하는 것을<br>모두 선택하세요</div>
+      <div class="card">
+        <div class="chip red">가슴통증+숨참</div><div class="chip red">갑작스런 심한 두통</div>
+        <div class="chip red">밀폐공간 어지럼·메스꺼움</div><div class="chip red">화학물질 눈·피부</div>
+        <div class="chip">의식 저하·혼돈</div><div class="chip">한쪽 마비·어눌</div>
+        <div class="chip">열사병·탈수</div><div class="chip">추락·협착 후 통증</div>
+      </div>
+      <div class="btn navy">결과 확인</div>
+      <div class="card" style="border-color:var(--red);background:#FFF2F1">
+        <b class="danger">🔴 응급 신호가 있을 수 있습니다</b><br>
+        즉시 119에 연락하거나 가까운 응급실을 확인하세요
+      </div>
+      <div class="row"><div class="btn red">📞 119</div><div class="btn navy">🏥 응급실</div></div>
+      <div class="btn ghost">👥 관리자/보호자 공유</div>
+    </div>
+    <div class="note"><b>규칙 기반</b>(AI 단독판단 금지). 산업현장 신호 추가. <b>오프라인 작동</b>(통신 음영지역 대비). 병명·확률 표시 금지.</div>
+  </div>
+
+  <!-- S4 증상메모 입력 -->
+  <div class="phone">
+    <div class="titlebar"><b>증상 메모 입력</b><span class="scr-no">S4</span></div>
+    <div class="body">
+      <div class="sub">3 / 7 단계</div>
+      <div class="bar"><i style="width:43%"></i></div>
+      <div class="h">어디가, 언제부터<br>불편하신가요?</div>
+      <div class="field">누구의 증상? · 본인 / 동료</div>
+      <div class="field">시작 시점 · 오늘 오전 10시</div>
+      <div class="field">부위 · 머리 / 가슴 / 배 …</div>
+      <div class="field">통증 강도 · ●●●●●●●○○○ 7/10</div>
+      <div class="card"><b>작업 중 발생?</b> <span class="chip on">예</span><span class="chip">아니오</span><br>
+        작업 종류 <span class="chip on">밀폐공간</span><span class="chip">화학물질</span><span class="chip">고소</span></div>
+      <div class="row"><div class="btn ghost">이전</div><div class="btn">다음</div></div>
+    </div>
+    <div class="note">60초 내 완성 목표. 긴 문장 없이 <b>체크 중심</b>. 동반증상·복용약·알레르기·사진첨부 단계 이어짐.</div>
+  </div>
+
+  <!-- S5 진료 요약 카드 -->
+  <div class="phone">
+    <div class="titlebar"><b>진료 요약 카드</b><span class="scr-no">S5</span> <span class="tag new" style="margin-left:auto">NEW</span></div>
+    <div class="body">
+      <div class="h">진료 요약 카드</div>
+      <div class="sub">병원에서 이 화면을 보여주세요</div>
+      <div class="card">
+        • 시작: 오늘 오전 10시<br>
+        • 증상: 두통, 메스꺼움<br>
+        • 발생: <b>밀폐공간 작업 중</b><br>
+        • 동반: 어지럼<br>
+        • 강도: 7/10<br>
+        • 복용약: 혈압약<br>
+        • 알레르기: 없음<br>
+        • 걱정: 가스 흡입 우려
+      </div>
+      <div class="card" style="background:#F1F8FF;border-color:#CDE6FF">
+        💡 <b>병원에서 물어볼 질문</b><br>- 추가 검사가 필요한가요?<br>- 작업 복귀 가능한가요?
+      </div>
+      <div class="row"><div class="btn">🏥 병원</div><div class="btn ghost">👥 공유</div></div>
+      <div class="btn ghost">📄 PDF 저장</div>
+    </div>
+    <div class="note"><b>AI는 정리만</b>(요약·질문 생성). 질환명·확률 절대 표시 안 함. 기존 "분석결과" 화면을 대체.</div>
+  </div>
+
+  <!-- S6 병원/응급실 찾기 -->
+  <div class="phone">
+    <div class="titlebar"><b>병원·약국·응급실</b><span class="scr-no">S6</span></div>
+    <div class="body">
+      <div class="row" style="gap:6px">
+        <div class="chip on">응급실</div><div class="chip">병원</div><div class="chip">약국</div>
+      </div>
+      <div>
+        <span class="chip">지금 운영중</span><span class="chip">야간·주말</span><span class="chip on">가용병상 있음</span>
+      </div>
+      <div class="card">
+        ○○응급의료센터 · <b>1.2km</b><br>
+        <span class="ok">🟢 가용병상 3 (실시간)</span><br>
+        <div class="row" style="margin-top:6px"><div class="btn">📞 전화</div><div class="btn ghost">🗺️ 길찾기</div></div>
+      </div>
+      <div class="card">
+        ○○병원 · 2.1km<br>내과·외과 · <span class="ok">운영중</span><br>
+        <div class="row" style="margin-top:6px"><div class="btn">📞 전화</div><div class="btn ghost">🗺️ 길찾기</div></div>
+      </div>
+      <div class="src">출처: 국립중앙의료원 E-Gen · 방문 전 전화 확인 권장</div>
+    </div>
+    <div class="note">킬러: <b>E-Gen 실시간 가용병상</b> API. "추천·순위·광고" 금지 → "조건에 맞는 의료기관". 출처 표기 필수.</div>
+  </div>
+
+  <!-- ============ 3. 건강검진기록 (NEW) ============ -->
+  <div class="sectit">③ 건강검진기록 보관·공유 ★ (현장 입장 서류 페인포인트 해결)</div>
+
+  <!-- S8 검진기록 보관함 -->
+  <div class="phone">
+    <div class="titlebar"><b>건강검진기록 보관함</b><span class="scr-no">S8</span> <span class="tag new" style="margin-left:auto">NEW★</span></div>
+    <div class="body">
+      <div class="h">건강검진기록</div>
+      <div class="sub">한 번 올려두면 어디서든 제출</div>
+      <div class="card">
+        📄 <b>특수건강진단</b> <span class="chip" style="float:right">PDF</span><br>
+        검진일 2026-04-12 · <span class="ok">적합</span><br>
+        <span class="warn">유효기간 ~2026-10-11</span>
+      </div>
+      <div class="card">
+        🖼️ <b>일반건강검진</b> <span class="chip" style="float:right">JPG</span><br>
+        검진일 2026-01-20
+      </div>
+      <div class="card sub" style="border-style:dashed;text-align:center">＋ 검진결과 업로드<br>(PDF·JPG / 카메라 촬영)</div>
+      <div>분류 <span class="chip on">특수건진</span><span class="chip">일반</span><span class="chip">채용</span><span class="chip">기타</span></div>
+      <div class="btn">＋ 새 기록 추가</div>
+    </div>
+    <div class="note">민감 개인정보 → <b>단말 암호화 저장</b>. 특수건진 <b>주기 도래 알림</b>. 앱은 결과를 판독·진단하지 않음(보관 도구).</div>
+  </div>
+
+  <!-- S9 검진기록 공유 -->
+  <div class="phone">
+    <div class="titlebar"><b>건강검진기록 공유</b><span class="scr-no">S9</span> <span class="tag new" style="margin-left:auto">NEW★</span></div>
+    <div class="body">
+      <div class="h">특수건강진단 공유</div>
+      <div class="sub">현장 입구에서 이 QR을 보여주세요</div>
+      <div class="qr"></div>
+      <div class="card" style="text-align:center">
+        🔒 <b>만료</b>: 30분 후 자동 종료<br>
+        <span class="sub">열람: 보기 전용 · 다운로드 차단</span>
+      </div>
+      <div class="btn navy">🔗 만료 링크 복사</div>
+      <div class="btn ghost">📤 관리자에게 직접 전송</div>
+      <div class="card sub">공유 동의가 필요합니다. 공유 이력(누가·언제 열람)이 기록됩니다. <span class="tag new">v1.5</span></div>
+    </div>
+    <div class="note">QR / <b>만료시간 링크</b> / 관리자 전송 3종. 원청·현장소장 입장 제출용. 보안: 만료·접근제한·동의 기본.</div>
+  </div>
+
+  <!-- ============ 4. @work 현장 ============ -->
+  <div class="sectit">④ 현장 전용 @work (작업 전 체크 · 사고보고 · 관리자)</div>
+
+  <!-- S10 작업 전 체크 -->
+  <div class="phone">
+    <div class="titlebar"><b>작업 전 건강체크</b><span class="scr-no">S10</span> <span class="tag work" style="margin-left:auto">@work</span></div>
+    <div class="body">
+      <div class="h">오늘 작업 전 체크</div>
+      <div class="field">작업 종류 · <b>밀폐공간 ▼</b></div>
+      <div class="card">
+        수면 6시간 이상? &nbsp;<span class="chip on">예</span><span class="chip">아니오</span><br>
+        전날 밤 음주? &nbsp;<span class="chip">예</span><span class="chip on">아니오</span><br>
+        혈압약 복용? &nbsp;<span class="chip on">예</span><span class="chip">아니오</span><br>
+        어지럼·심한 피로? &nbsp;<span class="chip">예</span><span class="chip on">아니오</span>
+      </div>
+      <div class="card" style="border-color:var(--yellow);background:#FFFae8">
+        ⚠️ <b class="warn">위험작업</b> — 미체크 시 관리자 확인 필요
+      </div>
+      <div class="btn green">체크 완료 → 관리자 전송</div>
+    </div>
+    <div class="note">진단 아님 — "작업 전 스스로 점검" 도구. 결과는 동의 기반으로 관리자 대시보드에 반영.</div>
+  </div>
+
+  <!-- S11 사고 보고 -->
+  <div class="phone">
+    <div class="titlebar"><b>사고·이상 보고</b><span class="scr-no">S11</span> <span class="tag work" style="margin-left:auto">@work</span></div>
+    <div class="body">
+      <div class="h">사고·이상 보고</div>
+      <div class="sub">유형을 선택하면 응급처치 + 가까운 응급실이 바로 뜹니다</div>
+      <div class="card">
+        <div class="chip red">질식</div><div class="chip red">화상</div><div class="chip red">추락</div>
+        <div class="chip red">중독</div><div class="chip red">감전</div><div class="chip">기타</div>
+      </div>
+      <div class="field">📍 위치 · 자동(GPS) 첨부됨</div>
+      <div class="field">메모 · ____________</div>
+      <div class="btn red big">🚨 즉시 보고 + 응급실</div>
+      <div class="card sub">선택 즉시: 해당 <b>응급처치 카드</b> 표시 + 관리자/보호자 알림 + 반경 응급실·중독센터 검색</div>
+    </div>
+    <div class="note">한 번의 탭으로 위치+증상+시각 전송. 응급처치 카드는 오프라인 로컬 데이터.</div>
+  </div>
+
+  <!-- S12 관리자 대시보드 -->
+  <div class="phone">
+    <div class="titlebar"><b>관리자 대시보드</b><span class="scr-no">S12</span> <span class="tag work" style="margin-left:auto">@work · 웹</span></div>
+    <div class="body">
+      <div class="h">○○ 현장 · 오늘</div>
+      <div class="row">
+        <div class="card" style="text-align:center"><b style="font-size:22px">12</b><br><span class="sub">작업 인원</span></div>
+        <div class="card" style="text-align:center"><b style="font-size:22px" class="ok">10</b><br><span class="sub">체크 완료</span></div>
+      </div>
+      <div class="card" style="border-color:var(--red);background:#FFF2F1">
+        🚨 <b class="danger">실시간 사고 보고 1건</b><br>김○○ · 질식 의심 · 3분 전 · A구역
+      </div>
+      <div class="card">
+        <b>검진 유효성</b> <span class="tag new">v1.5</span><br>
+        <span class="warn">⚠️ 2명 특수건진 만료 임박</span><br>
+        <span class="ok">🟢 10명 유효</span>
+      </div>
+      <div class="card sub"><b>사전 등록</b>: 산재지정병원·응급의료기관 목록</div>
+    </div>
+    <div class="note">웹 우선. 현장 인원 체크 현황 + 실시간 사고 알림 + 검진 유효성 일괄 확인.</div>
+  </div>
+
+  <!-- ============ 5. 기타 ============ -->
+  <div class="sectit">⑤ 복용약 · 기록 · 설정</div>
+
+  <!-- S7 복용약 -->
+  <div class="phone">
+    <div class="titlebar"><b>내 복용약 메모</b><span class="scr-no">S7</span></div>
+    <div class="body">
+      <div class="h">내 복용약</div>
+      <div class="sub">처방·추천 아님 · 기록 도구</div>
+      <div class="card">💊 혈압약 (아침)<br><span class="sub">복용시간 08:00</span></div>
+      <div class="card">💊 위장약 (식후)</div>
+      <div class="card sub" style="border-style:dashed;text-align:center">＋ 약 추가 (이름 직접 입력)</div>
+      <div class="field">알레르기 메모 · 페니실린</div>
+      <div class="btn ghost">🏥 병원·약국에 보여줄 목록</div>
+      <div class="card sub">v1.5: 식약처 e약은요로 효능·주의·상호작용 <b>조회</b>(판정 아님, 약사 상담 안내)</div>
+    </div>
+    <div class="note">MVP는 기록 중심. 증상 기반 약 추천·상호작용 자동판정 제외(약사법).</div>
+  </div>
+
+  <!-- S13 지난 기록 -->
+  <div class="phone">
+    <div class="titlebar"><b>지난 기록</b><span class="scr-no">S13</span></div>
+    <div class="body">
+      <div class="h">지난 기록</div>
+      <div class="card">📝 두통·메스꺼움 · 2026-06-05<br><span class="sub">밀폐공간 작업 중 · 요약카드 보기</span></div>
+      <div class="card">⚠️ 사고보고(경미) · 2026-05-28</div>
+      <div class="card">✅ 작업 전 체크 · 2026-05-28</div>
+      <div class="sub">로컬 저장 · 내보내기(PDF) 가능</div>
+    </div>
+    <div class="note">증상메모·사고·체크 이력 타임라인. 로그인 없는 MVP는 로컬, v1.5 계정 동기화.</div>
+  </div>
+
+  <!-- S14 설정 -->
+  <div class="phone">
+    <div class="titlebar"><b>설정</b><span class="scr-no">S14</span></div>
+    <div class="body">
+      <div class="h">설정</div>
+      <div class="card">👤 프로필 수정</div>
+      <div class="card">🦺 모드 전환 (현장 / 일반)</div>
+      <div class="card">🌐 언어 <span class="chip">한국어</span><span class="chip">EN</span><span class="chip">VI</span> <span class="tag new">v1.5</span></div>
+      <div class="card">🔔 검진 만료·복약 알림</div>
+      <div class="card">🔒 개인정보·데이터 관리 / 전체 삭제</div>
+      <div class="card" style="border-color:var(--red);text-decoration:line-through;color:var(--gray)">
+        ✖ Claude API 키 입력 (제거됨)
+      </div>
+      <div class="src">AI 호출은 서버 프록시(Cloud Functions)로만 — 키는 클라이언트에 저장 안 함</div>
+    </div>
+    <div class="note"><b>보안 필수</b>: 기존 클라이언트 API키 입력 기능 제거. 외국인 노동자 대비 다국어는 v1.5.</div>
+  </div>
+
+</div>
+
+<header class="top" style="margin-top:40px">
+  <p style="font-size:12px">세이프콜 와이어프레임 v1 · 2026-06-08 · 기획: 클로드 / 코드: codex / 검수: 클로드 ·
+     상세 명세는 <b>세이프콜_상세기획서_2026-06-08.md</b> 참조. 규제 준수(진단·처방·추천 금지 / 출처 표기 / API키 서버화) 체크리스트 적용.</p>
+</header>
+
+</body>
+</html>

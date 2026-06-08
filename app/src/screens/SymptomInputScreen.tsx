@@ -1,185 +1,108 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Screen } from '../components/Screen';
+import { AppBar } from '../components/AppBar';
+import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { Disclaimer } from '../components/Disclaimer';
 import { colors, radius, spacing } from '../theme/colors';
 import { typography } from '../theme/typography';
-import { RootStackParamList } from '../types';
-import { BODY_PARTS } from '../data/bodyParts';
-import { analyzeSymptom } from '../services/ai';
+import { ACCOMPANYING, BODY_PARTS, WORK_TYPES } from '../data/options';
+import { RootStackParamList, SymptomMemo } from '../types';
+import { storage } from '../services/storage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SymptomInput'>;
 
-const DURATION_OPTIONS = ['오늘 시작', '1-3일', '1주일 이상', '한 달 이상'];
-
 export function SymptomInputScreen({ navigation }: Props) {
-  const [text, setText] = useState('');
-  const [selectedParts, setSelectedParts] = useState<string[]>([]);
-  const [intensity, setIntensity] = useState<number>(0);
-  const [duration, setDuration] = useState<string>('');
-  const [loading, setLoading] = useState(false);
+  const [who, setWho] = useState<'self' | 'coworker'>('self');
+  const [startedAt, setStartedAt] = useState('');
+  const [bodyParts, setBodyParts] = useState<string[]>([]);
+  const [severity, setSeverity] = useState(5);
+  const [accompanying, setAccompanying] = useState<string[]>([]);
+  const [atWork, setAtWork] = useState(true);
+  const [workType, setWorkType] = useState<string>('');
+  const [concern, setConcern] = useState('');
 
-  function togglePart(id: string) {
-    setSelectedParts((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id],
-    );
-  }
+  const toggle = (arr: string[], set: (v: string[]) => void, v: string) =>
+    set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
 
-  async function submit() {
-    if (!text.trim() && selectedParts.length === 0) {
-      Alert.alert('입력 필요', '증상을 텍스트로 입력하거나 신체 부위를 선택해주세요.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const query = {
-        text: text.trim() || selectedParts.map((id) => BODY_PARTS.find((b) => b.id === id)?.label).join(', '),
-        bodyParts: selectedParts.map((id) => BODY_PARTS.find((b) => b.id === id)?.label ?? id),
-        intensity: intensity || undefined,
-        duration: duration || undefined,
-      };
-      const analysis = await analyzeSymptom(query);
-
-      if (analysis.isRedFlag) {
-        navigation.replace('RedFlag', { reason: analysis.redFlagReason ?? '응급 증상이 의심됩니다.' });
-      } else {
-        navigation.navigate('SymptomResult', { analysis, query });
-      }
-    } catch (e: any) {
-      Alert.alert('분석 실패', e?.message ?? '알 수 없는 오류');
-    } finally {
-      setLoading(false);
-    }
-  }
+  const save = async () => {
+    const id = `memo_${Date.now()}`;
+    const memo: SymptomMemo = {
+      id,
+      who,
+      startedAt: startedAt.trim() || undefined,
+      bodyParts,
+      severity,
+      accompanying,
+      atWork,
+      workType: atWork ? workType || undefined : undefined,
+      concern: concern.trim() || undefined,
+      createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    };
+    await storage.addSymptomMemo(memo);
+    navigation.navigate('SymptomSummary', { memoId: id });
+  };
 
   return (
-    <Screen>
-      <Text style={[typography.h2, styles.title]}>어디가 아프세요?</Text>
-      <Text style={[typography.body, styles.subtitle]}>
-        자연어로 자세히 적을수록 더 정확한 정보를 받을 수 있어요.
-      </Text>
+    <View style={styles.wrap}>
+      <AppBar title="증상 정리" onBack={() => navigation.goBack()} />
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.label}>누구의 증상인가요?</Text>
+        <View style={styles.chips}>
+          <Chip label="본인" selected={who === 'self'} onPress={() => setWho('self')} />
+          <Chip label="동료" selected={who === 'coworker'} onPress={() => setWho('coworker')} />
+        </View>
 
-      <Text style={[typography.bodyBold, styles.label]}>증상 설명</Text>
-      <TextInput
-        style={styles.textarea}
-        placeholder="예: 어제 저녁부터 머리 오른쪽이 지끈지끈 아파요. 누우면 좀 나아져요."
-        value={text}
-        onChangeText={setText}
-        multiline
-        numberOfLines={4}
-        placeholderTextColor={colors.textMuted}
-      />
+        <Text style={styles.label}>언제부터인가요?</Text>
+        <TextInput value={startedAt} onChangeText={setStartedAt} placeholder="예: 오늘 오전 10시" placeholderTextColor={colors.g400} style={styles.input} />
 
-      <Text style={[typography.bodyBold, styles.label]}>신체 부위 (선택)</Text>
-      <View style={styles.bodyGrid}>
-        {BODY_PARTS.map((part) => {
-          const active = selectedParts.includes(part.id);
-          return (
-            <Pressable
-              key={part.id}
-              style={[styles.bodyTile, active && styles.bodyTileActive]}
-              onPress={() => togglePart(part.id)}
-            >
-              <Text style={styles.bodyEmoji}>{part.emoji}</Text>
-              <Text style={[styles.bodyLabel, active && styles.bodyLabelActive]}>{part.label}</Text>
-            </Pressable>
-          );
-        })}
+        <Text style={styles.label}>어디가 불편한가요?</Text>
+        <View style={styles.chips}>
+          {BODY_PARTS.map((b) => <Chip key={b} label={b} selected={bodyParts.includes(b)} onPress={() => toggle(bodyParts, setBodyParts, b)} />)}
+        </View>
+
+        <Text style={styles.label}>통증 강도</Text>
+        <View style={styles.stepper}>
+          <Pressable style={styles.stepBtn} onPress={() => setSeverity((s) => Math.max(0, s - 1))}><Text style={styles.stepTxt}>−</Text></Pressable>
+          <Text style={[typography.h2, { color: colors.text, width: 70, textAlign: 'center' }]}>{severity}<Text style={[typography.body, { color: colors.textMuted }]}> /10</Text></Text>
+          <Pressable style={styles.stepBtn} onPress={() => setSeverity((s) => Math.min(10, s + 1))}><Text style={styles.stepTxt}>+</Text></Pressable>
+        </View>
+
+        <Text style={styles.label}>동반 증상</Text>
+        <View style={styles.chips}>
+          {ACCOMPANYING.map((a) => <Chip key={a} label={a} selected={accompanying.includes(a)} onPress={() => toggle(accompanying, setAccompanying, a)} />)}
+        </View>
+
+        <Text style={styles.label}>작업 중에 생긴 증상인가요?</Text>
+        <View style={styles.chips}>
+          <Chip label="예" tone="work" selected={atWork} onPress={() => setAtWork(true)} />
+          <Chip label="아니오" selected={!atWork} onPress={() => setAtWork(false)} />
+        </View>
+        {atWork && (
+          <View style={styles.chips}>
+            {WORK_TYPES.map((w) => <Chip key={w} label={w} tone="work" selected={workType === w} onPress={() => setWorkType(w)} />)}
+          </View>
+        )}
+
+        <Text style={styles.label}>걱정되는 점(선택)</Text>
+        <TextInput value={concern} onChangeText={setConcern} placeholder="예: 가스를 마신 것 같아 걱정돼요" placeholderTextColor={colors.g400} style={[styles.input, { minHeight: 56 }]} multiline />
+      </ScrollView>
+
+      <View style={styles.footer}>
+        <PrimaryButton title="요약 카드 만들기" icon="📝" size="lg" onPress={save} />
       </View>
-
-      <Text style={[typography.bodyBold, styles.label]}>통증 강도 (선택)</Text>
-      <View style={styles.row}>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-          <Pressable
-            key={n}
-            style={[styles.intensity, intensity === n && styles.intensityActive]}
-            onPress={() => setIntensity(intensity === n ? 0 : n)}
-          >
-            <Text style={[styles.intensityText, intensity === n && styles.intensityTextActive]}>{n}</Text>
-          </Pressable>
-        ))}
-      </View>
-
-      <Text style={[typography.bodyBold, styles.label]}>지속 시간 (선택)</Text>
-      <View style={styles.row}>
-        {DURATION_OPTIONS.map((d) => (
-          <Pressable
-            key={d}
-            style={[styles.chip, duration === d && styles.chipActive]}
-            onPress={() => setDuration(duration === d ? '' : d)}
-          >
-            <Text style={[styles.chipText, duration === d && styles.chipTextActive]}>{d}</Text>
-          </Pressable>
-        ))}
-      </View>
-
-      <Disclaimer compact />
-
-      <PrimaryButton
-        title={loading ? '분석 중...' : '정보 분석하기'}
-        onPress={submit}
-        loading={loading}
-        style={{ marginTop: spacing.lg }}
-      />
-    </Screen>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  title: { color: colors.text, marginBottom: spacing.xs },
-  subtitle: { color: colors.textSecondary, marginBottom: spacing.md },
-  label: { color: colors.text, marginTop: spacing.md, marginBottom: spacing.sm },
-  textarea: {
-    backgroundColor: colors.card,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    fontSize: 16,
-    color: colors.text,
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  bodyGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  bodyTile: {
-    width: '30%',
-    backgroundColor: colors.card,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    alignItems: 'center',
-  },
-  bodyTileActive: { backgroundColor: colors.primaryLight, borderColor: colors.primary },
-  bodyEmoji: { fontSize: 28, marginBottom: spacing.xs },
-  bodyLabel: { color: colors.text, fontSize: 13 },
-  bodyLabelActive: { color: colors.primaryDark, fontWeight: '600' },
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  intensity: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  intensityActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  intensityText: { color: colors.text, fontWeight: '600' },
-  intensityTextActive: { color: colors.textInverse },
-  chip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipText: { color: colors.text },
-  chipTextActive: { color: colors.textInverse, fontWeight: '600' },
+  wrap: { flex: 1, backgroundColor: colors.bg },
+  content: { padding: spacing.md, paddingBottom: 40 },
+  label: { ...typography.captionBold, color: colors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
+  chips: { flexDirection: 'row', flexWrap: 'wrap' },
+  input: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md, ...typography.body, color: colors.text },
+  stepper: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 6 },
+  stepBtn: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.g100, alignItems: 'center', justifyContent: 'center' },
+  stepTxt: { fontSize: 24, fontWeight: '700', color: colors.g800 },
+  footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.divider },
 });

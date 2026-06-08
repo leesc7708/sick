@@ -1,92 +1,76 @@
 import React, { useCallback, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Screen } from '../components/Screen';
-import { Card } from '../components/Card';
+import { AppBar } from '../components/AppBar';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { Disclaimer } from '../components/Disclaimer';
-import { colors, spacing } from '../theme/colors';
+import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
-import { RootStackParamList, Medicine } from '../types';
+import { MyMedicine, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
-import { findMedicine } from '../data/mockMedicines';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'MyMedicines'>;
 
 export function MyMedicinesScreen({ navigation }: Props) {
-  const [items, setItems] = useState<Medicine[]>([]);
+  const [list, setList] = useState<MyMedicine[]>([]);
+  const [name, setName] = useState('');
+  const [time, setTime] = useState('');
 
-  useFocusEffect(
-    useCallback(() => {
-      (async () => {
-        const ids = await storage.getMyMedicines();
-        setItems(ids.map((id) => findMedicine(id)).filter(Boolean) as Medicine[]);
-      })();
-    }, []),
-  );
+  const reload = useCallback(async () => setList(await storage.getMyMedicines()), []);
+  useFocusEffect(useCallback(() => { reload(); }, [reload]));
 
-  async function remove(id: string) {
-    const next = items.filter((m) => m.id !== id).map((m) => m.id);
-    await storage.setMyMedicines(next);
-    setItems(items.filter((m) => m.id !== id));
-  }
+  const add = async () => {
+    if (!name.trim()) return;
+    await storage.addMyMedicine({ id: `med_${Date.now()}`, name: name.trim(), doseTime: time.trim() || undefined });
+    setName('');
+    setTime('');
+    reload();
+  };
+  const remove = async (id: string) => { await storage.deleteMyMedicine(id); reload(); };
 
   return (
-    <Screen>
-      <Text style={[typography.h2, styles.title]}>내 약 목록</Text>
-      <Text style={[typography.caption, styles.subtitle]}>
-        등록한 약은 상호작용 체크와 AI 증상 분석에 활용됩니다.
-      </Text>
+    <View style={styles.wrap}>
+      <AppBar title="내 복용약" onBack={() => navigation.goBack()} />
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={[typography.caption, { color: colors.textMuted }]}>처방·추천이 아니라 기록 도구예요. 병원·약국에서 보여주세요.</Text>
 
-      {items.length === 0 ? (
-        <Card>
-          <Text style={[typography.body, styles.empty]}>등록된 약이 없습니다.</Text>
-          <PrimaryButton
-            title="약 검색하기"
-            onPress={() => navigation.navigate('MedicineSearch')}
-            style={{ marginTop: spacing.md }}
-          />
-        </Card>
-      ) : (
-        <>
-          {items.map((m) => (
-            <Card key={m.id} onPress={() => navigation.navigate('MedicineDetail', { medicineId: m.id })}>
-              <View style={styles.row}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[typography.bodyBold, { color: colors.text }]}>{m.name}</Text>
-                  <Text style={[typography.caption, { color: colors.textSecondary }]}>
-                    {m.genericName} · {m.category}
-                  </Text>
-                </View>
-                <PrimaryButton title="제거" variant="outline" onPress={() => remove(m.id)} />
-              </View>
-            </Card>
-          ))}
+        {list.map((m) => (
+          <View key={m.id} style={[styles.card, shadow.card]}>
+            <Text style={{ fontSize: 20, marginRight: 10 }}>💊</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[typography.bodyBold, { color: colors.text }]}>{m.name}</Text>
+              {m.doseTime ? <Text style={[typography.caption, { color: colors.textMuted }]}>복용 {m.doseTime}</Text> : null}
+            </View>
+            <Text onPress={() => remove(m.id)} style={[typography.caption, { color: colors.emergency }]}>삭제</Text>
+          </View>
+        ))}
 
-          <PrimaryButton
-            title="상호작용 체크"
-            variant="secondary"
-            onPress={() => navigation.navigate('InteractionCheck')}
-            style={{ marginTop: spacing.md }}
-          />
-          <PrimaryButton
-            title="더 추가하기"
-            variant="outline"
-            onPress={() => navigation.navigate('MedicineSearch')}
-            style={{ marginTop: spacing.sm }}
-          />
-        </>
-      )}
+        <View style={[styles.addBox, shadow.card]}>
+          <Text style={[typography.captionBold, { color: colors.textSecondary, marginBottom: spacing.sm }]}>약 추가</Text>
+          <TextInput value={name} onChangeText={setName} placeholder="약 이름 (예: 혈압약)" placeholderTextColor={colors.g400} style={styles.input} />
+          <TextInput value={time} onChangeText={setTime} placeholder="복용 시간(선택) (예: 아침 08:00)" placeholderTextColor={colors.g400} style={[styles.input, { marginTop: spacing.sm }]} />
+          <PrimaryButton title="추가" icon="＋" variant="primary" onPress={add} style={{ marginTop: spacing.sm }} />
+        </View>
 
-      <Disclaimer compact />
-    </Screen>
+        <View style={[styles.v15, shadow.card]}>
+          <Text style={[typography.captionBold, { color: colors.primary }]}>v1.5 예정</Text>
+          <Text style={[typography.caption, { color: colors.text, marginTop: 4 }]}>식약처 e약은요로 효능·주의사항·상호작용을 조회합니다. (판정이 아닌 정보 제공, 약사 상담 안내)</Text>
+        </View>
+      </ScrollView>
+
+      <View style={styles.footer}>
+        <PrimaryButton title="병원·약국에 보여줄 목록" icon="🏥" variant="outline" onPress={() => navigation.navigate('HospitalFinder', { kind: 'pharmacy' })} />
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  title: { color: colors.text },
-  subtitle: { color: colors.textSecondary, marginBottom: spacing.md },
-  row: { flexDirection: 'row', alignItems: 'center' },
-  empty: { color: colors.textSecondary, textAlign: 'center' },
+  wrap: { flex: 1, backgroundColor: colors.bg },
+  content: { padding: spacing.md, paddingBottom: 40 },
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.sm, flexDirection: 'row', alignItems: 'center' },
+  addBox: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.lg },
+  input: { backgroundColor: colors.g50, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md, ...typography.body, color: colors.text },
+  v15: { backgroundColor: '#F4F9FF', borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.lg, borderWidth: 1, borderColor: '#D8E9FF' },
+  footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.divider },
 });

@@ -5,7 +5,7 @@ import { RootNavigation } from './src/navigation/RootNavigation';
 export default function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <RootNavigation />
     </SafeAreaProvider>
   );

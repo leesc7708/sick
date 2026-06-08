@@ -7,15 +7,24 @@ import { RootStackParamList } from '../types';
 import { storage } from '../services/storage';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { HomeScreen } from '../screens/HomeScreen';
-import { SymptomInputScreen } from '../screens/SymptomInputScreen';
 import { RedFlagScreen } from '../screens/RedFlagScreen';
-import { SymptomResultScreen } from '../screens/SymptomResultScreen';
+import { SymptomInputScreen } from '../screens/SymptomInputScreen';
+import { SymptomSummaryScreen } from '../screens/SymptomSummaryScreen';
 import { HospitalFinderScreen } from '../screens/HospitalFinderScreen';
-import { MedicineSearchScreen } from '../screens/MedicineSearchScreen';
-import { MedicineDetailScreen } from '../screens/MedicineDetailScreen';
+import { HealthRecordsScreen } from '../screens/HealthRecordsScreen';
+import { HealthRecordShareScreen } from '../screens/HealthRecordShareScreen';
+import { WorkCheckScreen } from '../screens/WorkCheckScreen';
+import { IncidentReportScreen } from '../screens/IncidentReportScreen';
+import { ManagerDashboardScreen } from '../screens/ManagerDashboardScreen';
 import { MyMedicinesScreen } from '../screens/MyMedicinesScreen';
-import { InteractionCheckScreen } from '../screens/InteractionCheckScreen';
+import { HistoryScreen } from '../screens/HistoryScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+
+// 구 버전(일반 헬스케어) 화면은 보존하되 네비에서는 제외:
+// import { SymptomResultScreen } from '../screens/SymptomResultScreen';
+// import { MedicineSearchScreen } from '../screens/MedicineSearchScreen';
+// import { MedicineDetailScreen } from '../screens/MedicineDetailScreen';
+// import { InteractionCheckScreen } from '../screens/InteractionCheckScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -43,28 +52,22 @@ export function RootNavigation() {
     <NavigationContainer>
       <Stack.Navigator
         initialRouteName={initialRoute}
-        screenOptions={{
-          headerStyle: { backgroundColor: colors.primary },
-          headerTintColor: colors.textInverse,
-          headerTitleStyle: { fontWeight: '700' },
-          contentStyle: { backgroundColor: colors.bg },
-        }}
+        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}
       >
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="SymptomInput" component={SymptomInputScreen} options={{ title: '증상 입력' }} />
-        <Stack.Screen
-          name="RedFlag"
-          component={RedFlagScreen}
-          options={{ title: '🚨 응급 안내', headerStyle: { backgroundColor: colors.emergency }, headerBackVisible: false }}
-        />
-        <Stack.Screen name="SymptomResult" component={SymptomResultScreen} options={{ title: '분석 결과' }} />
-        <Stack.Screen name="HospitalFinder" component={HospitalFinderScreen} options={{ title: '병원 찾기' }} />
-        <Stack.Screen name="MedicineSearch" component={MedicineSearchScreen} options={{ title: '약 검색' }} />
-        <Stack.Screen name="MedicineDetail" component={MedicineDetailScreen} options={{ title: '약품 정보' }} />
-        <Stack.Screen name="MyMedicines" component={MyMedicinesScreen} options={{ title: '내 약 목록' }} />
-        <Stack.Screen name="InteractionCheck" component={InteractionCheckScreen} options={{ title: '상호작용 체크' }} />
-        <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: '설정' }} />
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="RedFlag" component={RedFlagScreen} />
+        <Stack.Screen name="SymptomInput" component={SymptomInputScreen} />
+        <Stack.Screen name="SymptomSummary" component={SymptomSummaryScreen} />
+        <Stack.Screen name="HospitalFinder" component={HospitalFinderScreen} />
+        <Stack.Screen name="HealthRecords" component={HealthRecordsScreen} />
+        <Stack.Screen name="HealthRecordShare" component={HealthRecordShareScreen} />
+        <Stack.Screen name="WorkCheck" component={WorkCheckScreen} />
+        <Stack.Screen name="IncidentReport" component={IncidentReportScreen} />
+        <Stack.Screen name="ManagerDashboard" component={ManagerDashboardScreen} />
+        <Stack.Screen name="MyMedicines" component={MyMedicinesScreen} />
+        <Stack.Screen name="History" component={HistoryScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

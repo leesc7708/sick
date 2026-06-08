@@ -1,125 +1,97 @@
 import React, { useCallback, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Screen } from '../components/Screen';
-import { Card } from '../components/Card';
+import { ListTile } from '../components/ListTile';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { Disclaimer } from '../components/Disclaimer';
+import { Tag } from '../components/Tag';
 import { colors, spacing } from '../theme/colors';
 import { typography } from '../theme/typography';
-import { RootStackParamList, UserProfile } from '../types';
+import { AppMode, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
-interface Tile {
-  emoji: string;
-  title: string;
-  desc: string;
-  route: keyof RootStackParamList;
-  bg: string;
-}
-
-const TILES: Tile[] = [
-  { emoji: '🩺', title: '증상 확인', desc: '아픈 곳을 알려주세요', route: 'SymptomInput', bg: '#E8F5E9' },
-  { emoji: '🏥', title: '병원 찾기', desc: '가까운 의료기관 보기', route: 'HospitalFinder', bg: '#E3F2FD' },
-  { emoji: '💊', title: '약 검색', desc: '약품 정보 알아보기', route: 'MedicineSearch', bg: '#FFF3E0' },
-  { emoji: '🧪', title: '약 상호작용', desc: '내 약 함께 먹어도 될까?', route: 'InteractionCheck', bg: '#F3E5F5' },
-  { emoji: '📋', title: '내 약 목록', desc: '복용 중인 약 관리', route: 'MyMedicines', bg: '#FFEBEE' },
-  { emoji: '⚙️', title: '설정', desc: 'AI 모드 / API 키 설정', route: 'Settings', bg: '#ECEFF1' },
-];
-
 export function HomeScreen({ navigation }: Props) {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [aiMode, setAiMode] = useState<'mock' | 'real'>('mock');
+  const [mode, setMode] = useState<AppMode>('work');
 
   useFocusEffect(
     useCallback(() => {
       (async () => {
-        setProfile(await storage.getProfile());
-        setAiMode(await storage.getAiMode());
+        const p = await storage.getProfile();
+        if (p) setMode(p.mode);
       })();
     }, []),
   );
 
+  const isWork = mode === 'work';
+
   return (
-    <Screen>
-      <View style={styles.header}>
-        <View>
-          <Text style={[typography.h1, { color: colors.text }]}>세이프콜</Text>
-          <Text style={[typography.caption, { color: colors.textSecondary }]}>
-            증상 확인부터 병원 연결까지
-          </Text>
-        </View>
-        <View style={[styles.modeBadge, aiMode === 'real' ? styles.modeReal : styles.modeMock]}>
-          <Text style={styles.modeBadgeText}>{aiMode === 'real' ? 'AI: 실제' : 'AI: Mock'}</Text>
-        </View>
-      </View>
-
-      {profile && (
-        <Card>
-          <Text style={[typography.bodyBold, { color: colors.text }]}>
-            {profile.age}세 · {profile.gender === 'male' ? '남' : profile.gender === 'female' ? '여' : '기타'}
-            {profile.isPregnant ? ' · 임신 중' : ''}
-            {profile.isLactating ? ' · 수유 중' : ''}
-          </Text>
-          {profile.conditions.length > 0 && (
-            <Text style={[typography.caption, styles.profileDetail]}>
-              기저질환: {profile.conditions.join(', ')}
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.header}>
+          <View>
+            <Text style={[typography.h1, { color: colors.text }]}>
+              세이프콜 {isWork && <Text style={{ color: colors.work }}>@work</Text>}
             </Text>
-          )}
-          {profile.currentMedicines.length > 0 && (
-            <Text style={[typography.caption, styles.profileDetail]}>
-              복용약: {profile.currentMedicines.join(', ')}
+            <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 2 }]}>
+              {isWork ? '아플 때·다쳤을 때, 현장에서 가장 먼저' : '증상 정리부터 병원 연결까지'}
             </Text>
-          )}
-        </Card>
-      )}
+          </View>
+        </View>
 
-      <View style={styles.grid}>
-        {TILES.map((t) => (
-          <Card
-            key={t.route}
-            style={{ ...styles.tile, backgroundColor: t.bg }}
-            onPress={() => navigation.navigate(t.route as any)}
-          >
-            <Text style={styles.tileEmoji}>{t.emoji}</Text>
-            <Text style={[typography.bodyBold, { color: colors.text }]}>{t.title}</Text>
-            <Text style={[typography.caption, { color: colors.textSecondary }]}>{t.desc}</Text>
-          </Card>
-        ))}
-      </View>
+        <PrimaryButton
+          title="응급 신호 먼저 확인"
+          icon="🚨"
+          variant="emergency"
+          size="lg"
+          onPress={() => navigation.navigate('RedFlag')}
+          style={{ marginBottom: spacing.md }}
+        />
 
-      <Disclaimer />
-    </Screen>
+        <ListTile icon="📝" title="지금 증상 정리하기" desc="병원에서 보여줄 요약 카드"
+          onPress={() => navigation.navigate('SymptomInput')} />
+        <ListTile icon="🏥" title="병원·약국·응급실 찾기" desc="실시간 가용병상 확인"
+          onPress={() => navigation.navigate('HospitalFinder')} />
+
+        {isWork && (
+          <>
+            <ListTile icon="⚠️" title="사고·이상 보고" desc="1초 보고 + 응급처치 안내" tone="emergency"
+              badge={<Tag label="@work" tone="work" />}
+              onPress={() => navigation.navigate('IncidentReport')} />
+            <ListTile icon="✅" title="작업 전 건강체크" desc="오늘 컨디션 점검 → 관리자 전송" tone="work"
+              badge={<Tag label="@work" tone="work" />}
+              onPress={() => navigation.navigate('WorkCheck')} />
+            <ListTile icon="📋" title="건강검진기록" desc="한 번 올려두면 QR로 즉시 제출" tone="work"
+              badge={<Tag label="NEW" tone="new" />}
+              onPress={() => navigation.navigate('HealthRecords')} />
+          </>
+        )}
+
+        <ListTile icon="💊" title="내 복용약" desc="병원·약국에 보여줄 목록"
+          onPress={() => navigation.navigate('MyMedicines')} />
+
+        {isWork && (
+          <ListTile icon="📊" title="관리자 대시보드" desc="현장 체크·사고·검진 현황" tone="work"
+            badge={<Tag label="@work" tone="work" />}
+            onPress={() => navigation.navigate('ManagerDashboard')} />
+        )}
+
+        <ListTile icon="🕐" title="지난 기록" desc="증상·사고·체크 이력"
+          onPress={() => navigation.navigate('History')} />
+        <ListTile icon="⚙️" title="설정" desc="모드 전환 · 데이터 관리"
+          onPress={() => navigation.navigate('Settings')} />
+
+        <Disclaimer />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  modeBadge: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 999,
-  },
-  modeMock: { backgroundColor: '#FFE0B2' },
-  modeReal: { backgroundColor: '#C8E6C9' },
-  modeBadgeText: { fontSize: 12, fontWeight: '600', color: colors.text },
-  profileDetail: { color: colors.textSecondary, marginTop: spacing.xs },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginTop: spacing.sm,
-  },
-  tile: {
-    width: '48%',
-    marginVertical: spacing.xs,
-  },
-  tileEmoji: { fontSize: 32, marginBottom: spacing.sm },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  content: { padding: spacing.md, paddingBottom: spacing.xxl },
+  header: { marginBottom: spacing.md, marginTop: spacing.xs },
 });
