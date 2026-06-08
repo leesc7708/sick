@@ -19,9 +19,10 @@ export function HealthRecordShareScreen({ navigation, route }: Props) {
     (async () => setRec(await storage.getHealthRecord(recordId)))();
   }, [recordId]);
 
-  // 데모용 만료 공유 링크 (실제로는 서버에서 만료 토큰 발급)
+  // ⚠️ 데모 링크 — 실제 만료 토큰·접근제어는 서버(백엔드 청사진) 연동 후 적용
   const link = `https://lifeline.app/s/${recordId}`;
-  const shareLink = () => Share.share({ message: `[라이프라인] 건강검진기록 공유\n${rec?.type ?? ''}\n${link}\n※ 30분 후 만료되는 보기 전용 링크입니다.` });
+  const shareLink = () => Share.share({ message: `[라이프라인] 건강검진기록 공유(데모)\n${rec?.type ?? ''}\n${link}\n※ 데모 링크입니다. 실제 만료·접근제어는 서버 연동 후 적용됩니다.` });
+  const sendToManager = () => Share.share({ message: `[라이프라인] 현장관리자 제출(데모)\n근로자 ${rec?.type ?? '검진기록'}\n${link}\n※ 데모 — 실서비스에서는 사내 채널로 안전하게 전송됩니다.` });
 
   return (
     <View style={styles.wrap}>
@@ -37,15 +38,15 @@ export function HealthRecordShareScreen({ navigation, route }: Props) {
         </View>
 
         <View style={[styles.lock, shadow.card]}>
-          <Text style={[typography.bodyBold, { color: colors.text, textAlign: 'center' }]}>🔒 30분 후 자동 만료</Text>
-          <Text style={[typography.small, { color: colors.textMuted, textAlign: 'center', marginTop: 4 }]}>보기 전용 · 다운로드 차단 · 공유 동의 기록</Text>
+          <Text style={[typography.bodyBold, { color: colors.text, textAlign: 'center' }]}>🔒 데모 미리보기</Text>
+          <Text style={[typography.small, { color: colors.textMuted, textAlign: 'center', marginTop: 4 }]}>만료(30분)·다운로드 차단·접근제어는 서버 연동 후 적용됩니다.</Text>
         </View>
 
-        <PrimaryButton title="만료 링크 공유" icon="🔗" variant="primary" onPress={shareLink} style={{ marginTop: spacing.lg }} />
-        <PrimaryButton title="관리자에게 직접 전송" icon="📤" variant="outline" onPress={shareLink} style={{ marginTop: spacing.sm }} />
+        <PrimaryButton title="링크 공유" icon="🔗" variant="primary" onPress={shareLink} style={{ marginTop: spacing.lg }} />
+        <PrimaryButton title="관리자에게 직접 전송" icon="📤" variant="outline" onPress={sendToManager} style={{ marginTop: spacing.sm }} />
 
         <Text style={[typography.small, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.lg }]}>
-          건강검진기록은 민감 개인정보입니다. 공유 시 만료·접근 제한이 적용됩니다.
+          건강검진기록은 민감 개인정보입니다. 실제 만료·접근 제한은 서버 연동 시 적용됩니다.
         </Text>
       </View>
     </View>

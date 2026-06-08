@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -73,14 +73,15 @@ export function HomeScreen({ navigation }: Props) {
           <Chip label={t('mode_general')} tone="primary" selected={!isWork} onPress={() => changeMode('general')} />
         </View>
 
-        <PrimaryButton
-          title={t('emergency_check')}
-          icon="🚨"
-          variant="emergency"
-          size="lg"
-          onPress={() => navigation.navigate('RedFlag')}
-          style={{ marginBottom: spacing.md }}
-        />
+        <View style={styles.emergencyRow}>
+          <View style={{ flex: 1 }}>
+            <PrimaryButton title="119" icon="📞" variant="emergency" size="lg" onPress={() => Linking.openURL('tel:119')} />
+          </View>
+          <View style={{ width: spacing.sm }} />
+          <View style={{ flex: 1.6 }}>
+            <PrimaryButton title={t('emergency_check')} icon="🚨" variant="primary" size="lg" onPress={() => navigation.navigate('RedFlag')} />
+          </View>
+        </View>
 
         <ListTile icon="📝" title={t('symptom_organize')} desc={t('symptom_desc')}
           onPress={() => navigation.navigate('SymptomInput')} />
@@ -127,4 +128,5 @@ const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md, marginTop: spacing.xs },
   modeToggle: { flexDirection: 'row', marginBottom: spacing.md },
+  emergencyRow: { flexDirection: 'row', marginBottom: spacing.md },
 });
