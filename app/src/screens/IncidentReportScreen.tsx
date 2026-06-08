@@ -36,9 +36,9 @@ export function IncidentReportScreen({ navigation }: Props) {
       memo: memo.trim() || undefined,
       reportedAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
     });
-    Alert.alert('보고 전송됨', '관리자·보호자에게 위치와 함께 전송되었습니다. (데모)', [
-      { text: '응급실 찾기', onPress: () => navigation.navigate('HospitalFinder', { kind: 'er' }) },
-      { text: '확인', style: 'cancel' },
+    Alert.alert(t('ir_sent_t'), t('ir_sent_m'), [
+      { text: t('ef_find_er'), onPress: () => navigation.navigate('HospitalFinder', { kind: 'er' }) },
+      { text: t('common_ok'), style: 'cancel' },
     ]);
   };
 
@@ -81,7 +81,7 @@ export function IncidentReportScreen({ navigation }: Props) {
               </View>
             ))}
             <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.sm }]}>
-              ※ 구조자 안전이 최우선입니다. 무리한 단독 구조는 2차 사고로 이어질 수 있습니다.
+              {t('ir_aid_warn')}
             </Text>
           </View>
         )}

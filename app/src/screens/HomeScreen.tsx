@@ -9,6 +9,7 @@ import { Disclaimer } from '../components/Disclaimer';
 import { Tag } from '../components/Tag';
 import { Chip } from '../components/Chip';
 import { LogoMark } from '../components/LogoMark';
+import { LangSwitcher } from '../components/LangSwitcher';
 import { colors, spacing } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
@@ -67,6 +68,8 @@ export function HomeScreen({ navigation }: Props) {
             </Text>
           </View>
         </View>
+
+        <LangSwitcher style={{ marginBottom: spacing.sm }} />
 
         <View style={styles.modeToggle}>
           <Chip label={t('mode_work')} tone="work" selected={isWork} onPress={() => changeMode('work')} />

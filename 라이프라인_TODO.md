@@ -37,5 +37,20 @@
 ---
 
 ## 진행 메모
-- 현재까지 완료(데모): 토스풍 14화면, 응급 정보 카드(위치·기저질환 전달), 진료요약 위급도·대처(AI의견 참고), 홈 모드토글, 맨위로(web), 7개 언어 인프라(홈·온보딩·설정 적용), 현장 서류함(건설기초·화관법), 데모 시드.
-- **다음 작업 추천 순서: P0-3(문구, 즉시) → P0-1(legacy 격리) → P0-2(응급 다국어) → P1.**
+### 진행 현황 (2026-06-08 검증 + 외부테스트 3팀 반영)
+
+**✅ 완료 (빌드·배포·커밋·push)**
+- P0-1 구버전 격리(`_legacy`) · P0-3 검진공유 문구 · P1-6 홈119 · P1-7 FAB
+- P0-2 다국어 7개 언어 9화면: 홈·온보딩·설정·응급신호·사고보고·진료요약(위급도/대처)·병원찾기·작업체크 + 데이터(redFlags/firstAid/careGuide) — 기능QA·다국어QA 모두 적용·완전성 확인
+
+**🔴 외부 테스트 새 발견 (다음 우선)**
+1. [즉시] `src/data/mockHospitals.ts` 고아 파일 → `tsc --noEmit` 8건 실패. `_legacy`로 이동 or 삭제 (격리 누락분, 활성앱엔 무해하나 CI 적신호)
+2. [외국인 치명] **첫 진입 언어 선택 없음 + 언어 토글이 설정 깊숙이** → 한국어 못 읽는 외국인이 번역에 도달 못함. 첫 화면/홈 상단 언어 선택 필요
+3. [핵심] `SymptomInputScreen` 다국어 미적용 → 입력→응급신호→진료요약 흐름의 입력 단계가 막힘. `options.ts` 칩 라벨 `Record<Lang>`화 필요
+4. 사고보고 성공 Alert·공유 메시지·`HealthRecords/History/Manager`의 Alert·저장 enum이 한국어 잔존
+5. 미적용 6화면: SymptomInput · MyMedicines · History · HealthRecords · ManagerDashboard · HealthRecordShare
+6. 번역 경미: th `it_poison`(버튼 모호)·`it_choke`, vi 구어체 → 원어민 검수 권장 (치명 오역은 없음)
+7. `_legacy` 내부 import 깨짐(재활성화 불가) — 보존 의도면 내부경로 `./`로 수정
+
+**⏳ 남은 P2**: 개인정보 동의화면 · 인라인컴포넌트 · ImagePicker · History 날짜정렬 · 출처표기 · LanguageContext useMemo
+**🔑 외부(형님)**: E-Gen키 · AI프록시 · 멀티유저 · KIPRIS 상표·도메인

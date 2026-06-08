@@ -7,6 +7,7 @@ import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Disclaimer } from '../components/Disclaimer';
 import { LogoMark } from '../components/LogoMark';
+import { LangSwitcher } from '../components/LangSwitcher';
 import { useLang } from '../i18n/LanguageContext';
 import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
@@ -54,6 +55,8 @@ export function OnboardingScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.body}>
+        <Text style={[typography.captionBold, { color: colors.textMuted, marginBottom: spacing.xs }]}>{t('lang_select')}</Text>
+        <LangSwitcher style={{ marginBottom: spacing.lg }} />
         <LogoMark size={52} />
         <Text style={[typography.display, { color: colors.text, marginTop: spacing.sm }]}>라이프라인</Text>
         <Text style={[typography.body, { color: colors.textSecondary, marginTop: spacing.xs }]}>
@@ -85,11 +88,11 @@ export function OnboardingScreen({ navigation }: Props) {
           {AGE_BANDS.map((b) => <Chip key={b.label} label={b.label} selected={ageBand === b.label} onPress={() => setAgeBand(b.label)} />)}
         </View>
         <Text style={styles.fieldLabel}>{t('conditions')}</Text>
-        <TextInput value={conditions} onChangeText={setConditions} placeholder="예: 고혈압, 당뇨" placeholderTextColor={colors.g400} style={styles.input} />
+        <TextInput value={conditions} onChangeText={setConditions} placeholder={t('ob_cond_ph')} placeholderTextColor={colors.g400} style={styles.input} />
         <Text style={styles.fieldLabel}>{t('allergies')}</Text>
-        <TextInput value={allergies} onChangeText={setAllergies} placeholder="예: 페니실린" placeholderTextColor={colors.g400} style={styles.input} />
+        <TextInput value={allergies} onChangeText={setAllergies} placeholder={t('ob_alg_ph')} placeholderTextColor={colors.g400} style={styles.input} />
         <Text style={styles.fieldLabel}>{t('current_meds')}</Text>
-        <TextInput value={meds} onChangeText={setMeds} placeholder="예: 혈압약" placeholderTextColor={colors.g400} style={styles.input} />
+        <TextInput value={meds} onChangeText={setMeds} placeholder={t('ob_meds_ph')} placeholderTextColor={colors.g400} style={styles.input} />
 
         <Disclaimer compact text={t('disclaimer')} />
       </ScrollView>

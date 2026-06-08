@@ -11,10 +11,23 @@ import { typography } from '../theme/typography';
 import { ACCOMPANYING, BODY_PARTS, WORK_TYPES } from '../data/options';
 import { RootStackParamList, SymptomMemo } from '../types';
 import { storage } from '../services/storage';
+import { useLang } from '../i18n/LanguageContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SymptomInput'>;
 
+// 저장은 한국어 원본으로(데이터 일관성), 화면 표시는 번역 키로 매핑
+const BP_KEY: Record<string, string> = {
+  '머리': 'bp_head', '눈': 'bp_eye', '코/목': 'bp_nose', '가슴': 'bp_chest', '배': 'bp_belly', '등/허리': 'bp_back', '팔': 'bp_arm', '다리': 'bp_leg', '피부': 'bp_skin',
+};
+const AC_KEY: Record<string, string> = {
+  '열': 'ac_fever', '구토': 'ac_vomit', '설사': 'ac_diarrhea', '발진': 'ac_rash', '호흡곤란': 'ac_dyspnea', '어지럼': 'ac_dizzy', '오한': 'ac_chill', '출혈': 'ac_bleed',
+};
+const WT_KEY: Record<string, string> = {
+  '밀폐공간': 'wt_confined', '화학물질 취급': 'wt_chem', '고소작업': 'wt_height', '중장비': 'wt_heavy', '용접·화기': 'wt_weld', '일반작업': 'wt_general',
+};
+
 export function SymptomInputScreen({ navigation }: Props) {
+  const { t } = useLang();
   const [who, setWho] = useState<'self' | 'coworker'>('self');
   const [startedAt, setStartedAt] = useState('');
   const [bodyParts, setBodyParts] = useState<string[]>([]);
@@ -57,49 +70,49 @@ export function SymptomInputScreen({ navigation }: Props) {
 
   return (
     <View style={styles.wrap}>
-      <AppBar title="증상 정리" onBack={() => navigation.goBack()} />
+      <AppBar title={t('si_title')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.label}>누구의 증상인가요?</Text>
+        <Text style={styles.label}>{t('si_who')}</Text>
         <View style={styles.chips}>
-          <Chip label="본인" selected={who === 'self'} onPress={() => setWho('self')} />
-          <Chip label="동료" selected={who === 'coworker'} onPress={() => setWho('coworker')} />
+          <Chip label={t('si_self')} selected={who === 'self'} onPress={() => setWho('self')} />
+          <Chip label={t('si_coworker')} selected={who === 'coworker'} onPress={() => setWho('coworker')} />
         </View>
 
-        <Text style={styles.label}>언제부터인가요?</Text>
-        <TextInput value={startedAt} onChangeText={setStartedAt} placeholder="예: 오늘 오전 10시" placeholderTextColor={colors.g400} style={styles.input} />
+        <Text style={styles.label}>{t('si_when')}</Text>
+        <TextInput value={startedAt} onChangeText={setStartedAt} placeholder={t('si_when_ph')} placeholderTextColor={colors.g400} style={styles.input} />
 
-        <Text style={styles.label}>어디가 불편한가요?</Text>
+        <Text style={styles.label}>{t('si_where')}</Text>
         <View style={styles.chips}>
-          {BODY_PARTS.map((b) => <Chip key={b} label={b} selected={bodyParts.includes(b)} onPress={() => toggle(bodyParts, setBodyParts, b)} />)}
+          {BODY_PARTS.map((b) => <Chip key={b} label={t(BP_KEY[b])} selected={bodyParts.includes(b)} onPress={() => toggle(bodyParts, setBodyParts, b)} />)}
         </View>
 
-        <Text style={styles.label}>통증 강도</Text>
+        <Text style={styles.label}>{t('si_severity')}</Text>
         <View style={styles.stepper}>
           <Pressable style={styles.stepBtn} onPress={() => setSeverity((s) => Math.max(0, s - 1))}><Text style={styles.stepTxt}>−</Text></Pressable>
           <Text style={[typography.h2, { color: colors.text, width: 70, textAlign: 'center' }]}>{severity}<Text style={[typography.body, { color: colors.textMuted }]}> /10</Text></Text>
           <Pressable style={styles.stepBtn} onPress={() => setSeverity((s) => Math.min(10, s + 1))}><Text style={styles.stepTxt}>+</Text></Pressable>
         </View>
 
-        <Text style={styles.label}>동반 증상</Text>
+        <Text style={styles.label}>{t('si_accom')}</Text>
         <View style={styles.chips}>
-          {ACCOMPANYING.map((a) => <Chip key={a} label={a} selected={accompanying.includes(a)} onPress={() => toggle(accompanying, setAccompanying, a)} />)}
+          {ACCOMPANYING.map((a) => <Chip key={a} label={t(AC_KEY[a])} selected={accompanying.includes(a)} onPress={() => toggle(accompanying, setAccompanying, a)} />)}
         </View>
 
-        <Text style={styles.label}>작업 중에 생긴 증상인가요?</Text>
+        <Text style={styles.label}>{t('si_atwork')}</Text>
         <View style={styles.chips}>
-          <Chip label="예" tone="work" selected={atWork} onPress={() => setAtWork(true)} />
-          <Chip label="아니오" selected={!atWork} onPress={() => setAtWork(false)} />
+          <Chip label={t('si_yes')} tone="work" selected={atWork} onPress={() => setAtWork(true)} />
+          <Chip label={t('si_no')} selected={!atWork} onPress={() => setAtWork(false)} />
         </View>
         {atWork && (
           <View style={styles.chips}>
-            {WORK_TYPES.map((w) => <Chip key={w} label={w} tone="work" selected={workType === w} onPress={() => setWorkType(w)} />)}
+            {WORK_TYPES.map((w) => <Chip key={w} label={t(WT_KEY[w])} tone="work" selected={workType === w} onPress={() => setWorkType(w)} />)}
           </View>
         )}
 
-        <Text style={styles.label}>걱정되는 점(선택)</Text>
-        <TextInput value={concern} onChangeText={setConcern} placeholder="예: 가스를 마신 것 같아 걱정돼요" placeholderTextColor={colors.g400} style={[styles.input, { minHeight: 56 }]} multiline />
+        <Text style={styles.label}>{t('si_concern')}</Text>
+        <TextInput value={concern} onChangeText={setConcern} placeholder={t('si_concern_ph')} placeholderTextColor={colors.g400} style={[styles.input, { minHeight: 56 }]} multiline />
 
-        <Text style={styles.label}>사진 첨부(선택) — 피부·상처 등</Text>
+        <Text style={styles.label}>{t('si_photo')}</Text>
         <View style={styles.photoRow}>
           {photos.map((uri, i) => <Image key={i} source={{ uri }} style={styles.thumb} />)}
           <Pressable onPress={addPhoto} style={styles.addPhoto}><Text style={{ fontSize: 28, color: colors.g400 }}>＋</Text></Pressable>
@@ -107,7 +120,7 @@ export function SymptomInputScreen({ navigation }: Props) {
       </ScrollView>
 
       <View style={styles.footer}>
-        <PrimaryButton title="요약 카드 만들기" icon="📝" size="lg" onPress={save} />
+        <PrimaryButton title={t('si_make')} icon="📝" size="lg" onPress={save} />
       </View>
     </View>
   );

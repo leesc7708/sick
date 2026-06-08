@@ -1,13 +1,13 @@
 export type Lang = 'ko' | 'en' | 'zh' | 'ja' | 'vi' | 'th' | 'es';
 
-export const LANGS: { code: Lang; label: string }[] = [
-  { code: 'ko', label: '한국어' },
-  { code: 'en', label: 'English' },
-  { code: 'zh', label: '中文' },
-  { code: 'ja', label: '日本語' },
-  { code: 'vi', label: 'Tiếng Việt' },
-  { code: 'th', label: 'ไทย' },
-  { code: 'es', label: 'Español' },
+export const LANGS: { code: Lang; label: string; flag: string }[] = [
+  { code: 'ko', label: '한국어', flag: '🇰🇷' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'zh', label: '中文', flag: '🇨🇳' },
+  { code: 'ja', label: '日本語', flag: '🇯🇵' },
+  { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
+  { code: 'th', label: 'ไทย', flag: '🇹🇭' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
 ];
 
 // ⚠️ 1차 기계/AI 번역 — 정식 출시 전 원어민 검수 권장(특히 th·vi)
@@ -69,6 +69,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     wc_title: '작업 전 건강체크', wc_today: '오늘 작업 전 체크', wc_work_type: '작업 종류', wc_q_sleep: '수면을 6시간 이상 잤나요?', wc_q_alcohol: '전날 음주를 안 했나요?', wc_q_meds: '필요한 약을 복용했나요?', wc_q_dizzy: '어지럼·심한 피로가 없나요?', wc_yes: '예', wc_no: '아니오',
     wc_warn_t: '⚠️ 위험작업 컨디션 주의', wc_warn_m: '밀폐공간·화학물질·고소작업은 컨디션이 중요합니다. 관리자 확인 후 작업하세요.', wc_note: '※ 진단이 아닌 자가 점검 도구입니다. 결과는 동의에 따라 관리자에게 공유됩니다.', wc_submit: '체크 완료 → 관리자 전송',
     wt_confined: '밀폐공간', wt_chem: '화학물질 취급', wt_height: '고소작업', wt_heavy: '중장비', wt_weld: '용접·화기', wt_general: '일반작업',
+    si_title: '증상 정리', si_who: '누구의 증상인가요?', si_self: '본인', si_coworker: '동료', si_when: '언제부터인가요?', si_when_ph: '예: 오늘 오전 10시', si_where: '어디가 불편한가요?', si_severity: '통증 강도', si_accom: '동반 증상', si_atwork: '작업 중에 생긴 증상인가요?', si_yes: '예', si_no: '아니오', si_concern: '걱정되는 점(선택)', si_concern_ph: '예: 가스를 마신 것 같아 걱정돼요', si_photo: '사진 첨부(선택) — 피부·상처 등', si_make: '요약 카드 만들기',
+    bp_head: '머리', bp_eye: '눈', bp_nose: '코/목', bp_chest: '가슴', bp_belly: '배', bp_back: '등/허리', bp_arm: '팔', bp_leg: '다리', bp_skin: '피부',
+    ac_fever: '열', ac_vomit: '구토', ac_diarrhea: '설사', ac_rash: '발진', ac_dyspnea: '호흡곤란', ac_dizzy: '어지럼', ac_chill: '오한', ac_bleed: '출혈',
+    ir_sent_t: '보고 전송됨', ir_sent_m: '관리자·보호자에게 위치와 함께 전송되었습니다. (데모)', ir_aid_warn: '※ 구조자 안전이 최우선입니다. 무리한 단독 구조는 2차 사고로 이어질 수 있습니다.', common_ok: '확인',
+    lang_select: '언어 선택 · Language', ob_cond_ph: '예: 고혈압, 당뇨', ob_alg_ph: '예: 페니실린', ob_meds_ph: '예: 혈압약',
   },
   en: {
     tagline_work: 'When hurt or sick — the first step on site',
@@ -127,6 +132,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     wc_title: 'Pre-work Health Check', wc_today: "Today's pre-work check", wc_work_type: 'Work type', wc_q_sleep: 'Did you sleep 6+ hours?', wc_q_alcohol: 'No alcohol last night?', wc_q_meds: 'Took needed medication?', wc_q_dizzy: 'No dizziness/severe fatigue?', wc_yes: 'Yes', wc_no: 'No',
     wc_warn_t: '⚠️ Hazardous work — check condition', wc_warn_m: 'Confined space/chemical/height work needs good condition. Get manager approval first.', wc_note: '※ A self-check tool, not a diagnosis. Results are shared with the manager per consent.', wc_submit: 'Complete → send to manager',
     wt_confined: 'Confined space', wt_chem: 'Chemical handling', wt_height: 'Height work', wt_heavy: 'Heavy equipment', wt_weld: 'Welding/fire', wt_general: 'General work',
+    si_title: 'Symptom note', si_who: 'Whose symptoms?', si_self: 'Myself', si_coworker: 'Coworker', si_when: 'When did it start?', si_when_ph: 'e.g. 10 AM today', si_where: 'Where does it hurt?', si_severity: 'Pain level', si_accom: 'Other symptoms', si_atwork: 'Did it start during work?', si_yes: 'Yes', si_no: 'No', si_concern: 'Concerns (optional)', si_concern_ph: 'e.g. I think I inhaled gas', si_photo: 'Add photo (optional) — skin/wound', si_make: 'Create summary card',
+    bp_head: 'Head', bp_eye: 'Eyes', bp_nose: 'Nose/throat', bp_chest: 'Chest', bp_belly: 'Abdomen', bp_back: 'Back/waist', bp_arm: 'Arm', bp_leg: 'Leg', bp_skin: 'Skin',
+    ac_fever: 'Fever', ac_vomit: 'Vomiting', ac_diarrhea: 'Diarrhea', ac_rash: 'Rash', ac_dyspnea: 'Shortness of breath', ac_dizzy: 'Dizziness', ac_chill: 'Chills', ac_bleed: 'Bleeding',
+    ir_sent_t: 'Report sent', ir_sent_m: 'Sent to manager/guardian with your location. (demo)', ir_aid_warn: '※ Rescuer safety comes first. Forced solo rescue can cause secondary accidents.', common_ok: 'OK',
+    lang_select: 'Language', ob_cond_ph: 'e.g. hypertension, diabetes', ob_alg_ph: 'e.g. penicillin', ob_meds_ph: 'e.g. blood pressure meds',
   },
   zh: {
     tagline_work: '受伤或不适时，现场第一步',
@@ -185,6 +195,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     wc_title: '工作前健康检查', wc_today: '今日工作前检查', wc_work_type: '工作类型', wc_q_sleep: '睡眠是否6小时以上？', wc_q_alcohol: '前一天没饮酒吗？', wc_q_meds: '是否服用了必要的药？', wc_q_dizzy: '没有头晕·严重疲劳吗？', wc_yes: '是', wc_no: '否',
     wc_warn_t: '⚠️ 危险作业·注意状态', wc_warn_m: '密闭空间·化学品·高处作业状态很重要。请经管理者确认后作业。', wc_note: '※ 这是自我检查工具，非诊断。结果经同意后与管理者共享。', wc_submit: '完成检查 → 发送管理者',
     wt_confined: '密闭空间', wt_chem: '化学品处理', wt_height: '高处作业', wt_heavy: '重型设备', wt_weld: '焊接·明火', wt_general: '一般作业',
+    si_title: '症状记录', si_who: '谁的症状？', si_self: '本人', si_coworker: '同事', si_when: '什么时候开始的？', si_when_ph: '例：今天上午10点', si_where: '哪里不舒服？', si_severity: '疼痛程度', si_accom: '伴随症状', si_atwork: '是工作中出现的吗？', si_yes: '是', si_no: '否', si_concern: '担心的事（可选）', si_concern_ph: '例：我好像吸入了气体', si_photo: '添加照片（可选）— 皮肤/伤口', si_make: '生成摘要卡',
+    bp_head: '头', bp_eye: '眼', bp_nose: '鼻/喉', bp_chest: '胸', bp_belly: '腹', bp_back: '背/腰', bp_arm: '手臂', bp_leg: '腿', bp_skin: '皮肤',
+    ac_fever: '发热', ac_vomit: '呕吐', ac_diarrhea: '腹泻', ac_rash: '皮疹', ac_dyspnea: '呼吸困难', ac_dizzy: '头晕', ac_chill: '畏寒', ac_bleed: '出血',
+    ir_sent_t: '报告已发送', ir_sent_m: '已连同位置发送给管理者·监护人。（演示）', ir_aid_warn: '※ 救援者安全第一。勉强单独救援可能导致二次事故。', common_ok: '确认',
+    lang_select: '语言', ob_cond_ph: '例：高血压、糖尿病', ob_alg_ph: '例：青霉素', ob_meds_ph: '例：降压药',
   },
   ja: {
     tagline_work: '痛い時・怪我した時、現場でまず最初に',
@@ -243,6 +258,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     wc_title: '作業前の健康チェック', wc_today: '今日の作業前チェック', wc_work_type: '作業の種類', wc_q_sleep: '睡眠を6時間以上とりましたか？', wc_q_alcohol: '前日に飲酒していませんか？', wc_q_meds: '必要な薬を服用しましたか？', wc_q_dizzy: 'めまい・強い疲労はありませんか？', wc_yes: 'はい', wc_no: 'いいえ',
     wc_warn_t: '⚠️ 危険作業・体調注意', wc_warn_m: '密閉空間・化学物質・高所作業は体調が重要。管理者の確認後に作業を。', wc_note: '※ 診断ではなく自己点検ツールです。結果は同意に基づき管理者へ共有。', wc_submit: 'チェック完了 → 管理者へ送信',
     wt_confined: '密閉空間', wt_chem: '化学物質取扱', wt_height: '高所作業', wt_heavy: '重機', wt_weld: '溶接・火気', wt_general: '一般作業',
+    si_title: '症状メモ', si_who: '誰の症状ですか？', si_self: '本人', si_coworker: '同僚', si_when: 'いつからですか？', si_when_ph: '例：今日午前10時', si_where: 'どこが不調ですか？', si_severity: '痛みの強さ', si_accom: '随伴症状', si_atwork: '作業中に出た症状ですか？', si_yes: 'はい', si_no: 'いいえ', si_concern: '心配な点（任意）', si_concern_ph: '例：ガスを吸ったかもしれず心配です', si_photo: '写真添付（任意）— 皮膚・傷など', si_make: '要約カードを作成',
+    bp_head: '頭', bp_eye: '目', bp_nose: '鼻/喉', bp_chest: '胸', bp_belly: '腹', bp_back: '背中/腰', bp_arm: '腕', bp_leg: '脚', bp_skin: '皮膚',
+    ac_fever: '発熱', ac_vomit: '嘔吐', ac_diarrhea: '下痢', ac_rash: '発疹', ac_dyspnea: '呼吸困難', ac_dizzy: 'めまい', ac_chill: '悪寒', ac_bleed: '出血',
+    ir_sent_t: '報告を送信しました', ir_sent_m: '管理者・保護者に位置とともに送信しました。（デモ）', ir_aid_warn: '※ 救助者の安全が最優先です。無理な単独救助は二次事故につながります。', common_ok: '確認',
+    lang_select: '言語', ob_cond_ph: '例：高血圧、糖尿病', ob_alg_ph: '例：ペニシリン', ob_meds_ph: '例：血圧の薬',
   },
   vi: {
     tagline_work: 'Khi đau hay bị thương — bước đầu tiên tại công trường',
@@ -301,6 +321,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     wc_title: 'Kiểm tra sức khỏe trước khi làm', wc_today: 'Kiểm tra trước khi làm hôm nay', wc_work_type: 'Loại công việc', wc_q_sleep: 'Bạn ngủ 6 tiếng trở lên chứ?', wc_q_alcohol: 'Tối qua không uống rượu chứ?', wc_q_meds: 'Đã uống thuốc cần thiết chưa?', wc_q_dizzy: 'Không chóng mặt/mệt nặng chứ?', wc_yes: 'Có', wc_no: 'Không',
     wc_warn_t: '⚠️ Việc nguy hiểm — chú ý tình trạng', wc_warn_m: 'Việc trong không gian kín/hóa chất/trên cao cần tình trạng tốt. Hãy được quản lý duyệt trước.', wc_note: '※ Công cụ tự kiểm tra, không phải chẩn đoán. Kết quả chia sẻ với quản lý theo đồng ý.', wc_submit: 'Hoàn tất → gửi quản lý',
     wt_confined: 'Không gian kín', wt_chem: 'Xử lý hóa chất', wt_height: 'Làm trên cao', wt_heavy: 'Thiết bị nặng', wt_weld: 'Hàn/lửa', wt_general: 'Việc chung',
+    si_title: 'Ghi chú triệu chứng', si_who: 'Triệu chứng của ai?', si_self: 'Bản thân', si_coworker: 'Đồng nghiệp', si_when: 'Bắt đầu từ khi nào?', si_when_ph: 'VD: 10 giờ sáng nay', si_where: 'Đau ở đâu?', si_severity: 'Mức độ đau', si_accom: 'Triệu chứng kèm theo', si_atwork: 'Xuất hiện khi đang làm việc?', si_yes: 'Có', si_no: 'Không', si_concern: 'Điều lo lắng (tùy chọn)', si_concern_ph: 'VD: Tôi nghĩ mình đã hít phải khí', si_photo: 'Thêm ảnh (tùy chọn) — da/vết thương', si_make: 'Tạo thẻ tóm tắt',
+    bp_head: 'Đầu', bp_eye: 'Mắt', bp_nose: 'Mũi/họng', bp_chest: 'Ngực', bp_belly: 'Bụng', bp_back: 'Lưng/thắt lưng', bp_arm: 'Tay', bp_leg: 'Chân', bp_skin: 'Da',
+    ac_fever: 'Sốt', ac_vomit: 'Nôn', ac_diarrhea: 'Tiêu chảy', ac_rash: 'Phát ban', ac_dyspnea: 'Khó thở', ac_dizzy: 'Chóng mặt', ac_chill: 'Ớn lạnh', ac_bleed: 'Chảy máu',
+    ir_sent_t: 'Đã gửi báo cáo', ir_sent_m: 'Đã gửi cho quản lý·người giám hộ kèm vị trí. (demo)', ir_aid_warn: '※ An toàn của người cứu hộ là trên hết. Cứu hộ một mình liều lĩnh có thể gây tai nạn thứ cấp.', common_ok: 'OK',
+    lang_select: 'Ngôn ngữ', ob_cond_ph: 'VD: cao huyết áp, tiểu đường', ob_alg_ph: 'VD: penicillin', ob_meds_ph: 'VD: thuốc huyết áp',
   },
   th: {
     tagline_work: 'เมื่อเจ็บป่วยหรือบาดเจ็บ — ก้าวแรกในไซต์งาน',
@@ -359,6 +384,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     wc_title: 'ตรวจสุขภาพก่อนทำงาน', wc_today: 'ตรวจก่อนทำงานวันนี้', wc_work_type: 'ประเภทงาน', wc_q_sleep: 'นอน 6 ชั่วโมงขึ้นไปไหม?', wc_q_alcohol: 'เมื่อคืนไม่ดื่มแอลกอฮอล์ใช่ไหม?', wc_q_meds: 'กินยาที่จำเป็นแล้วไหม?', wc_q_dizzy: 'ไม่เวียนหัว/อ่อนเพลียมากใช่ไหม?', wc_yes: 'ใช่', wc_no: 'ไม่',
     wc_warn_t: '⚠️ งานอันตราย — ระวังสภาพร่างกาย', wc_warn_m: 'งานในที่อับอากาศ·สารเคมี·ที่สูง สภาพร่างกายสำคัญ ขออนุมัติหัวหน้าก่อน', wc_note: '※ เครื่องมือตรวจตนเอง ไม่ใช่การวินิจฉัย ผลจะแบ่งปันกับหัวหน้าตามความยินยอม', wc_submit: 'เสร็จ → ส่งหัวหน้า',
     wt_confined: 'ที่อับอากาศ', wt_chem: 'จัดการสารเคมี', wt_height: 'งานที่สูง', wt_heavy: 'เครื่องจักรหนัก', wt_weld: 'เชื่อม/ไฟ', wt_general: 'งานทั่วไป',
+    si_title: 'บันทึกอาการ', si_who: 'อาการของใคร?', si_self: 'ตัวเอง', si_coworker: 'เพื่อนร่วมงาน', si_when: 'เริ่มเมื่อไหร่?', si_when_ph: 'เช่น 10 โมงเช้าวันนี้', si_where: 'ไม่สบายตรงไหน?', si_severity: 'ระดับความเจ็บปวด', si_accom: 'อาการร่วม', si_atwork: 'เกิดขึ้นระหว่างทำงานหรือไม่?', si_yes: 'ใช่', si_no: 'ไม่', si_concern: 'สิ่งที่กังวล (ไม่บังคับ)', si_concern_ph: 'เช่น คิดว่าสูดดมแก๊สเข้าไป', si_photo: 'แนบรูป (ไม่บังคับ) — ผิวหนัง/บาดแผล', si_make: 'สร้างการ์ดสรุป',
+    bp_head: 'ศีรษะ', bp_eye: 'ตา', bp_nose: 'จมูก/คอ', bp_chest: 'หน้าอก', bp_belly: 'ท้อง', bp_back: 'หลัง/เอว', bp_arm: 'แขน', bp_leg: 'ขา', bp_skin: 'ผิวหนัง',
+    ac_fever: 'ไข้', ac_vomit: 'อาเจียน', ac_diarrhea: 'ท้องเสีย', ac_rash: 'ผื่น', ac_dyspnea: 'หายใจลำบาก', ac_dizzy: 'เวียนศีรษะ', ac_chill: 'หนาวสั่น', ac_bleed: 'เลือดออก',
+    ir_sent_t: 'ส่งรายงานแล้ว', ir_sent_m: 'ส่งให้ผู้จัดการ·ผู้ปกครองพร้อมตำแหน่งแล้ว (เดโม)', ir_aid_warn: '※ ความปลอดภัยของผู้ช่วยเหลือสำคัญที่สุด การช่วยเหลือคนเดียวโดยฝืนอาจทำให้เกิดอุบัติเหตุซ้ำ', common_ok: 'ตกลง',
+    lang_select: 'ภาษา', ob_cond_ph: 'เช่น ความดันสูง เบาหวาน', ob_alg_ph: 'เช่น เพนิซิลลิน', ob_meds_ph: 'เช่น ยาความดัน',
   },
   es: {
     tagline_work: 'Cuando te lastimas o enfermas — el primer paso en obra',
@@ -417,5 +447,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     wc_title: 'Chequeo de salud antes del trabajo', wc_today: 'Chequeo de hoy antes del trabajo', wc_work_type: 'Tipo de trabajo', wc_q_sleep: '¿Durmió 6+ horas?', wc_q_alcohol: '¿No bebió anoche?', wc_q_meds: '¿Tomó la medicación necesaria?', wc_q_dizzy: '¿Sin mareo/fatiga severa?', wc_yes: 'Sí', wc_no: 'No',
     wc_warn_t: '⚠️ Trabajo peligroso — revise su estado', wc_warn_m: 'El trabajo en espacio confinado/químico/altura requiere buen estado. Obtenga aprobación del gestor.', wc_note: '※ Herramienta de autochequeo, no diagnóstico. Los resultados se comparten con el gestor según consentimiento.', wc_submit: 'Completar → enviar al gestor',
     wt_confined: 'Espacio confinado', wt_chem: 'Manejo químico', wt_height: 'Trabajo en altura', wt_heavy: 'Maquinaria pesada', wt_weld: 'Soldadura/fuego', wt_general: 'Trabajo general',
+    si_title: 'Nota de síntomas', si_who: '¿Síntomas de quién?', si_self: 'Yo', si_coworker: 'Compañero', si_when: '¿Cuándo empezó?', si_when_ph: 'p. ej. hoy a las 10 a.m.', si_where: '¿Dónde le molesta?', si_severity: 'Nivel de dolor', si_accom: 'Síntomas acompañantes', si_atwork: '¿Apareció durante el trabajo?', si_yes: 'Sí', si_no: 'No', si_concern: 'Preocupaciones (opcional)', si_concern_ph: 'p. ej. creo que inhalé gas', si_photo: 'Añadir foto (opcional) — piel/herida', si_make: 'Crear tarjeta resumen',
+    bp_head: 'Cabeza', bp_eye: 'Ojos', bp_nose: 'Nariz/garganta', bp_chest: 'Pecho', bp_belly: 'Abdomen', bp_back: 'Espalda/cintura', bp_arm: 'Brazo', bp_leg: 'Pierna', bp_skin: 'Piel',
+    ac_fever: 'Fiebre', ac_vomit: 'Vómito', ac_diarrhea: 'Diarrea', ac_rash: 'Erupción', ac_dyspnea: 'Dificultad para respirar', ac_dizzy: 'Mareo', ac_chill: 'Escalofríos', ac_bleed: 'Sangrado',
+    ir_sent_t: 'Informe enviado', ir_sent_m: 'Enviado al gestor/tutor con su ubicación. (demo)', ir_aid_warn: '※ La seguridad del rescatador es lo primero. Un rescate en solitario forzado puede causar accidentes secundarios.', common_ok: 'Aceptar',
+    lang_select: 'Idioma', ob_cond_ph: 'p. ej. hipertensión, diabetes', ob_alg_ph: 'p. ej. penicilina', ob_meds_ph: 'p. ej. medicación para la presión',
   },
 };
