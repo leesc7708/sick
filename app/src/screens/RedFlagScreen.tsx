@@ -9,6 +9,7 @@ import { typography } from '../theme/typography';
 import { RED_FLAGS, evaluateRedFlags } from '../data/redFlags';
 import { RedFlagItem, RedFlagResult, RootStackParamList, UserProfile } from '../types';
 import { storage } from '../services/storage';
+import { useLang } from '../i18n/LanguageContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'RedFlag'>;
 
@@ -22,6 +23,7 @@ const FIRST_STEPS = [
 export function RedFlagScreen({ navigation }: Props) {
   const [sel, setSel] = useState<string[]>([]);
   const [result, setResult] = useState<RedFlagResult | null>(null);
+  const { lang } = useLang();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   useEffect(() => { storage.getProfile().then(setProfile); }, []);
 
@@ -36,7 +38,7 @@ export function RedFlagScreen({ navigation }: Props) {
   const call119 = () => Linking.openURL('tel:119');
   const findER = () => navigation.navigate('HospitalFinder', { kind: 'er' });
   const share = () => {
-    const labels = RED_FLAGS.filter((f) => sel.includes(f.id)).map((f) => f.label).join(', ');
+    const labels = RED_FLAGS.filter((f) => sel.includes(f.id)).map((f) => f.label[lang]).join(', ');
     const cond = (profile?.conditions ?? []).join(', ') || '없음';
     const meds = (profile?.currentMedicines ?? []).join(', ') || '없음';
     const alg = (profile?.allergies ?? []).join(', ') || '없음';
@@ -66,7 +68,7 @@ export function RedFlagScreen({ navigation }: Props) {
         <View style={[styles.box, on && { backgroundColor: colors.emergency, borderColor: colors.emergency }]}>
           {on && <Text style={styles.check}>✓</Text>}
         </View>
-        <Text style={[typography.body, { color: colors.text, flex: 1 }]}>{item.label}</Text>
+        <Text style={[typography.body, { color: colors.text, flex: 1 }]}>{item.label[lang]}</Text>
       </Pressable>
     );
   };
@@ -104,7 +106,7 @@ export function RedFlagScreen({ navigation }: Props) {
                 말로 설명하기 어렵거나 한국어가 통하지 않을 때, 이 화면을 그대로 제시하세요.
               </Text>
               <Info label="📍 위치" value="현재 위치(GPS) 자동 — 데모" />
-              <Info label="🩹 증상" value={RED_FLAGS.filter((f) => sel.includes(f.id)).map((f) => f.label).join(', ') || '선택 없음'} />
+              <Info label="🩹 증상" value={RED_FLAGS.filter((f) => sel.includes(f.id)).map((f) => f.label[lang]).join(', ') || '선택 없음'} />
               <Info label="💊 기저질환" value={(profile?.conditions ?? []).join(', ') || '없음/미입력'} />
               <Info label="💊 복용약" value={(profile?.currentMedicines ?? []).join(', ') || '없음/미입력'} />
               <Info label="⚠️ 알레르기" value={(profile?.allergies ?? []).join(', ') || '없음/미입력'} />

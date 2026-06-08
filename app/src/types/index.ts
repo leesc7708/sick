@@ -1,4 +1,5 @@
 // 라이프라인 타입 — @work 산업현장 안전·응급 + 건강검진기록 (2026-06-08 재정의)
+import { Lang } from '../i18n/translations';
 
 export type AppMode = 'work' | 'general';
 export type Gender = 'male' | 'female' | 'other';
@@ -17,7 +18,7 @@ export interface UserProfile {
 export type RedFlagLevel = 'red' | 'yellow' | 'gray';
 export interface RedFlagItem {
   id: string;
-  label: string;
+  label: Record<Lang, string>;
   group: 'general' | 'work';
   critical: boolean; // true면 선택 시 즉시 red
 }
