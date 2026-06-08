@@ -1,4 +1,4 @@
-// 세이프콜 타입 — @work 산업현장 안전·응급 + 건강검진기록 (2026-06-08 재정의)
+// 라이프라인 타입 — @work 산업현장 안전·응급 + 건강검진기록 (2026-06-08 재정의)
 
 export type AppMode = 'work' | 'general';
 export type Gender = 'male' | 'female' | 'other';

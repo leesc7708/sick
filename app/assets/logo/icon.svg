@@ -1,0 +1,15 @@
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ice" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5EE7FF"/><stop offset="1" stop-color="#9B8BFF"/>
+    </linearGradient>
+    <radialGradient id="bg" cx="0.5" cy="0.42" r="0.75">
+      <stop offset="0" stop-color="#142036"/><stop offset="1" stop-color="#0A0F1A"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <g transform="translate(112,112) scale(8)" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M50 22 C61 41 70 50 70 61 a20 20 0 0 1 -40 0 C30 50 39 41 50 22 Z" stroke="url(#ice)" stroke-width="4.2"/>
+    <polyline points="36,59 45,59 50,49 55,69 60,59 64,59" stroke="#FF3B5C" stroke-width="3.6"/>
+  </g>
+</svg>

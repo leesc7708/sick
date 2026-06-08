@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>라이프라인 로고 시안 v3 (색다른 방향)</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;}
+  body{background:#0C0F1A;color:#E8EDF4;padding:44px 24px 90px;}
+  h1{font-size:28px;font-weight:800;letter-spacing:-.5px;}
+  h1 .ac{color:#C6F24E;}
+  p.sub{color:#8B95A1;margin:10px 0 30px;font-size:14px;line-height:1.6;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:22px;max-width:1120px;margin:0 auto;}
+  .card{background:#151A28;border:1px solid #232B40;border-radius:22px;padding:24px;text-align:center;}
+  .card .name{margin-top:16px;font-weight:700;font-size:14px;color:#E8EDF4;}
+  .card .desc{font-size:11.5px;color:#7A879B;margin-top:5px;line-height:1.5;}
+  .ico{width:124px;height:124px;}
+</style>
+</head>
+<body>
+  <h1>라이프라인 <span class="ac">Lifeline</span> — 로고 시안 v3</h1>
+  <p class="sub">맥박선(흔함)을 버리고 색다른 메타포로. 생명을 잇고·신호를 보내고·끌어올린다.<br>흔하지 않게, 색 조합도 새롭게. 마음에 드는 번호를 알려주세요.</p>
+
+  <svg width="0" height="0" style="position:absolute"><defs>
+    <filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="lime" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D7FF5E"/><stop offset="1" stop-color="#7BD832"/></linearGradient>
+    <linearGradient id="purp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8B7BFF"/><stop offset="1" stop-color="#FF6A85"/></linearGradient>
+    <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2DE2C0"/><stop offset="1" stop-color="#1B9AAA"/></linearGradient>
+    <linearGradient id="amber" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFD24B"/><stop offset="1" stop-color="#FF7A3C"/></linearGradient>
+    <linearGradient id="ice" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5EE7FF"/><stop offset="1" stop-color="#9B8BFF"/></linearGradient>
+  </defs></svg>
+
+  <div class="grid">
+
+    <!-- 1. 비콘 신호 (긴급 발신) -->
+    <div class="card">
+      <svg class="ico" viewBox="0 0 100 100">
+        <rect x="4" y="4" width="92" height="92" rx="26" fill="#0A1A18"/>
+        <g fill="none" stroke="url(#teal)" stroke-width="4.5" stroke-linecap="round" filter="url(#g)">
+          <path d="M62 36 a20 20 0 0 1 0 28"/>
+          <path d="M71 28 a32 32 0 0 1 0 44"/>
+          <path d="M38 36 a20 20 0 0 0 0 28"/>
+        </g>
+        <circle cx="50" cy="50" r="8" fill="url(#teal)" filter="url(#g)"/>
+      </svg>
+      <div class="name">① 비콘 신호</div>
+      <div class="desc">생명 신호를 사방으로 발신. 긴급 호출의 핵</div>
+    </div>
+
+    <!-- 2. 무한 흐름 (생명 지속) -->
+    <div class="card">
+      <svg class="ico" viewBox="0 0 100 100">
+        <rect x="4" y="4" width="92" height="92" rx="26" fill="#140C24"/>
+        <path d="M30 50 C30 36 46 36 50 50 C54 64 70 64 70 50 C70 36 54 36 50 50 C46 64 30 64 30 50 Z" fill="none" stroke="url(#purp)" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <div class="name">② 무한 흐름 (∞)</div>
+      <div class="desc">끊기지 않는 생명선. 퍼플→코랄 듀오톤</div>
+    </div>
+
+    <!-- 3. 상승 구조선 -->
+    <div class="card">
+      <svg class="ico" viewBox="0 0 100 100">
+        <rect x="4" y="4" width="92" height="92" rx="26" fill="#0E1320"/>
+        <polyline points="22,72 38,72 50,40 60,54 74,24" fill="none" stroke="url(#lime)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#g)"/>
+        <circle cx="74" cy="24" r="5" fill="url(#lime)" filter="url(#g)"/>
+      </svg>
+      <div class="name">③ 상승 구조선</div>
+      <div class="desc">바닥에서 끌어올린다. 라임 네온 · 생존</div>
+    </div>
+
+    <!-- 4. 연결 (골든타임) -->
+    <div class="card">
+      <svg class="ico" viewBox="0 0 100 100">
+        <rect x="4" y="4" width="92" height="92" rx="26" fill="#101622"/>
+        <line x1="30" y1="64" x2="70" y2="36" stroke="url(#ice)" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="30" cy="64" r="9" fill="#101622" stroke="#5EE7FF" stroke-width="4.5"/>
+        <circle cx="70" cy="36" r="9" fill="url(#ice)"/>
+        <circle cx="50" cy="50" r="3.5" fill="#fff"/>
+      </svg>
+      <div class="name">④ 연결 (골든타임)</div>
+      <div class="desc">사고 현장 ↔ 구조를 잇는 한 선</div>
+    </div>
+
+    <!-- 5. 로프 매듭 (산업 생명줄) -->
+    <div class="card">
+      <svg class="ico" viewBox="0 0 100 100">
+        <rect x="4" y="4" width="92" height="92" rx="26" fill="#1A1206"/>
+        <g fill="none" stroke="url(#amber)" stroke-width="6" stroke-linecap="round">
+          <path d="M28 38 C50 38 50 62 72 62"/>
+          <path d="M28 62 C50 62 50 38 72 38"/>
+        </g>
+      </svg>
+      <div class="name">⑤ 로프 매듭</div>
+      <div class="desc">산업현장 안전로프=생명줄. 가장 '현장'다움</div>
+    </div>
+
+    <!-- 6. 생명 드롭 + 라인 -->
+    <div class="card">
+      <svg class="ico" viewBox="0 0 100 100">
+        <rect x="4" y="4" width="92" height="92" rx="26" fill="#0B1220"/>
+        <path d="M50 24 C60 42 68 50 68 60 a18 18 0 0 1 -36 0 C32 50 40 42 50 24 Z" fill="none" stroke="url(#ice)" stroke-width="4.5" stroke-linejoin="round"/>
+        <polyline points="38,58 46,58 50,50 54,66 58,58 62,58" fill="none" stroke="#FF3B5C" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="name">⑥ 생명 드롭</div>
+      <div class="desc">방울 안에 박동. 생명·응급 융합</div>
+    </div>
+
+  </div>
+
+  <p class="sub" style="max-width:1120px;margin:30px auto 0">
+    ※ 방향만 고르시면 그 컨셉을 더 정교하게 다듬어 앱 아이콘·워드마크까지 완성합니다. "⑤인데 색을 다르게", "①과 ③ 섞어줘" 같은 요청도 환영합니다.
+  </p>
+</body>
+</html>

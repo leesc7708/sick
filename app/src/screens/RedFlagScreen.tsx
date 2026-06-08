@@ -26,7 +26,7 @@ export function RedFlagScreen({ navigation }: Props) {
   const findER = () => navigation.navigate('HospitalFinder', { kind: 'er' });
   const share = () => {
     const labels = RED_FLAGS.filter((f) => sel.includes(f.id)).map((f) => f.label).join(', ');
-    Share.share({ message: `[세이프콜] 응급 상황 공유\n선택한 증상: ${labels || '없음'}\n위치를 확인하고 도와주세요.` });
+    Share.share({ message: `[라이프라인] 응급 상황 공유\n선택한 증상: ${labels || '없음'}\n위치를 확인하고 도와주세요.` });
   };
 
   const toneColor =

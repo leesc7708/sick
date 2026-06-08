@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "lifeline-safety",
     "public": "dist",
     "ignore": [
       "firebase.json",

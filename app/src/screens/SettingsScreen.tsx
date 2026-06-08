@@ -87,7 +87,7 @@ export function SettingsScreen({ navigation }: Props) {
         <PrimaryButton title="모든 데이터 삭제" variant="outline" onPress={clearAll} style={{ marginTop: spacing.lg }} />
 
         <Text style={[typography.small, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.lg }]}>
-          세이프콜 SafeCall · 데모 빌드{'\n'}의료·약 정보 출처: E-Gen / 심평원 / 식약처
+          라이프라인 Lifeline · 데모 빌드{'\n'}의료·약 정보 출처: E-Gen / 심평원 / 식약처
         </Text>
       </ScrollView>
     </View>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>세이프콜 로고 시안</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;}
+  body{background:#F2F4F6;color:#191F28;padding:40px 24px 80px;}
+  h1{font-size:26px;color:#1B3A5B;}
+  p.sub{color:#6B7684;margin:8px 0 28px;font-size:14px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px;max-width:1100px;}
+  .card{background:#fff;border-radius:20px;padding:24px;text-align:center;box-shadow:0 4px 18px rgba(25,31,40,.06);}
+  .card .name{margin-top:14px;font-weight:700;font-size:14px;color:#191F28;}
+  .card .desc{font-size:11.5px;color:#8B95A1;margin-top:4px;line-height:1.5;}
+  .ico{width:120px;height:120px;}
+  .ico.sm{width:64px;height:64px;}
+  .row{display:flex;align-items:center;justify-content:center;gap:14px;}
+  .wordmark{font-size:26px;font-weight:800;letter-spacing:-.5px;color:#191F28;}
+  .wordmark .en{font-size:14px;font-weight:700;color:#8B95A1;display:block;letter-spacing:1px;}
+  .section{max-width:1100px;margin:40px 0 14px;font-size:16px;font-weight:800;color:#1B3A5B;border-left:4px solid #3182F6;padding-left:10px;}
+  .darkcard{background:#191F28;}
+  .darkcard .name{color:#fff;} .darkcard .desc{color:#8B95A1;}
+</style>
+</head>
+<body>
+  <h1>세이프콜 (SafeCall) 로고 시안</h1>
+  <p class="sub">안전(방패) + 응급·생명(맥박선) + 연결(Call) · 토스/당근풍 둥근 앱아이콘 · 마음에 드는 번호를 알려주세요</p>
+
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#4D9BFF"/><stop offset="1" stop-color="#1B64DA"/>
+      </linearGradient>
+      <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#2C5A8C"/><stop offset="1" stop-color="#16263A"/>
+      </linearGradient>
+      <linearGradient id="redg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#FF5A5F"/><stop offset="1" stop-color="#E0353B"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="section">① 앱 아이콘 시안</div>
+  <div class="grid">
+
+    <!-- 1. 블루 방패 + 맥박 -->
+    <div class="card">
+      <svg class="ico" viewBox="0 0 100 100">
+        <rect x="4" y="4" width="92" height="92" rx="26" fill="url(#blue)"/>
+        <path d="M50 22 L72 30 L72 50 C72 64 62 72 50 77 C38 72 28 64 28 50 L28 30 Z" fill="#fff"/>
+        <polyline points="35,51 43,51 47,42 51,60 55,46 58,51 65,51" fill="none" stroke="#E0353B" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="name">① 블루 실드 + 맥박</div>
+      <div class="desc">신뢰의 블루 + 응급 레드 맥박. 가장 표준적</div>
+    </div>
+
+    <!-- 2. 네이비 방패 + 맥박 -->
+    <div class="card">
+      <svg class="ico" viewBox="0 0 100 100">
+        <rect x="4" y="4" width="92" height="92" rx="26" fill="url(#navy)"/>
+        <path d="M50 22 L72 30 L72 50 C72 64 62 72 50 77 C38 72 28 64 28 50 L28 30 Z" fill="#fff"/>
+        <polyline points="35,51 43,51 47,42 51,60 55,46 58,51 65,51" fill="none" stroke="#E0353B" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="name">② 네이비 실드 + 맥박</div>
+      <div class="desc">묵직한 산업·안전 느낌. 더 진중함</div>
+    </div>
+
+    <!-- 3. 블루 + 통화 + 신호 -->
+    <div class="card">
+      <svg class="ico" viewBox="0 0 100 100">
+        <rect x="4" y="4" width="92" height="92" rx="26" fill="url(#blue)"/>
+        <path d="M40 36 q-4 0 -4 4 q0 22 20 30 q4 1 6 -3 l2 -5 q1 -3 -2 -5 l-5 -3 q-2 -1 -4 1 q-6 -4 -8 -10 q2 -2 1 -4 l-3 -5 q-1 -2 -3 -2 z" fill="#fff"/>
+        <path d="M64 30 a16 16 0 0 1 6 12" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" opacity=".85"/>
+        <path d="M62 38 a8 8 0 0 1 3 6" fill="none" stroke="#FFD24D" stroke-width="3.2" stroke-linecap="round"/>
+      </svg>
+      <div class="name">③ 콜(통화) + 신호</div>
+      <div class="desc">"즉시 연결(Call)" 강조. 긴급호출 직관적</div>
+    </div>
+
+    <!-- 4. 위치핀 + 십자 -->
+    <div class="card">
+      <svg class="ico" viewBox="0 0 100 100">
+        <rect x="4" y="4" width="92" height="92" rx="26" fill="url(#blue)"/>
+        <path d="M50 24 C38 24 30 33 30 45 C30 60 50 78 50 78 C50 78 70 60 70 45 C70 33 62 24 50 24 Z" fill="#fff"/>
+        <path d="M50 36 v18 M41 45 h18" stroke="#E0353B" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <div class="name">④ 위치핀 + 응급 십자</div>
+      <div class="desc">"가까운 병원·응급실 연결" 강조</div>
+    </div>
+
+    <!-- 5. 화이트 라이트버전 -->
+    <div class="card">
+      <svg class="ico" viewBox="0 0 100 100">
+        <rect x="4" y="4" width="92" height="92" rx="26" fill="#fff" stroke="#E5E8EB" stroke-width="2"/>
+        <path d="M50 22 L72 30 L72 50 C72 64 62 72 50 77 C38 72 28 64 28 50 L28 30 Z" fill="url(#blue)"/>
+        <polyline points="35,51 43,51 47,42 51,60 55,46 58,51 65,51" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="name">⑤ 화이트(라이트)</div>
+      <div class="desc">밝은 배경용. 블루 실드 + 흰 맥박</div>
+    </div>
+
+    <!-- 6. 방패+콜+맥박 결합 -->
+    <div class="card">
+      <svg class="ico" viewBox="0 0 100 100">
+        <rect x="4" y="4" width="92" height="92" rx="26" fill="url(#navy)"/>
+        <path d="M50 21 L73 29 L73 50 C73 65 62 73 50 78 C38 73 27 65 27 50 L27 29 Z" fill="#fff"/>
+        <polyline points="34,52 41,52 45,43 49,61 53,47 56,52 66,52" fill="none" stroke="#1B64DA" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="66" cy="52" r="3.6" fill="#E0353B"/>
+      </svg>
+      <div class="name">⑥ 네이비 + 블루맥박 + 레드점</div>
+      <div class="desc">맥박 끝에 응급 포인트. 디테일</div>
+    </div>
+
+  </div>
+
+  <div class="section">② 가로 로고(워드마크) — 시안 ①① 기준</div>
+  <div class="grid">
+    <div class="card" style="grid-column:span 2">
+      <div class="row">
+        <svg class="ico sm" viewBox="0 0 100 100">
+          <rect x="4" y="4" width="92" height="92" rx="26" fill="url(#blue)"/>
+          <path d="M50 22 L72 30 L72 50 C72 64 62 72 50 77 C38 72 28 64 28 50 L28 30 Z" fill="#fff"/>
+          <polyline points="35,51 43,51 47,42 51,60 55,46 58,51 65,51" fill="none" stroke="#E0353B" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div style="text-align:left">
+          <span class="wordmark">세이프콜</span>
+          <span class="wordmark en">SAFECALL</span>
+        </div>
+      </div>
+      <div class="name" style="margin-top:18px">가로형 — 앱 상단·문서·명함용</div>
+    </div>
+    <div class="card darkcard" style="grid-column:span 2">
+      <div class="row">
+        <svg class="ico sm" viewBox="0 0 100 100">
+          <rect x="4" y="4" width="92" height="92" rx="26" fill="#fff"/>
+          <path d="M50 22 L72 30 L72 50 C72 64 62 72 50 77 C38 72 28 64 28 50 L28 30 Z" fill="url(#blue)"/>
+          <polyline points="35,51 43,51 47,42 51,60 55,46 58,51 65,51" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div style="text-align:left">
+          <span class="wordmark" style="color:#fff">세이프콜</span>
+          <span class="wordmark en">SAFECALL</span>
+        </div>
+      </div>
+      <div class="name" style="margin-top:18px">다크 배경용</div>
+    </div>
+  </div>
+
+</body>
+</html>

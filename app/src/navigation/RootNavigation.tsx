@@ -30,7 +30,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // 웹에서 브라우저 주소/히스토리(마우스 뒤로가기) 연동
 const linking = {
-  prefixes: ['safecall://', 'https://wheresick-5617a.web.app'],
+  prefixes: ['lifeline://', 'https://lifeline-safety.web.app'],
   config: {
     screens: {
       Onboarding: 'onboarding',

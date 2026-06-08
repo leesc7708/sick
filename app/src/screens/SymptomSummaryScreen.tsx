@@ -41,7 +41,7 @@ export function SymptomSummaryScreen({ navigation, route }: Props) {
 
   const share = () => {
     const text = rows.map(([k, v]) => `• ${k}: ${v}`).join('\n');
-    Share.share({ message: `[세이프콜] 진료 요약\n${text}\n\n※ 진단이 아닌 정리 자료입니다.` });
+    Share.share({ message: `[라이프라인] 진료 요약\n${text}\n\n※ 진단이 아닌 정리 자료입니다.` });
   };
 
   const savePdf = async () => {
@@ -50,7 +50,7 @@ export function SymptomSummaryScreen({ navigation, route }: Props) {
       ? `<h3 style="margin-top:18px">요약</h3><p>${ai.summary}</p><h3>병원에서 물어볼 질문</h3>${ai.questions.map((q) => `<p>- ${q}</p>`).join('')}`
       : '';
     const html = `<html><head><meta charset="utf-8"/></head><body style="font-family:-apple-system,sans-serif;padding:28px;color:#191F28">
-      <h2 style="color:#3182F6">세이프콜 진료 요약</h2>${body}${aiHtml}
+      <h2 style="color:#3182F6">라이프라인 진료 요약</h2>${body}${aiHtml}
       <p style="color:#888;font-size:12px;margin-top:20px">※ 진단이 아닌 정리 자료입니다. 정확한 진단은 의료기관에서 받으세요.</p></body></html>`;
     const { uri } = await Print.printToFileAsync({ html });
     if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: '진료 요약 PDF' });

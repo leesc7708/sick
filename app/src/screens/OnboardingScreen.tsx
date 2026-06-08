@@ -50,7 +50,7 @@ export function OnboardingScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.body}>
-        <Text style={[typography.display, { color: colors.text }]}>세이프콜</Text>
+        <Text style={[typography.display, { color: colors.text }]}>라이프라인</Text>
         <Text style={[typography.body, { color: colors.textSecondary, marginTop: spacing.xs }]}>
           아플 때·다쳤을 때, 현장에서 가장 먼저
         </Text>

@@ -35,7 +35,7 @@ export function HomeScreen({ navigation }: Props) {
         <View style={styles.header}>
           <View>
             <Text style={[typography.h1, { color: colors.text }]}>
-              세이프콜 {isWork && <Text style={{ color: colors.work }}>@work</Text>}
+              라이프라인 {isWork && <Text style={{ color: colors.work }}>@work</Text>}
             </Text>
             <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 2 }]}>
               {isWork ? '아플 때·다쳤을 때, 현장에서 가장 먼저' : '증상 정리부터 병원 연결까지'}

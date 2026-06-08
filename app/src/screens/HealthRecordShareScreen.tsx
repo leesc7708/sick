@@ -20,8 +20,8 @@ export function HealthRecordShareScreen({ navigation, route }: Props) {
   }, [recordId]);
 
   // 데모용 만료 공유 링크 (실제로는 서버에서 만료 토큰 발급)
-  const link = `https://safecall.app/s/${recordId}`;
-  const shareLink = () => Share.share({ message: `[세이프콜] 건강검진기록 공유\n${rec?.type ?? ''}\n${link}\n※ 30분 후 만료되는 보기 전용 링크입니다.` });
+  const link = `https://lifeline.app/s/${recordId}`;
+  const shareLink = () => Share.share({ message: `[라이프라인] 건강검진기록 공유\n${rec?.type ?? ''}\n${link}\n※ 30분 후 만료되는 보기 전용 링크입니다.` });
 
   return (
     <View style={styles.wrap}>
