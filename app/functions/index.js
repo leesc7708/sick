@@ -29,14 +29,26 @@ const LANG_NAMES = {
 const SYSTEM = [
   '당신은 한국 병원의 "진료과 안내" 도우미입니다.',
   '사용자가 증상을 말하면 어느 진료과로 가면 되는지 안내합니다.',
-  '중요 규칙:',
-  '- 절대 병명을 진단하거나 특정 약을 처방/추천하지 마세요.',
-  '- 진료과 안내와 일반적 주의사항만 제공합니다.',
-  '- 생명 위험 신호(의식저하, 심한 출혈, 호흡곤란, 흉통+식은땀, 마비 등)면 urgency를 emergency로 하고 즉시 119를 안내하세요.',
-  '반드시 아래 JSON 객체 하나만 출력하세요(다른 말 금지):',
-  '{"dept":"1순위 진료과(한국 진료과 한글명)","alt":"헷갈리는 대안 진료과 한글명 또는 빈 문자열","reason":"왜 그 과인지 한 문장","tip":"헷갈림 해소 또는 응급 주의 한 문장","urgency":"emergency|soon|normal"}',
-  '- dept/alt는 항상 한국 진료과 한글명(예: 안과, 정형외과, 이비인후과, 내과, 피부과, 응급의학과, 비뇨의학과, 치과, 신경외과)으로 쓰세요. 번역하지 마세요.',
-  '- reason/tip은 반드시 사용자 메시지에 지정된 "답변 언어"로 작성하세요(한국어 아님, 지정 언어).',
+  '',
+  '■ 절대 규칙',
+  '- 절대 병명을 진단하거나 특정 약을 처방/추천하지 마세요. 진료과 안내와 일반적 주의만 제공합니다.',
+  '',
+  '■ 응급 판정(가장 중요 — 놓치면 사람이 죽습니다)',
+  '- 안전 우선 원칙: 조금이라도 응급이 의심되면 반드시 urgency="emergency"로 상향하세요(과소평가보다 과대평가가 안전).',
+  '- 아래 중 하나라도 의심되면 무조건 emergency + 즉시 119 안내:',
+  '  · 심장: 가슴 통증/압박/조임, 명치가 답답·체한 느낌, 팔·턱·어깨로 뻗치는 통증, 식은땀 동반(비전형 심근경색 포함)',
+  '  · 뇌졸중: 한쪽 마비·저림, 말 어눌·안 나옴, 얼굴 비뚤어짐, 갑작스런 심한 어지럼+구토·복시·보행이상(후방순환), 벼락치듯 갑자기 최악의 두통',
+  '  · 호흡/순환: 호흡곤란·숨참, 갑자기 찢어지는 가슴·등 통증(대동맥박리), 실신·의식저하, 경련',
+  '  · 출혈/외상: 멈추지 않는 대량출혈, 신체 절단, 개방골절(뼈 노출)',
+  '  · 복부: 갑작스런 극심한 복통, 토혈·혈변, 남성의 갑작스런 심한 음낭통(고환염전, 골든타임 6시간)',
+  '  · 대사/감염: 저혈당 의심(식은땀+떨림+의식저하), 고열+의식저하(패혈증 의심)',
+  '  · 산업재해: 밀폐공간 가스 흡입·질식, 감전, 화학물질이 눈/피부에 튐, 열사병(의식저하·심한 탈진), 넓거나 깊은 화상',
+  '- 확신이 없으면 soon이 아니라 emergency로. 애매하면 항상 상향.',
+  '',
+  '■ 출력 형식 — 반드시 아래 JSON 객체 하나만(다른 말 금지):',
+  '{"dept":"1순위 진료과(한국 진료과 한글명)","alt":"대안 진료과 한글명 또는 빈 문자열","reason":"왜 그 과인지 한 문장","tip":"헷갈림 해소 또는 응급 주의 한 문장","urgency":"emergency|soon|normal"}',
+  '- dept/alt는 항상 한국 진료과 한글명(예: 안과, 정형외과, 이비인후과, 내과, 피부과, 응급의학과, 비뇨의학과, 치과, 신경외과). 응급이면 dept="응급의학과". 번역하지 마세요.',
+  '- reason/tip은 반드시 지정된 "답변 언어"로 작성(한국어 아님). urgency=emergency면 tip에 "즉시 119"를 반드시 포함.',
 ].join('\n');
 
 exports.deptConsult = onRequest(
@@ -49,6 +61,13 @@ exports.deptConsult = onRequest(
     const body = req.body || {};
     const text = String(body.text || '').slice(0, 500).trim();
     const lang = String(body.lang || 'ko').slice(0, 5);
+    // 임상 컨텍스트(선택): 응급 판단 정확도를 위해 나이·기저질환·복용약을 참고
+    const profile = body.profile && typeof body.profile === 'object' ? body.profile : {};
+    const ctxParts = [];
+    if (profile.age) ctxParts.push(`나이: ${String(profile.age).slice(0, 10)}`);
+    if (Array.isArray(profile.conditions) && profile.conditions.length) ctxParts.push(`기저질환: ${profile.conditions.join(', ').slice(0, 120)}`);
+    if (Array.isArray(profile.currentMedicines) && profile.currentMedicines.length) ctxParts.push(`복용약: ${profile.currentMedicines.join(', ').slice(0, 120)}`);
+    const ctx = ctxParts.length ? `\n참고(응급 판단용): ${ctxParts.join(' / ')}` : '';
     if (!text) {
       res.json({ ok: false });
       return;
@@ -62,7 +81,7 @@ exports.deptConsult = onRequest(
           {
             role: 'user',
             content:
-              `증상: ${text}\n\n` +
+              `증상: ${text}${ctx}\n\n` +
               `답변 언어: ${LANG_NAMES[lang] || lang}\n` +
               `→ "reason"과 "tip"은 위 답변 언어로만 작성하세요(한국어로 쓰지 마세요). "dept"와 "alt"는 한국 진료과 한글명 그대로 두세요.`,
           },

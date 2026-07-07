@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Linking, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
@@ -10,6 +10,7 @@ import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { DEPT_GUIDES } from '../data/departmentGuide';
 import { consultAI, ConsultResult } from '../services/deptConsult';
+import { storage } from '../services/storage';
 import { RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
 
@@ -37,7 +38,11 @@ export function DeptConsultScreen({ navigation }: Props) {
   const run = async () => {
     setLoading(true);
     try {
-      setResults(await consultAI(text, picked, lang));
+      const p = await storage.getProfile();
+      const profile = p
+        ? { age: p.age, conditions: p.conditions, currentMedicines: p.currentMedicines }
+        : undefined;
+      setResults(await consultAI(text, picked, lang, profile));
     } finally {
       setLoading(false);
     }
@@ -87,6 +92,11 @@ export function DeptConsultScreen({ navigation }: Props) {
 
         {results && results.length > 0 && (
           <>
+            {results.some((r) => r.guide.urgency === 'emergency') && (
+              <View style={{ marginTop: spacing.lg }}>
+                <PrimaryButton title={t('ef_call119')} icon="📞" variant="emergency" size="lg" onPress={() => Linking.openURL('tel:119')} />
+              </View>
+            )}
             <Text style={[styles.label, { marginTop: spacing.xl }]}>{t('dc_result_label')}</Text>
             {results.map(({ guide }, idx) => {
               const u = URGENCY_STYLE[guide.urgency];
