@@ -126,4 +126,57 @@ export const PHRASES: Phrase[] = [
   { id: 'a3', group: 'basic', ko: '천천히 말해 주세요.', text: { ko: '천천히 말해 주세요.', en: 'Please speak slowly.', zh: '请说慢一点。', ja: 'ゆっくり話してください。', vi: 'Làm ơn nói chậm lại.', th: 'ช่วยพูดช้าๆ หน่อย', es: 'Por favor, hable despacio.' } },
   { id: 'a4', group: 'basic', ko: '한국어를 잘 못해요.', text: { ko: '한국어를 잘 못해요.', en: 'I cannot speak Korean well.', zh: '我韩语说得不好。', ja: '韓国語がうまく話せません。', vi: 'Tôi không nói tốt tiếng Hàn.', th: 'ฉันพูดภาษาเกาหลีไม่เก่ง', es: 'No hablo bien el coreano.' } },
   { id: 'a5', group: 'basic', ko: '도와주세요.', text: { ko: '도와주세요.', en: 'Please help me.', zh: '请帮帮我。', ja: '助けてください。', vi: 'Làm ơn giúp tôi.', th: 'ช่วยฉันด้วย', es: 'Por favor, ayúdeme.' } },
+
+  // ── 확장 배치 (부위×양상 심화 + 응급·산재·과거력) ──
+  { id: 'e8', group: 'emergency', ko: '온몸이 붓고 숨쉬기가 힘들어요.', text: { ko: '온몸이 붓고 숨쉬기가 힘들어요.', en: 'My whole body is swelling and I cannot breathe well.', zh: '我全身肿胀，呼吸困难。', ja: '全身が腫れて、息がしにくいです。', vi: 'Toàn thân tôi sưng lên và khó thở.', th: 'ตัวบวมทั้งตัวและหายใจลำบาก', es: 'Se me hincha todo el cuerpo y no puedo respirar bien.' } },
+  { id: 'e9', group: 'emergency', ko: '사람이 쓰러졌어요.', text: { ko: '사람이 쓰러졌어요.', en: 'Someone has collapsed.', zh: '有人晕倒了。', ja: '人が倒れました。', vi: 'Có người bị ngất.', th: 'มีคนล้มหมดสติ', es: 'Alguien se ha desplomado.' } },
+  { id: 'w8', group: 'work', ko: '무거운 물건에 깔렸어요.', text: { ko: '무거운 물건에 깔렸어요.', en: 'I am pinned under something heavy.', zh: '我被重物压住了。', ja: '重い物の下敷きになりました。', vi: 'Tôi bị vật nặng đè lên.', th: 'ฉันถูกของหนักทับ', es: 'Estoy atrapado bajo algo pesado.' } },
+  { id: 'w9', group: 'work', ko: '손가락이 잘렸어요.', text: { ko: '손가락이 잘렸어요.', en: 'My finger was cut off.', zh: '我的手指被切断了。', ja: '指が切断されました。', vi: 'Ngón tay tôi bị đứt lìa.', th: 'นิ้วฉันขาด', es: 'Se me cortó un dedo.' } },
+  { id: 'w10', group: 'work', ko: '날카로운 것에 찔렸어요.', text: { ko: '날카로운 것에 찔렸어요.', en: 'I got stabbed by something sharp.', zh: '我被尖锐物刺伤了。', ja: '鋭い物が刺さりました。', vi: 'Tôi bị vật sắc nhọn đâm.', th: 'ฉันถูกของมีคมทิ่ม', es: 'Me pinché con algo afilado.' } },
+  { id: 'h4', group: 'head', ko: '뒷목이 뻣뻣하고 아파요.', text: { ko: '뒷목이 뻣뻣하고 아파요.', en: 'The back of my neck is stiff and painful.', zh: '我后脖子僵硬又疼。', ja: '首の後ろがこわばって痛いです。', vi: 'Gáy của tôi bị cứng và đau.', th: 'ต้นคอฉันแข็งและปวด', es: 'Tengo la nuca rígida y me duele.' } },
+  { id: 'h5', group: 'head', ko: '갑자기 심한 두통이 왔어요.', text: { ko: '갑자기 심한 두통이 왔어요.', en: 'I suddenly got a severe headache.', zh: '我突然剧烈头痛。', ja: '突然ひどい頭痛がしました。', vi: 'Tôi đột nhiên đau đầu dữ dội.', th: 'จู่ๆ ฉันปวดหัวรุนแรง', es: 'De repente me dio un dolor de cabeza muy fuerte.' } },
+  { id: 'y4', group: 'eye', ko: '눈이 잘 안 보여요.', text: { ko: '눈이 잘 안 보여요.', en: 'I cannot see well.', zh: '我看不清楚。', ja: 'よく見えません。', vi: 'Tôi nhìn không rõ.', th: 'ฉันมองไม่ค่อยเห็น', es: 'No veo bien.' } },
+  { id: 'y5', group: 'eye', ko: '눈이 빨갛게 충혈됐어요.', text: { ko: '눈이 빨갛게 충혈됐어요.', en: 'My eye is red and bloodshot.', zh: '我的眼睛红了、充血了。', ja: '目が赤く充血しています。', vi: 'Mắt tôi bị đỏ và sung huyết.', th: 'ตาฉันแดงก่ำ', es: 'Tengo el ojo rojo e irritado.' } },
+  { id: 'c4', group: 'chest', ko: '심장이 빨리 뛰어요.', text: { ko: '심장이 빨리 뛰어요.', en: 'My heart is beating fast.', zh: '我心跳很快。', ja: '心臓がドキドキします。', vi: 'Tim tôi đập nhanh.', th: 'หัวใจฉันเต้นเร็ว', es: 'El corazón me late muy rápido.' } },
+  { id: 'b5', group: 'belly', ko: '오른쪽 아랫배가 아파요.', text: { ko: '오른쪽 아랫배가 아파요.', en: 'My lower right belly hurts.', zh: '我右下腹疼。', ja: '右下腹が痛いです。', vi: 'Bụng dưới bên phải của tôi đau.', th: 'ท้องน้อยด้านขวาปวด', es: 'Me duele la parte inferior derecha del abdomen.' } },
+  { id: 'b6', group: 'belly', ko: '토했어요.', text: { ko: '토했어요.', en: 'I vomited.', zh: '我吐了。', ja: '吐きました。', vi: 'Tôi đã bị nôn.', th: 'ฉันอาเจียนแล้ว', es: 'Vomité.' } },
+  { id: 'k3', group: 'back', ko: '허리부터 다리까지 저려요.', text: { ko: '허리부터 다리까지 저려요.', en: 'Numbness runs from my lower back down my leg.', zh: '我从腰到腿都发麻。', ja: '腰から足までしびれます。', vi: 'Tôi bị tê từ thắt lưng xuống chân.', th: 'ชาตั้งแต่หลังลงไปถึงขา', es: 'Siento entumecimiento desde la espalda baja hasta la pierna.' } },
+  { id: 'n4', group: 'hand', ko: '손가락이 안 움직여요.', text: { ko: '손가락이 안 움직여요.', en: 'My fingers will not move.', zh: '我的手指动不了。', ja: '指が動きません。', vi: 'Ngón tay tôi không cử động được.', th: 'นิ้วฉันขยับไม่ได้', es: 'No puedo mover los dedos.' } },
+  { id: 'n5', group: 'hand', ko: '어깨가 아파서 팔을 못 들겠어요.', text: { ko: '어깨가 아파서 팔을 못 들겠어요.', en: 'My shoulder hurts and I cannot raise my arm.', zh: '我肩膀疼，抬不起胳膊。', ja: '肩が痛くて腕を上げられません。', vi: 'Vai tôi đau, không giơ tay lên được.', th: 'ไหล่ปวดจนยกแขนไม่ขึ้น', es: 'Me duele el hombro y no puedo levantar el brazo.' } },
+  { id: 'l4', group: 'leg', ko: '무릎이 붓고 아파요.', text: { ko: '무릎이 붓고 아파요.', en: 'My knee is swollen and painful.', zh: '我的膝盖肿了、疼。', ja: '膝が腫れて痛いです。', vi: 'Đầu gối tôi sưng và đau.', th: 'เข่าฉันบวมและปวด', es: 'Tengo la rodilla hinchada y me duele.' } },
+  { id: 'l5', group: 'leg', ko: '다리에 쥐가 났어요.', text: { ko: '다리에 쥐가 났어요.', en: 'I have a cramp in my leg.', zh: '我腿抽筋了。', ja: '足がつりました。', vi: 'Chân tôi bị chuột rút.', th: 'ขาฉันเป็นตะคริว', es: 'Tengo un calambre en la pierna.' } },
+  { id: 's3', group: 'skin', ko: '상처가 곪았어요.', text: { ko: '상처가 곪았어요.', en: 'My wound is festering.', zh: '我的伤口化脓了。', ja: '傷が化膿しました。', vi: 'Vết thương của tôi bị mưng mủ.', th: 'แผลฉันเป็นหนอง', es: 'La herida se me ha infectado.' } },
+  { id: 's4', group: 'skin', ko: '벌레에 물렸어요.', text: { ko: '벌레에 물렸어요.', en: 'I got bitten by an insect.', zh: '我被虫子咬了。', ja: '虫に刺されました。', vi: 'Tôi bị côn trùng cắn.', th: 'ฉันโดนแมลงกัด', es: 'Me picó un insecto.' } },
+  { id: 'g4', group: 'body', ko: '오한이 들고 추워요.', text: { ko: '오한이 들고 추워요.', en: 'I have chills and feel cold.', zh: '我发冷、打寒战。', ja: '寒気がして震えます。', vi: 'Tôi bị ớn lạnh và thấy lạnh.', th: 'ฉันหนาวสั่น', es: 'Tengo escalofríos y frío.' } },
+  { id: 'g5', group: 'body', ko: '기운이 하나도 없어요.', text: { ko: '기운이 하나도 없어요.', en: 'I have no energy at all.', zh: '我一点力气都没有。', ja: '全く力が出ません。', vi: 'Tôi hoàn toàn không có sức.', th: 'ฉันไม่มีแรงเลย', es: 'No tengo nada de energía.' } },
+  { id: 'd5', group: 'history', ko: '저는 심장병이 있어요.', text: { ko: '저는 심장병이 있어요.', en: 'I have heart disease.', zh: '我有心脏病。', ja: '私は心臓病があります。', vi: 'Tôi bị bệnh tim.', th: 'ฉันเป็นโรคหัวใจ', es: 'Tengo una enfermedad del corazón.' } },
+  { id: 'd6', group: 'history', ko: '저는 천식이 있어요.', text: { ko: '저는 천식이 있어요.', en: 'I have asthma.', zh: '我有哮喘。', ja: '私は喘息があります。', vi: 'Tôi bị hen suyễn.', th: 'ฉันเป็นโรคหอบหืด', es: 'Tengo asma.' } },
+  { id: 'd7', group: 'history', ko: '저는 임신 중이에요.', text: { ko: '저는 임신 중이에요.', en: 'I am pregnant.', zh: '我怀孕了。', ja: '私は妊娠しています。', vi: 'Tôi đang mang thai.', th: 'ฉันกำลังตั้งครรภ์', es: 'Estoy embarazada.' } },
+  { id: 'r4', group: 'request', ko: '회사(사장님)에 연락해 주세요.', text: { ko: '회사(사장님)에 연락해 주세요.', en: 'Please contact my company (boss).', zh: '请联系我的公司（老板）。', ja: '会社（社長）に連絡してください。', vi: 'Làm ơn liên hệ công ty (chủ) của tôi.', th: 'ช่วยติดต่อบริษัท (เจ้านาย) ของฉัน', es: 'Por favor, contacte a mi empresa (jefe).' } },
+  { id: 'r5', group: 'request', ko: '가까운 응급실이 어디예요?', text: { ko: '가까운 응급실이 어디예요?', en: 'Where is the nearest emergency room?', zh: '最近的急诊室在哪里？', ja: '近い救急室はどこですか？', vi: 'Phòng cấp cứu gần nhất ở đâu?', th: 'ห้องฉุกเฉินที่ใกล้ที่สุดอยู่ที่ไหน?', es: '¿Dónde está la sala de urgencias más cercana?' } },
+  { id: 'a6', group: 'basic', ko: '많이 아파요.', text: { ko: '많이 아파요.', en: 'It hurts a lot.', zh: '非常疼。', ja: 'とても痛いです。', vi: 'Tôi rất đau.', th: 'เจ็บมาก', es: 'Me duele mucho.' } },
+  { id: 'a7', group: 'basic', ko: '어제부터 아팠어요.', text: { ko: '어제부터 아팠어요.', en: 'It has hurt since yesterday.', zh: '从昨天开始就疼。', ja: '昨日から痛いです。', vi: 'Tôi đau từ hôm qua.', th: 'ปวดตั้งแต่เมื่อวาน', es: 'Me duele desde ayer.' } },
+  { id: 'a8', group: 'basic', ko: '갑자기 아프기 시작했어요.', text: { ko: '갑자기 아프기 시작했어요.', en: 'It started hurting suddenly.', zh: '突然开始疼了。', ja: '急に痛くなりました。', vi: 'Nó bắt đầu đau đột ngột.', th: 'จู่ๆ ก็เริ่มปวด', es: 'Empezó a doler de repente.' } },
+];
+
+// ── 역방향(의료진·관리자 → 환자): 한국어 질문을 고르면 환자 언어 음성/자막 ──
+export interface StaffQuestion {
+  id: string;
+  ko: string;               // 의료진이 보고 고르는 한국어
+  text: Record<Lang, string>; // 환자 언어로 출력(음성+자막)
+}
+
+export const STAFF_QUESTIONS: StaffQuestion[] = [
+  { id: 'q1', ko: '어디가 아파요?', text: { ko: '어디가 아파요?', en: 'Where does it hurt?', zh: '哪里疼？', ja: 'どこが痛いですか？', vi: 'Bạn đau ở đâu?', th: 'เจ็บตรงไหน?', es: '¿Dónde le duele?' } },
+  { id: 'q2', ko: '언제부터 아팠어요?', text: { ko: '언제부터 아팠어요?', en: 'When did the pain start?', zh: '什么时候开始疼的？', ja: 'いつから痛いですか？', vi: 'Bạn đau từ khi nào?', th: 'เริ่มเจ็บตั้งแต่เมื่อไหร่?', es: '¿Desde cuándo le duele?' } },
+  { id: 'q3', ko: '다친 거예요, 아니면 그냥 아픈 거예요?', text: { ko: '다친 거예요, 아니면 그냥 아픈 거예요?', en: 'Were you injured, or did it just start hurting?', zh: '是受伤了，还是自己疼起来的？', ja: 'けがですか、それとも自然に痛くなりましたか？', vi: 'Bạn bị thương hay tự nhiên đau?', th: 'บาดเจ็บ หรือว่าปวดขึ้นมาเอง?', es: '¿Se lastimó o simplemente empezó a dolerle?' } },
+  { id: 'q4', ko: '많이 아파요, 조금 아파요?', text: { ko: '많이 아파요, 조금 아파요?', en: 'Does it hurt a lot or a little?', zh: '很疼还是有点疼？', ja: 'とても痛いですか、少しですか？', vi: 'Đau nhiều hay đau ít?', th: 'เจ็บมากหรือเจ็บนิดหน่อย?', es: '¿Le duele mucho o poco?' } },
+  { id: 'q5', ko: '약 알레르기가 있어요?', text: { ko: '약 알레르기가 있어요?', en: 'Do you have any medication allergies?', zh: '您对药物过敏吗？', ja: '薬のアレルギーはありますか？', vi: 'Bạn có bị dị ứng thuốc không?', th: 'คุณแพ้ยาไหม?', es: '¿Tiene alergia a algún medicamento?' } },
+  { id: 'q6', ko: '지금 먹는 약이 있어요?', text: { ko: '지금 먹는 약이 있어요?', en: 'Are you taking any medication now?', zh: '您现在在吃什么药吗？', ja: '今飲んでいる薬はありますか？', vi: 'Bạn có đang uống thuốc gì không?', th: 'ตอนนี้กินยาอะไรอยู่ไหม?', es: '¿Está tomando algún medicamento?' } },
+  { id: 'q7', ko: '지병이 있어요? (당뇨, 고혈압 등)', text: { ko: '지병이 있어요? (당뇨, 고혈압 등)', en: 'Do you have any chronic illness? (diabetes, high blood pressure, etc.)', zh: '您有慢性病吗？（糖尿病、高血压等）', ja: '持病はありますか？（糖尿病・高血圧など）', vi: 'Bạn có bệnh mãn tính không? (tiểu đường, cao huyết áp...)', th: 'มีโรคประจำตัวไหม? (เบาหวาน ความดัน ฯลฯ)', es: '¿Tiene alguna enfermedad crónica? (diabetes, hipertensión, etc.)' } },
+  { id: 'q8', ko: '임신했어요?', text: { ko: '임신했어요?', en: 'Are you pregnant?', zh: '您怀孕了吗？', ja: '妊娠していますか？', vi: 'Bạn có đang mang thai không?', th: 'คุณตั้งครรภ์ไหม?', es: '¿Está embarazada?' } },
+  { id: 'q9', ko: '여기가 아파요? (누르면서)', text: { ko: '여기가 아파요? (누르면서)', en: 'Does it hurt here? (while pressing)', zh: '这里疼吗？（按压时）', ja: 'ここが痛いですか？（押しながら）', vi: 'Chỗ này có đau không? (khi ấn vào)', th: 'ตรงนี้เจ็บไหม? (ขณะกด)', es: '¿Le duele aquí? (al presionar)' } },
+  { id: 'q10', ko: '숨쉬기 힘들어요?', text: { ko: '숨쉬기 힘들어요?', en: 'Do you have trouble breathing?', zh: '呼吸困难吗？', ja: '息がしにくいですか？', vi: 'Bạn có khó thở không?', th: 'หายใจลำบากไหม?', es: '¿Tiene dificultad para respirar?' } },
+  { id: 'q11', ko: '어지러워요?', text: { ko: '어지러워요?', en: 'Do you feel dizzy?', zh: '头晕吗？', ja: 'めまいがしますか？', vi: 'Bạn có bị chóng mặt không?', th: 'เวียนหัวไหม?', es: '¿Se siente mareado?' } },
+  { id: 'q12', ko: '곧 의사가 올 거예요. 잠시만 기다리세요.', text: { ko: '곧 의사가 올 거예요. 잠시만 기다리세요.', en: 'The doctor will come soon. Please wait a moment.', zh: '医生马上来，请稍等。', ja: 'まもなく医師が来ます。少しお待ちください。', vi: 'Bác sĩ sẽ đến ngay. Xin chờ một lát.', th: 'เดี๋ยวหมอจะมา รอสักครู่นะ', es: 'El médico vendrá pronto. Espere un momento, por favor.' } },
 ];

@@ -8,38 +8,50 @@ import { Platform } from 'react-native';
 //  - ⚠️ 폰에 한국어 음성이 없으면 어색할 수 있음 → 재생과 함께 항상 "큰 한국어 자막"을 병행 표시한다(화면이 최종 안전망).
 // ─────────────────────────────────────────────────────────────
 
-let koVoice: any = null;
+// BCP-47 로케일 매핑 (SpeechSynthesis 음성 선택용)
+const LOCALE: Record<string, string> = {
+  ko: 'ko-KR', en: 'en-US', zh: 'zh-CN', ja: 'ja-JP', vi: 'vi-VN', th: 'th-TH', es: 'es-ES',
+};
 
-function pickKoVoice(synth: any) {
-  if (koVoice) return koVoice;
+const voiceCache: Record<string, any> = {};
+function pickVoice(synth: any, lang: string) {
+  if (voiceCache[lang]) return voiceCache[lang];
+  const locale = LOCALE[lang] || lang;
+  const short = (LOCALE[lang] || lang).split('-')[0].toLowerCase();
   const voices = synth.getVoices ? synth.getVoices() : [];
-  koVoice =
-    voices.find((v: any) => v.lang === 'ko-KR') ||
-    voices.find((v: any) => (v.lang || '').toLowerCase().startsWith('ko')) ||
+  const v =
+    voices.find((x: any) => x.lang === locale) ||
+    voices.find((x: any) => (x.lang || '').toLowerCase().startsWith(short)) ||
     null;
-  return koVoice;
+  if (v) voiceCache[lang] = v;
+  return v;
 }
 
 export type SpeakResult = 'ok' | 'no-voice' | 'unsupported';
 
-/** 한국어 문장을 소리내어 읽는다. 재생 가능 여부를 반환(자막 폴백 판단용). */
-export function speakKorean(ko: string): SpeakResult {
+/** 지정 언어로 문장을 소리내어 읽는다. 재생 가능 여부 반환(자막 폴백 판단용). */
+export function speak(text: string, lang = 'ko'): SpeakResult {
   if (Platform.OS !== 'web' || typeof window === 'undefined' || !(window as any).speechSynthesis) {
     return 'unsupported';
   }
   const synth = (window as any).speechSynthesis;
   try {
     synth.cancel(); // 연타 시 이전 음성 중단 후 재생(겹침 방지)
-    const u = new (window as any).SpeechSynthesisUtterance(ko);
-    u.lang = 'ko-KR';
+    const u = new (window as any).SpeechSynthesisUtterance(text);
+    u.lang = LOCALE[lang] || lang;
     u.rate = 0.92; // 응급 상황 또박또박
-    const v = pickKoVoice(synth);
+    const v = pickVoice(synth, lang);
     if (v) u.voice = v;
     synth.speak(u);
-    return v ? 'ok' : 'no-voice'; // 한국어 음성 미탑재면 자막 강조 필요
+    return v ? 'ok' : 'no-voice'; // 해당 언어 음성 미탑재면 자막 강조 필요
   } catch {
     return 'unsupported';
   }
+}
+
+/** 한국어 전용 래퍼(기존 호출부 호환) */
+export function speakKorean(ko: string): SpeakResult {
+  return speak(ko, 'ko');
 }
 
 export function stopSpeaking() {
