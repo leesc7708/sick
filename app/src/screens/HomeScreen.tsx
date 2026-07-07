@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { Linking, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert as RNAlert, Linking, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -10,18 +10,28 @@ import { Tag } from '../components/Tag';
 import { Chip } from '../components/Chip';
 import { LogoMark } from '../components/LogoMark';
 import { LangSwitcher } from '../components/LangSwitcher';
-import { colors, spacing } from '../theme/colors';
+import { colors, radius, spacing } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
+import { useAuth } from '../auth/AuthContext';
+import { Role, isManager } from '../services/auth';
+import { getMyMembership, sendEmergency, Membership } from '../services/crew';
 import { useRegisterScrollTop } from '../utils/scrollTop';
 import { useLang } from '../i18n/LanguageContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
+const ROLE_LABEL: Record<Role, string> = {
+  general: '일반사용자', worker: '근로자', svisor: '에스바이저', ssvisor: '떠블에스바이저',
+};
+
 export function HomeScreen({ navigation }: Props) {
   const [mode, setMode] = useState<AppMode>('work');
+  const { account } = useAuth();
+  const [membership, setMembership] = useState<Membership | null>(null);
   const { t } = useLang();
+  const mgr = isManager(account);
   const scrollRef = useRef<ScrollView>(null);
   const toTop = useCallback(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: true });
@@ -35,9 +45,19 @@ export function HomeScreen({ navigation }: Props) {
         const p = await storage.getProfile();
         // 구버전 프로필(mode 없음)은 현장 모드로 폴백
         setMode(p?.mode === 'general' ? 'general' : 'work');
+        if (account && account.role === 'worker') {
+          try { setMembership(await getMyMembership(account.uid)); } catch { setMembership(null); }
+        }
       })();
-    }, []),
+    }, [account]),
   );
+
+  const emergency = async () => {
+    if (!account) return;
+    const r = await sendEmergency(account, membership);
+    if (r === 'no-crew') RNAlert.alert('현장 그룹 없음', '오늘 배정된 그룹이 없어 관리자에게 직접 전송할 수 없습니다. 119로 연락하세요.');
+    else RNAlert.alert('전송됨', '관리자에게 긴급 알림을 보냈습니다.');
+  };
 
   const changeMode = async (m: AppMode) => {
     setMode(m);
@@ -69,7 +89,38 @@ export function HomeScreen({ navigation }: Props) {
           </View>
         </View>
 
+        {account && (
+          <View style={styles.greet}>
+            <Text style={[typography.bodyBold, { color: colors.text }]}>👤 {account.name}님</Text>
+            <Text style={[typography.small, { color: account.status === 'active' ? colors.primary : colors.warning, marginLeft: 8 }]}>
+              {ROLE_LABEL[account.role]}{account.status !== 'active' ? ' · 승인대기' : ''}
+            </Text>
+          </View>
+        )}
+
         <LangSwitcher style={{ marginBottom: spacing.sm }} />
+
+        {/* 워커: 오늘 소속 그룹 + 관리자에게 긴급 */}
+        {account?.role === 'worker' && (
+          <View style={styles.crewBanner}>
+            {membership ? (
+              <>
+                <Text style={[typography.captionBold, { color: colors.work }]}>오늘 소속: {membership.label}</Text>
+                <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>관리자: {membership.ownerName}</Text>
+                <View style={{ marginTop: spacing.sm }}>
+                  <PrimaryButton title="관리자에게 긴급 알림" icon="🚨" variant="work" onPress={emergency} />
+                </View>
+              </>
+            ) : (
+              <Text style={[typography.small, { color: colors.textMuted }]}>오늘 배정된 현장 그룹이 없습니다. 긴급 시 119.</Text>
+            )}
+          </View>
+        )}
+
+        {/* 관리자(에스바이저/떠블에스바이저): 현장 그룹 관리 */}
+        {mgr && (
+          <PrimaryButton title="현장 그룹 · 긴급 관리" icon="📊" variant="work" size="lg" style={{ marginBottom: spacing.sm }} onPress={() => navigation.navigate('Crew')} />
+        )}
 
         {/* 생명 직결: 119를 전체폭·최상단·최대로 (디자인팀 P0 — 위계 정상화) */}
         <PrimaryButton title="119 즉시 전화" icon="📞" variant="emergency" size="lg" style={styles.call119} onPress={() => Linking.openURL('tel:119')} />
@@ -131,6 +182,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md, marginTop: spacing.xs },
+  greet: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
+  crewBanner: { backgroundColor: colors.workLight, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm },
   modeToggle: { flexDirection: 'row', marginBottom: spacing.md },
   call119: { height: 64 },
 });

@@ -28,14 +28,29 @@ service cloud.firestore {
       allow delete: if isSsvisor();
     }
 
-    // ── 긴급 알림 ──
+    // ── 그날의 현장 크루 (에스바이저 소유) ──
+    match /crews/{cid} {
+      allow create: if isManager() && request.resource.data.ownerUid == request.auth.uid;
+      allow read:   if isSignedIn() && (resource.data.ownerUid == request.auth.uid || isSsvisor());
+      allow update: if isSignedIn() && resource.data.ownerUid == request.auth.uid; // 종료·수정은 소유 svisor
+      allow delete: if false;
+    }
+
+    // ── 크루 멤버십 (워커별 현재 소속) ──
+    match /crewMemberships/{wuid} {
+      // 본인 워커 or 관리자 열람
+      allow read: if isSignedIn() && (request.auth.uid == wuid || isManager());
+      // 관리자(자기 크루로) 강제추가·이동·수정 / 워커 본인은 status='left'(자기 이탈)만
+      allow write: if (isManager() && request.resource.data.ownerUid == request.auth.uid)
+        || (request.auth.uid == wuid && request.resource.data.status == 'left');
+    }
+
+    // ── 긴급 알림 (생성자에게만 라우팅) ──
     match /alerts/{id} {
-      // 근로자는 자기 alert 생성
       allow create: if isSignedIn() && request.resource.data.workerUid == request.auth.uid;
-      // 본인(자기 alert) 또는 관리자 열람
-      allow read: if isSignedIn() && (resource.data.workerUid == request.auth.uid || isManager());
-      // 상태변경(확인 등)은 관리자만. 삭제 금지(기록 보존)
-      allow update: if isManager();
+      allow read:   if isSignedIn() && (resource.data.workerUid == request.auth.uid
+                      || resource.data.notifyUid == request.auth.uid || isSsvisor());
+      allow update: if isSignedIn() && (resource.data.notifyUid == request.auth.uid || isSsvisor());
       allow delete: if false;
     }
   }

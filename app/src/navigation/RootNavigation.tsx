@@ -7,6 +7,7 @@ import { RootStackParamList } from '../types';
 import { useAuth } from '../auth/AuthContext';
 import { LoginScreen } from '../screens/LoginScreen';
 import { SignupScreen } from '../screens/SignupScreen';
+import { CrewScreen } from '../screens/CrewScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { RedFlagScreen } from '../screens/RedFlagScreen';
@@ -52,6 +53,7 @@ const linking = {
       WorkCheck: 'work-check',
       IncidentReport: 'incident',
       ManagerDashboard: 'manager',
+      Crew: 'crew',
       MyMedicines: 'medicines',
       History: 'history',
       Settings: 'settings',
@@ -95,6 +97,7 @@ export function RootNavigation() {
         <Stack.Screen name="WorkCheck" component={WorkCheckScreen} />
         <Stack.Screen name="IncidentReport" component={IncidentReportScreen} />
         <Stack.Screen name="ManagerDashboard" component={ManagerDashboardScreen} />
+        <Stack.Screen name="Crew" component={CrewScreen} />
         <Stack.Screen name="MyMedicines" component={MyMedicinesScreen} />
         <Stack.Screen name="History" component={HistoryScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />

@@ -79,6 +79,14 @@
 - **[P0 완료] 국외이전 동의 고지**: DeptConsult 자유문장 AI 사용 전 7개언어 동의팝업(storage.getAiConsent) + 입력창 아래 상시 안내. 미동의 시 consultAI(allowAI=false)로 해외 전송 없이 규칙기반만. 개인정보보호법 제28조의8 대응
 - ⏳ 다음: mp3 고품질 오프라인화(gcloud 필요) · E-9 주력국 언어(네팔·크메르 등) · [남은 P0] DeptConsult 결과화면 다국어(KB 언어필드화)·민감정보 동의·부적합자가체크 로그·특수건진 유효기간
 
+### 2026-07-07 | 로그인 시스템(P1) + 현장그룹·긴급알림(P2-v1) + gcloud 백엔드 셋업
+- **Firebase 백엔드 gcloud로 셋업**(콘솔 클릭 0): Auth 초기화·이메일/비번 활성화, Firestore Native(서울) 생성, TTS mp3 생성, 웹앱 등록. 인증=wiiInfo tmzkt2 캐시 재사용
+- **P1 로그인**: 아이디+비번(가짜메일 매핑), 역할 general/worker/svisor(에스바이저)/ssvisor(떠블에스바이저,모든DB). 미승인=AI차단. LoginScreen(최초 언어선택)/SignupScreen(아이디·비번·이름·전화, 현장선택 제거=외국인금지). 홈에 로그인자 이름·역할 표시. 로그아웃(설정)
+- **P2-v1 현장그룹·긴급(CF없이 작동)**: crew.ts+CrewScreen. 에스바이저가 오늘 그룹 생성(종료시각 직접설정=야간대응)→아이디로 워커 강제추가→워커 홈 "오늘 소속"배너+긴급버튼(위치포함 alert)→에스바이저 실시간 수신(onSnapshot+경고음+확인). 라우팅=notifyUid(생성 svisor에게만). 워커 자기이탈 가능. firestore.rules 역할기반(crews/crewMemberships/alerts)
+- **3팀 결정 확정**: FCM도입O·생성자만+미응답확산·워커자기이탈·야간=svisor설정. 문서 라이프라인_현장그룹_긴급알림_3팀종합
+- ⏳ P2 남은것: **Cloud Functions**(강제멤버십 하드닝·alert notifyUid 재확정·미응답3분 확산)·**FCM 웹푸시**(알림전용SW,안드탭닫힘)·ssvisor 엑셀 스프레드시트 대시보드·오프라인 큐잉. 도메인=wheresick-5617a.firebaseapp.com 단독(lifeline-safety 삭제). ★순수웹 유지(PWA/설치팝업 금지)
+- ⚠️ 미검증: 2계정(svisor+worker) e2e는 브라우저 실테스트 필요(tsc·빌드·배포·규칙배포·사이트로드는 통과). 이성천(mmersum)=ssvisor·active로 설정됨
+
 ### 2026-07-07 | 표현집 고품질 한국어 음성(Google TTS Wavenet) 적용
 - **gcloud 기존 인증 재사용**(wiiInfo에서 로그인한 tmzkt2 계정 캐시 살아있음 → 재로그인 불필요). tools/gen-ko-tts.js로 self 102문장 ko mp3 생성(ko-KR-Wavenet-A, rate 0.92). ⚠️ 로그인 토큰은 x-goog-user-project 헤더(wiigame-448c7) 필수
 - speak.ts playPhraseAudio: /audio-ko/<id>.mp3 우선 재생, 실패 시 SpeechSynthesis 폴백. PhrasebookScreen self=mp3, staff=환자언어 TTS
