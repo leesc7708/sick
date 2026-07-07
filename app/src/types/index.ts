@@ -135,6 +135,7 @@ export type RootStackParamList = {
   SymptomInput: undefined;
   SymptomSummary: { memoId?: string } | undefined;
   DeptConsult: undefined;
+  Phrasebook: undefined;
   HospitalFinder: { kind?: FacilityKind; department?: string } | undefined;
   HealthRecords: undefined;
   HealthRecordShare: { recordId: string };

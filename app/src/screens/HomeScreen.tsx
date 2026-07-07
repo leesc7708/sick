@@ -83,6 +83,9 @@ export function HomeScreen({ navigation }: Props) {
 
         <ListTile icon="📝" title={t('symptom_organize')} desc={t('symptom_desc')}
           onPress={() => navigation.navigate('SymptomInput')} />
+        <ListTile icon="🗣️" title={t('phrasebook_title')} desc={t('phrasebook_desc')}
+          badge={<Tag label="NEW" tone="new" />}
+          onPress={() => navigation.navigate('Phrasebook')} />
         <ListTile icon="🩺" title={t('dept_consult')} desc={t('dept_consult_desc')}
           badge={<Tag label="NEW" tone="new" />}
           onPress={() => navigation.navigate('DeptConsult')} />

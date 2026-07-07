@@ -11,6 +11,7 @@ import { RedFlagScreen } from '../screens/RedFlagScreen';
 import { SymptomInputScreen } from '../screens/SymptomInputScreen';
 import { SymptomSummaryScreen } from '../screens/SymptomSummaryScreen';
 import { DeptConsultScreen } from '../screens/DeptConsultScreen';
+import { PhrasebookScreen } from '../screens/PhrasebookScreen';
 import { HospitalFinderScreen } from '../screens/HospitalFinderScreen';
 import { HealthRecordsScreen } from '../screens/HealthRecordsScreen';
 import { HealthRecordShareScreen } from '../screens/HealthRecordShareScreen';
@@ -40,6 +41,7 @@ const linking = {
       SymptomInput: 'symptom',
       SymptomSummary: 'summary',
       DeptConsult: 'dept-consult',
+      Phrasebook: 'speak',
       HospitalFinder: 'hospitals',
       HealthRecords: 'health-records',
       HealthRecordShare: 'health-records/share/:recordId',
@@ -85,6 +87,7 @@ export function RootNavigation() {
         <Stack.Screen name="SymptomInput" component={SymptomInputScreen} />
         <Stack.Screen name="SymptomSummary" component={SymptomSummaryScreen} />
         <Stack.Screen name="DeptConsult" component={DeptConsultScreen} />
+        <Stack.Screen name="Phrasebook" component={PhrasebookScreen} />
         <Stack.Screen name="HospitalFinder" component={HospitalFinderScreen} />
         <Stack.Screen name="HealthRecords" component={HealthRecordsScreen} />
         <Stack.Screen name="HealthRecordShare" component={HealthRecordShareScreen} />
