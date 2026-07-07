@@ -19,6 +19,7 @@ const KEYS = {
   incidents: 'safecall:incidents',
   myMedicines: 'safecall:myMedicines',
   lang: 'lifeline:lang',
+  aiConsent: 'lifeline:aiConsent', // 국외이전(증상 텍스트 → 해외 AI) 동의 여부
 };
 
 async function getList<T>(key: string): Promise<T[]> {
@@ -36,6 +37,14 @@ export const storage = {
   },
   async setLang(l: Lang): Promise<void> {
     await AsyncStorage.setItem(KEYS.lang, l);
+  },
+
+  // ── AI 국외이전 동의 (증상 문구가 해외 AI로 전송됨) ──
+  async getAiConsent(): Promise<boolean> {
+    return (await AsyncStorage.getItem(KEYS.aiConsent)) === 'yes';
+  },
+  async setAiConsent(v: boolean): Promise<void> {
+    await AsyncStorage.setItem(KEYS.aiConsent, v ? 'yes' : 'no');
   },
 
   // ── 프로필 ──

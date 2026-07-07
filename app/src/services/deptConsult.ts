@@ -77,11 +77,12 @@ export async function consultAI(
   quickIds: string[] = [],
   lang = 'ko',
   profile?: { age?: number; conditions?: string[]; currentMedicines?: string[] },
+  allowAI = true, // 국외이전 동의 안 하면 false → 규칙기반만(해외 전송 없음)
 ): Promise<ConsultResult[]> {
   const emerg = scanEmergency(text);
 
-  // 빠른칩 선택은 즉시·무료 규칙기반 (응급 신호 있으면 상향)
-  if (quickIds.length) {
+  // 빠른칩 선택 or AI 미동의 → 즉시·무료 규칙기반(해외 전송 없음), 응급 신호 있으면 상향
+  if (quickIds.length || !allowAI) {
     const r = consultRuleBased(text, quickIds);
     return emerg ? escalate(r) : r;
   }

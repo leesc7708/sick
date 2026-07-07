@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Linking, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Linking, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
@@ -13,11 +13,37 @@ import { consultAI, ConsultResult } from '../services/deptConsult';
 import { storage } from '../services/storage';
 import { RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
+import type { Lang } from '../i18n/translations';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'DeptConsult'>;
 
 // 자주 헷갈리는 케이스를 빠른 선택칩으로 (id는 departmentGuide와 일치)
 const QUICK = ['stye', 'hand_numb', 'dizzy', 'rash', 'weld_eye', 'burn', 'chem_eye', 'dust_breath'];
+
+// 국외이전(자유 문장 → 해외 AI) 동의 문구. 7개 언어.
+const CONSENT: Record<string, Record<Lang, string>> = {
+  notice: {
+    ko: '🔒 자유 문장으로 물으면, 안내 생성을 위해 문장이 해외 AI(Anthropic·미국)로 전송됩니다. 빠른 선택은 전송 없이 즉시 안내돼요.',
+    en: '🔒 Free-text questions are sent to an overseas AI (Anthropic, USA) to generate guidance. Quick picks answer instantly with no transfer.',
+    zh: '🔒 用自由文字提问时，句子会被发送到海外 AI（Anthropic·美国）以生成指引。快速选择不发送、即时给出。',
+    ja: '🔒 自由入力で質問すると、案内生成のため文章が海外AI（Anthropic・米国）に送信されます。クイック選択は送信なしで即時。',
+    vi: '🔒 Khi hỏi bằng câu chữ tự do, câu của bạn được gửi tới AI ở nước ngoài (Anthropic, Mỹ) để tạo hướng dẫn. Chọn nhanh trả lời ngay, không gửi đi.',
+    th: '🔒 เมื่อพิมพ์ถามอิสระ ข้อความจะถูกส่งไปยัง AI ต่างประเทศ (Anthropic สหรัฐฯ) เพื่อสร้างคำแนะนำ การเลือกด่วนตอบทันทีโดยไม่ส่งข้อมูล',
+    es: '🔒 Las preguntas de texto libre se envían a una IA en el extranjero (Anthropic, EE. UU.) para generar la guía. Las opciones rápidas responden al instante sin envío.',
+  },
+  title: { ko: '해외 AI 전송 동의', en: 'Overseas AI transfer', zh: '海外 AI 传输同意', ja: '海外AIへの送信の同意', vi: 'Đồng ý gửi ra AI nước ngoài', th: 'ยินยอมส่งไป AI ต่างประเทศ', es: 'Envío a IA en el extranjero' },
+  body: {
+    ko: '입력하신 증상 문구가 안내를 만들기 위해 해외 AI 서비스(Anthropic, 미국)로 전송됩니다. 동의하시겠어요? 동의하지 않으면 전송 없이 기본 안내만 제공됩니다.',
+    en: 'Your symptom text will be sent to an overseas AI service (Anthropic, USA) to generate guidance. Do you agree? If not, only basic guidance is given with no transfer.',
+    zh: '您输入的症状文字将被发送到海外 AI 服务（Anthropic·美国）以生成指引。是否同意？不同意则仅提供基本指引、不发送。',
+    ja: '入力した症状の文章が、案内生成のため海外AIサービス（Anthropic・米国）に送信されます。同意しますか？同意しない場合は送信せず基本案内のみ提供します。',
+    vi: 'Câu mô tả triệu chứng của bạn sẽ được gửi tới dịch vụ AI ở nước ngoài (Anthropic, Mỹ) để tạo hướng dẫn. Bạn có đồng ý không? Nếu không, chỉ cung cấp hướng dẫn cơ bản, không gửi đi.',
+    th: 'ข้อความอาการของคุณจะถูกส่งไปยังบริการ AI ต่างประเทศ (Anthropic สหรัฐฯ) เพื่อสร้างคำแนะนำ คุณยินยอมไหม? หากไม่ จะให้เฉพาะคำแนะนำพื้นฐานโดยไม่ส่งข้อมูล',
+    es: 'Su texto de síntomas se enviará a un servicio de IA en el extranjero (Anthropic, EE. UU.) para generar la guía. ¿Está de acuerdo? Si no, solo se da una guía básica sin envío.',
+  },
+  yes: { ko: '동의하고 AI 안내', en: 'Agree & use AI', zh: '同意并使用AI', ja: '同意してAI案内', vi: 'Đồng ý, dùng AI', th: 'ยินยอมและใช้ AI', es: 'Aceptar y usar IA' },
+  no: { ko: '동의 안 함 (기본 안내)', en: 'No (basic only)', zh: '不同意（仅基本）', ja: '同意しない（基本のみ）', vi: 'Không (chỉ cơ bản)', th: 'ไม่ยินยอม (พื้นฐาน)', es: 'No (solo básico)' },
+};
 
 const URGENCY_STYLE: Record<string, { bg: string; fg: string; label: string }> = {
   emergency: { bg: '#FDECEC', fg: colors.emergency, label: '🔴 응급 — 지체 말고 119/응급실' },
@@ -35,17 +61,37 @@ export function DeptConsultScreen({ navigation }: Props) {
   const togglePick = (id: string) =>
     setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
 
-  const run = async () => {
+  const C = (k: string) => CONSENT[k][lang];
+
+  const execute = async (allowAI: boolean) => {
     setLoading(true);
     try {
       const p = await storage.getProfile();
       const profile = p
         ? { age: p.age, conditions: p.conditions, currentMedicines: p.currentMedicines }
         : undefined;
-      setResults(await consultAI(text, picked, lang, profile));
+      setResults(await consultAI(text, picked, lang, profile, allowAI));
     } finally {
       setLoading(false);
     }
+  };
+
+  const run = async () => {
+    // 빠른칩만 있거나 자유문장이 없으면 해외 전송 없음 → 바로 실행
+    if (picked.length || !text.trim()) {
+      execute(true);
+      return;
+    }
+    // 자유문장(AI 경로) → 국외이전 동의 확인(1회)
+    const consented = await storage.getAiConsent();
+    if (consented) {
+      execute(true);
+      return;
+    }
+    Alert.alert(C('title'), C('body'), [
+      { text: C('no'), style: 'cancel', onPress: () => execute(false) },
+      { text: C('yes'), onPress: async () => { await storage.setAiConsent(true); execute(true); } },
+    ]);
   };
 
   const goHospital = (dept: string) =>
@@ -68,6 +114,7 @@ export function DeptConsultScreen({ navigation }: Props) {
           style={[styles.input, { minHeight: 64 }]}
           multiline
         />
+        <Text style={[typography.small, { color: colors.textMuted, marginTop: 6 }]}>{C('notice')}</Text>
 
         <Text style={styles.label}>{t('dc_quick_label')}</Text>
         <View style={styles.chips}>
