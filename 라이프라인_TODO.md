@@ -53,7 +53,14 @@
 7. `_legacy` 내부 import 깨짐(재활성화 불가) — 보존 의도면 내부경로 `./`로 수정
 
 **⏳ 남은 P2**: 개인정보 동의화면 · 인라인컴포넌트 · ImagePicker · History 날짜정렬 · 출처표기 · LanguageContext useMemo
-**🔑 외부(형님)**: E-Gen키 · AI프록시 · 멀티유저 · KIPRIS 상표·도메인
+**🔑 외부(형님)**: E-Gen키 · ~~AI프록시~~(2026-07-07 완료) · 멀티유저 · KIPRIS 상표·도메인
+
+### 2026-07-07 | 진료과 상담 AI 연결 완료 (Claude Haiku, 자유문장 상담 라이브)
+- Firebase Blaze 전환(형님) 완료 → Cloud Functions v2 `deptConsult`(asia-northeast3) 배포. Claude Haiku(claude-haiku-4-5)로 자유문장→진료과 안내
+- 키는 DY ON functions/.env의 CLAUDE_API_KEY 재사용, lifeline functions/.env에만 저장(git 제외, 앱 미노출). 호스팅 rewrite /api/dept-consult(동일출처, CORS 불필요) + gcf-artifacts cleanup 정책(1일)
+- 프롬프트: 진단·처방 금지·진료과 안내만, dept/alt는 한국 진료과 한글명, reason/tip은 사용자 언어로. 실테스트 ko/es/en 통과("발목 삠→정형외과", "용접 후 눈→안과" 정확)
+- 프론트: 자유문장→AI 함수, 빠른칩→무료 규칙기반, 실패시 규칙기반 폴백. 화면 async+로딩. dc_ai_note 7개언어 "AI 작동"으로 갱신
+- ⚠️ 비용: Haiku 상담 1건 ~1원, maxInstances:5로 폭주 방지. 결제 예산알림 권장
 
 ### 2026-07-07 | 사업 3팀 검토 + 진료과 상담 기능 추가
 - 외부 3팀(마케팅·원가·벤처) 검토 → `라이프라인_3팀검토_마케팅_원가_벤처_2026-07-07.md`. 공통 지적: "법적강제=구매" 비약, "마진200%" 지표오류, 데모 목업/허위 정직화, 숫자(BEP·TAM) 부재
