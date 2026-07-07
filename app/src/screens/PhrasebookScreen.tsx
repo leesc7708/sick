@@ -8,7 +8,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { PHRASE_GROUPS, PHRASES, STAFF_QUESTIONS, Phrase, StaffQuestion, PhraseGroupId } from '../data/emergencyPhrases';
-import { speak, stopSpeaking } from '../services/speak';
+import { speak, playPhraseAudio, stopSpeaking } from '../services/speak';
 import { RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
 import type { Lang } from '../i18n/translations';
@@ -42,14 +42,18 @@ export function PhrasebookScreen({ navigation }: Props) {
   const [active, setActive] = useState<Active | null>(null);
 
   const playSelf = (p: Phrase) => {
-    const r = speak(p.ko, 'ko');
-    setActive({ big: p.ko, sub: p.text[lang], noVoice: r !== 'ok', id: p.id, speakText: p.ko, speakLang: 'ko', showHint: true });
+    playPhraseAudio(p.id, p.ko); // 고품질 mp3 우선, 실패 시 TTS
+    setActive({ big: p.ko, sub: p.text[lang], noVoice: false, id: p.id, speakText: p.ko, speakLang: 'ko', showHint: true });
   };
   const playStaff = (q: StaffQuestion) => {
     const r = speak(q.text[lang], lang);
     setActive({ big: q.text[lang], sub: q.ko, noVoice: r !== 'ok', id: q.id, speakText: q.text[lang], speakLang: lang, showHint: false });
   };
-  const replay = () => active && speak(active.speakText, active.speakLang);
+  const replay = () => {
+    if (!active) return;
+    if (active.showHint) playPhraseAudio(active.id, active.speakText); // self=mp3
+    else speak(active.speakText, active.speakLang); // staff=환자언어 TTS
+  };
 
   const report = (label: string) => Alert.alert(t('report'), `"${label}"`, [{ text: 'OK', onPress: () => Alert.alert(t('reported')) }]);
 

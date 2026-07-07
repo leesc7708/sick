@@ -54,7 +54,26 @@ export function speakKorean(ko: string): SpeakResult {
   return speak(ko, 'ko');
 }
 
+let currentAudio: any = null;
+
+/** 표현집 한국어 재생: 사전생성 mp3(고품질 Wavenet) 우선, 실패 시 브라우저 TTS 폴백. */
+export function playPhraseAudio(id: string, fallbackKo: string): SpeakResult {
+  if (Platform.OS !== 'web' || typeof window === 'undefined' || !(window as any).Audio) {
+    return speak(fallbackKo, 'ko');
+  }
+  try {
+    stopSpeaking();
+    const a = new (window as any).Audio(`/audio-ko/${id}.mp3`);
+    currentAudio = a;
+    a.play().catch(() => speak(fallbackKo, 'ko')); // mp3 없거나 재생불가 → TTS
+    return 'ok';
+  } catch {
+    return speak(fallbackKo, 'ko');
+  }
+}
+
 export function stopSpeaking() {
+  if (currentAudio) { try { currentAudio.pause(); currentAudio.currentTime = 0; } catch {} }
   if (Platform.OS === 'web' && typeof window !== 'undefined' && (window as any).speechSynthesis) {
     (window as any).speechSynthesis.cancel();
   }

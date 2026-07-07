@@ -79,6 +79,12 @@
 - **[P0 완료] 국외이전 동의 고지**: DeptConsult 자유문장 AI 사용 전 7개언어 동의팝업(storage.getAiConsent) + 입력창 아래 상시 안내. 미동의 시 consultAI(allowAI=false)로 해외 전송 없이 규칙기반만. 개인정보보호법 제28조의8 대응
 - ⏳ 다음: mp3 고품질 오프라인화(gcloud 필요) · E-9 주력국 언어(네팔·크메르 등) · [남은 P0] DeptConsult 결과화면 다국어(KB 언어필드화)·민감정보 동의·부적합자가체크 로그·특수건진 유효기간
 
+### 2026-07-07 | 표현집 고품질 한국어 음성(Google TTS Wavenet) 적용
+- **gcloud 기존 인증 재사용**(wiiInfo에서 로그인한 tmzkt2 계정 캐시 살아있음 → 재로그인 불필요). tools/gen-ko-tts.js로 self 102문장 ko mp3 생성(ko-KR-Wavenet-A, rate 0.92). ⚠️ 로그인 토큰은 x-goog-user-project 헤더(wiigame-448c7) 필수
+- speak.ts playPhraseAudio: /audio-ko/<id>.mp3 우선 재생, 실패 시 SpeechSynthesis 폴백. PhrasebookScreen self=mp3, staff=환자언어 TTS
+- ⚠️ **배포 절차**: expo export 후 audio-ko\*.mp3 → dist\audio-ko\ 복사 필수(expo가 자동복사 안 함) → firebase deploy. mp3 102개 커밋됨
+- 뒤로가기 단계별 수정 + DeptConsult 위급도 라벨 7개언어도 이 배치에 포함
+
 ### 2026-07-07 | 사업 3팀 검토 + 진료과 상담 기능 추가
 - 외부 3팀(마케팅·원가·벤처) 검토 → `라이프라인_3팀검토_마케팅_원가_벤처_2026-07-07.md`. 공통 지적: "법적강제=구매" 비약, "마진200%" 지표오류, 데모 목업/허위 정직화, 숫자(BEP·TAM) 부재
 - 사업성 1p 재작성 → `라이프라인_사업성_1페이지_재작성_2026-07-07.md`: "마진200%" 삭제→BEP(현금14/완전원가40 사업장)·티어가격표, 유동인력·다현장 페인포인트로 포지셔닝 재정의, "중대재해=수억" 삭제→행정비 절감 주력
