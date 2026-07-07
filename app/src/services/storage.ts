@@ -20,6 +20,8 @@ const KEYS = {
   myMedicines: 'safecall:myMedicines',
   lang: 'lifeline:lang',
   aiConsent: 'lifeline:aiConsent', // 국외이전(증상 텍스트 → 해외 AI) 동의 여부
+  phraseFaves: 'lifeline:phraseFaves', // 표현집 즐겨찾기 문장 id
+  phraseRecents: 'lifeline:phraseRecents', // 표현집 최근 사용 문장 id
 };
 
 async function getList<T>(key: string): Promise<T[]> {
@@ -45,6 +47,25 @@ export const storage = {
   },
   async setAiConsent(v: boolean): Promise<void> {
     await AsyncStorage.setItem(KEYS.aiConsent, v ? 'yes' : 'no');
+  },
+
+  // ── 표현집 즐겨찾기 / 최근 ──
+  async getPhraseFaves(): Promise<string[]> {
+    const r = await AsyncStorage.getItem(KEYS.phraseFaves);
+    return r ? (JSON.parse(r) as string[]) : [];
+  },
+  async setPhraseFaves(ids: string[]): Promise<void> {
+    await AsyncStorage.setItem(KEYS.phraseFaves, JSON.stringify(ids));
+  },
+  async getPhraseRecents(): Promise<string[]> {
+    const r = await AsyncStorage.getItem(KEYS.phraseRecents);
+    return r ? (JSON.parse(r) as string[]) : [];
+  },
+  async pushPhraseRecent(id: string): Promise<string[]> {
+    const cur = await this.getPhraseRecents();
+    const next = [id, ...cur.filter((x) => x !== id)].slice(0, 8);
+    await AsyncStorage.setItem(KEYS.phraseRecents, JSON.stringify(next));
+    return next;
   },
 
   // ── 프로필 ──

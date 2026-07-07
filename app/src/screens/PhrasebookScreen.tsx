@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -9,6 +9,7 @@ import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { PHRASE_GROUPS, PHRASES, STAFF_QUESTIONS, Phrase, StaffQuestion, PhraseGroupId } from '../data/emergencyPhrases';
 import { speak, playPhraseAudio, stopSpeaking } from '../services/speak';
+import { storage } from '../services/storage';
 import { RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
 import type { Lang } from '../i18n/translations';
@@ -30,6 +31,8 @@ const UI: Record<string, Record<Lang, string>> = {
   disclaimer: { ko: '진단이 아니라 의사 전달을 돕는 문장입니다. 위급하면 즉시 119.', en: 'These sentences help you communicate, not a diagnosis. In an emergency, call 119.', zh: '这些句子用于沟通，不是诊断。紧急时请拨打119。', ja: '診断ではなく意思疎通を助ける文です。緊急時は119へ。', vi: 'Đây là câu để giao tiếp, không phải chẩn đoán. Khi khẩn cấp gọi 119.', th: 'ประโยคนี้ช่วยสื่อสาร ไม่ใช่การวินิจฉัย หากฉุกเฉินโทร 119', es: 'Estas frases ayudan a comunicarse, no son un diagnóstico. En emergencia, llame al 119.' },
   call119: { ko: '119 전화', en: 'Call 119', zh: '拨打119', ja: '119に電話', vi: 'Gọi 119', th: 'โทร 119', es: 'Llamar al 119' },
   soundOff: { ko: '소리가 안 나면 위 글자를 보여주세요.', en: 'If there is no sound, show the text above.', zh: '如果没有声音，请出示上面的文字。', ja: '音が出ない場合は、上の文字を見せてください。', vi: 'Nếu không có âm thanh, hãy đưa chữ ở trên.', th: 'ถ้าไม่มีเสียง ให้แสดงข้อความด้านบน', es: 'Si no hay sonido, muestre el texto de arriba.' },
+  fave: { ko: '⭐ 자주 쓰는', en: '⭐ Favorites', zh: '⭐ 常用', ja: '⭐ よく使う', vi: '⭐ Hay dùng', th: '⭐ ที่ใช้บ่อย', es: '⭐ Favoritos' },
+  recent: { ko: '🕐 최근', en: '🕐 Recent', zh: '🕐 最近', ja: '🕐 最近', vi: '🕐 Gần đây', th: '🕐 ล่าสุด', es: '🕐 Recientes' },
 };
 
 interface Active { big: string; sub: string; noVoice: boolean; id: string; speakText: string; speakLang: Lang; showHint: boolean; }
@@ -40,11 +43,40 @@ export function PhrasebookScreen({ navigation }: Props) {
   const [mode, setMode] = useState<'self' | 'staff'>('self');
   const [group, setGroup] = useState<PhraseGroupId | null>(null);
   const [active, setActive] = useState<Active | null>(null);
+  const [faves, setFaves] = useState<string[]>([]);
+  const [recents, setRecents] = useState<string[]>([]);
+
+  useEffect(() => {
+    storage.getPhraseFaves().then(setFaves);
+    storage.getPhraseRecents().then(setRecents);
+  }, []);
+
+  const toggleFave = (id: string) => {
+    const next = faves.includes(id) ? faves.filter((x) => x !== id) : [id, ...faves];
+    setFaves(next);
+    storage.setPhraseFaves(next);
+  };
 
   const playSelf = (p: Phrase) => {
     playPhraseAudio(p.id, p.ko); // 고품질 mp3 우선, 실패 시 TTS
     setActive({ big: p.ko, sub: p.text[lang], noVoice: false, id: p.id, speakText: p.ko, speakLang: 'ko', showHint: true });
+    storage.pushPhraseRecent(p.id).then(setRecents);
   };
+
+  // 문장 한 줄 (즐겨찾기 별 + 재생)
+  const phraseRow = (p: Phrase) => (
+    <Pressable key={p.id} onPress={() => playSelf(p)} style={[styles.phrase, shadow.card, active?.id === p.id && { borderColor: colors.primary, borderWidth: 1.5 }]}>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.phraseText}>{p.text[lang]}</Text>
+        {lang !== 'ko' && <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>{p.ko}</Text>}
+        <Pressable onPress={() => report(p.text[lang])} hitSlop={8}><Text style={styles.reportTxt}>{UI.report[lang]}</Text></Pressable>
+      </View>
+      <Pressable onPress={() => toggleFave(p.id)} hitSlop={8}><Text style={styles.star}>{faves.includes(p.id) ? '⭐' : '☆'}</Text></Pressable>
+      <Text style={styles.playIcon}>🔊</Text>
+    </Pressable>
+  );
+
+  const byId = (ids: string[]): Phrase[] => ids.map((id) => PHRASES.find((p) => p.id === id)).filter((p): p is Phrase => !!p);
   const playStaff = (q: StaffQuestion) => {
     const r = speak(q.text[lang], lang);
     setActive({ big: q.text[lang], sub: q.ko, noVoice: r !== 'ok', id: q.id, speakText: q.text[lang], speakLang: lang, showHint: false });
@@ -122,6 +154,10 @@ export function PhrasebookScreen({ navigation }: Props) {
                 <Text style={styles.urgentTxt}>{g.icon}  {g.label[lang]}</Text>
               </Pressable>
             ))}
+
+            {byId(faves).length > 0 && (<><Text style={styles.section}>{t('fave')}</Text>{byId(faves).map(phraseRow)}</>)}
+            {byId(recents).length > 0 && (<><Text style={styles.section}>{t('recent')}</Text>{byId(recents).map(phraseRow)}</>)}
+
             <Text style={styles.section}>{t('where')}</Text>
             <View style={styles.grid}>
               {parts.map((g) => (
@@ -153,16 +189,7 @@ export function PhrasebookScreen({ navigation }: Props) {
                 <PrimaryButton title={t('call119')} icon="📞" variant="emergency" size="lg" onPress={() => Linking.openURL('tel:119')} />
               </View>
             )}
-            {list.map((p) => (
-              <Pressable key={p.id} onPress={() => playSelf(p)} style={[styles.phrase, shadow.card, active?.id === p.id && { borderColor: colors.primary, borderWidth: 1.5 }]}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.phraseText}>{p.text[lang]}</Text>
-                  {lang !== 'ko' && <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>{p.ko}</Text>}
-                  <Pressable onPress={() => report(p.text[lang])} hitSlop={8}><Text style={styles.reportTxt}>{UI.report[lang]}</Text></Pressable>
-                </View>
-                <Text style={styles.playIcon}>🔊</Text>
-              </Pressable>
-            ))}
+            {list.map(phraseRow)}
           </>
         )}
 
@@ -188,6 +215,7 @@ const styles = StyleSheet.create({
   phrase: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm, borderColor: 'transparent', borderWidth: 1.5 },
   phraseText: { ...typography.bodyBold, color: colors.text, fontSize: 17 },
   reportTxt: { ...typography.small, color: colors.g400, marginTop: 8, textDecorationLine: 'underline' },
+  star: { fontSize: 24, marginLeft: spacing.sm },
   playIcon: { fontSize: 30, marginLeft: spacing.sm },
   activeCard: { backgroundColor: colors.primaryLight, borderRadius: radius.xl, padding: spacing.lg, marginBottom: spacing.md },
   activeBig: { fontSize: 26, fontWeight: '800', color: colors.text, lineHeight: 34 },

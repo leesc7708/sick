@@ -142,6 +142,9 @@ export function DeptConsultScreen({ navigation }: Props) {
         <View style={{ marginTop: spacing.lg }}>
           <PrimaryButton title={t('dc_run')} icon="🔎" size="lg" loading={loading} onPress={run} />
         </View>
+        <View style={{ marginTop: spacing.sm }}>
+          <PrimaryButton title={t('phrasebook_title')} icon="🗣️" variant="ghost" size="sm" onPress={() => navigation.navigate('Phrasebook')} />
+        </View>
 
         {results && results.length === 0 && (
           <View style={[styles.card, shadow.card, { marginTop: spacing.lg }]}>
