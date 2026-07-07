@@ -61,9 +61,18 @@ export function PhrasebookScreen({ navigation }: Props) {
 
   const switchMode = (m: 'self' | 'staff') => { setMode(m); setGroup(null); setActive(null); stopSpeaking(); };
 
+  // 뒤로가기: 화면을 바로 나가지 말고 "전 단계"로. (그룹 안 → 목록, 재생중 카드 닫기, 의료진모드 → 내 모드)
+  const handleBack = () => {
+    stopSpeaking();
+    if (mode === 'self' && group) { setGroup(null); setActive(null); return; }
+    if (mode === 'staff') { setMode('self'); setActive(null); return; }
+    if (active) { setActive(null); return; }
+    navigation.goBack();
+  };
+
   return (
     <View style={styles.wrap}>
-      <AppBar title={t('title')} onBack={() => navigation.goBack()} />
+      <AppBar title={t('title')} onBack={handleBack} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.modeRow}>
           <Chip label={t('mode_self')} tone="primary" selected={mode === 'self'} onPress={() => switchMode('self')} />

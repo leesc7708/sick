@@ -45,10 +45,26 @@ const CONSENT: Record<string, Record<Lang, string>> = {
   no: { ko: '동의 안 함 (기본 안내)', en: 'No (basic only)', zh: '不同意（仅基本）', ja: '同意しない（基本のみ）', vi: 'Không (chỉ cơ bản)', th: 'ไม่ยินยอม (พื้นฐาน)', es: 'No (solo básico)' },
 };
 
-const URGENCY_STYLE: Record<string, { bg: string; fg: string; label: string }> = {
-  emergency: { bg: '#FDECEC', fg: colors.emergency, label: '🔴 응급 — 지체 말고 119/응급실' },
-  soon: { bg: '#FFF4E5', fg: colors.warning, label: '🟠 되도록 빨리 진료' },
-  normal: { bg: '#EAF5EE', fg: colors.success, label: '🟢 서두르지 않아도 되나 진료 권장' },
+const URGENCY_STYLE: Record<string, { bg: string; fg: string }> = {
+  emergency: { bg: '#FDECEC', fg: colors.emergency },
+  soon: { bg: '#FFF4E5', fg: colors.warning },
+  normal: { bg: '#EAF5EE', fg: colors.success },
+};
+
+// 위급도 라벨 7개 언어 (모든 결과 카드가 자국어로)
+const URGENCY_LABEL: Record<string, Record<Lang, string>> = {
+  emergency: {
+    ko: '🔴 응급 — 지체 말고 119/응급실', en: '🔴 Emergency — call 119 / go to ER now', zh: '🔴 紧急 — 立即拨打119/去急诊',
+    ja: '🔴 緊急 — ためらわず119/救急外来へ', vi: '🔴 Khẩn cấp — gọi 119 / đến cấp cứu ngay', th: '🔴 ฉุกเฉิน — โทร 119 / ไปห้องฉุกเฉินทันที', es: '🔴 Emergencia — llame al 119 / vaya a urgencias ya',
+  },
+  soon: {
+    ko: '🟠 되도록 빨리 진료', en: '🟠 See a doctor soon', zh: '🟠 尽快就医',
+    ja: '🟠 できるだけ早く受診を', vi: '🟠 Nên đi khám sớm', th: '🟠 ควรพบแพทย์โดยเร็ว', es: '🟠 Consulte pronto a un médico',
+  },
+  normal: {
+    ko: '🟢 서두르지 않아도 되나 진료 권장', en: '🟢 Not urgent, but a visit is advised', zh: '🟢 不急，但建议就诊',
+    ja: '🟢 急ぎではないが受診推奨', vi: '🟢 Không gấp, nhưng nên đi khám', th: '🟢 ไม่เร่งด่วน แต่แนะนำให้พบแพทย์', es: '🟢 No urgente, pero se recomienda consultar',
+  },
 };
 
 export function DeptConsultScreen({ navigation }: Props) {
@@ -169,7 +185,7 @@ export function DeptConsultScreen({ navigation }: Props) {
                   )}
 
                   <View style={[styles.urgency, { backgroundColor: u.bg }]}>
-                    <Text style={[typography.captionBold, { color: u.fg }]}>{u.label}</Text>
+                    <Text style={[typography.captionBold, { color: u.fg }]}>{URGENCY_LABEL[guide.urgency][lang]}</Text>
                     {guide.urgencyNote && <Text style={[typography.small, { color: u.fg, marginTop: 2 }]}>{guide.urgencyNote}</Text>}
                   </View>
 
