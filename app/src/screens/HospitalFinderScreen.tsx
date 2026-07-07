@@ -21,12 +21,15 @@ const TABS: { k: FacilityKind; label: string }[] = [
 
 export function HospitalFinderScreen({ navigation, route }: Props) {
   const { t } = useLang();
-  const [kind, setKind] = useState<FacilityKind>(route.params?.kind ?? 'er');
+  // 진료과 상담에서 넘어온 경우: 병원 탭 + 해당 진료과 필터로 진입
+  const [kind, setKind] = useState<FacilityKind>(route.params?.kind ?? (route.params?.department ? 'hospital' : 'er'));
+  const [dept, setDept] = useState<string | undefined>(route.params?.department);
   const [openOnly, setOpenOnly] = useState(false);
   const [nightOnly, setNightOnly] = useState(false);
   const [bedsOnly, setBedsOnly] = useState(false);
 
   const list = FACILITIES.filter((f) => f.kind === kind)
+    .filter((f) => (dept ? f.departments.includes(dept) : true))
     .filter((f) => (openOnly ? f.isOpenNow : true))
     .filter((f) => (nightOnly ? f.hasNight : true))
     .filter((f) => (bedsOnly && kind === 'er' ? (f.availableBeds ?? 0) > 0 : true))
@@ -49,6 +52,11 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
         <Chip label={t('hf_night')} selected={nightOnly} onPress={() => setNightOnly((v) => !v)} />
         {kind === 'er' && <Chip label={t('hf_beds_f')} tone="primary" selected={bedsOnly} onPress={() => setBedsOnly((v) => !v)} />}
       </View>
+      {dept && (
+        <View style={styles.filters}>
+          <Chip label={`${dept} ${t('hf_dept_clear')} ✕`} tone="primary" selected onPress={() => setDept(undefined)} />
+        </View>
+      )}
 
       <ScrollView contentContainerStyle={styles.content}>
         {list.length === 0 && (

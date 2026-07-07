@@ -134,7 +134,8 @@ export type RootStackParamList = {
   RedFlag: undefined;
   SymptomInput: undefined;
   SymptomSummary: { memoId?: string } | undefined;
-  HospitalFinder: { kind?: FacilityKind } | undefined;
+  DeptConsult: undefined;
+  HospitalFinder: { kind?: FacilityKind; department?: string } | undefined;
   HealthRecords: undefined;
   HealthRecordShare: { recordId: string };
   WorkCheck: undefined;
