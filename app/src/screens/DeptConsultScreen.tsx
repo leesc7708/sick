@@ -83,7 +83,7 @@ export function DeptConsultScreen({ navigation }: Props) {
             {results.map(({ guide }, idx) => {
               const u = URGENCY_STYLE[guide.urgency];
               return (
-                <View key={guide.id} style={[styles.card, shadow.card]}>
+                <View key={guide.id} style={[styles.card, shadow.card, { borderLeftWidth: 5, borderLeftColor: u.fg }]}>
                   {idx === 0 && <Text style={[typography.small, { color: colors.primary, marginBottom: 4 }]}>{t('dc_best')}</Text>}
                   <Text style={[typography.bodyBold, { color: colors.text }]}>{guide.symptom}</Text>
 

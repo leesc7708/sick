@@ -1,28 +1,37 @@
 import React from 'react';
-import Svg, { Defs, LinearGradient, Path, Polyline, Stop } from 'react-native-svg';
+import Svg, { Polyline } from 'react-native-svg';
+import { colors } from '../theme/colors';
 
-// 라이프라인 심볼 — 생명 드롭 + 박동
+// 라이프라인 심볼 — 생명선(ECG 맥박선). 신뢰 블루 라인 + 응급 레드 스파이크(2색).
+// (구 청록·보라 물방울 폐기 — 헬스·뷰티 잔재 제거, 안전/응급 팔레트 정합)
 export function LogoMark({ size = 40 }: { size?: number }) {
+  const sw = 7;
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
-      <Defs>
-        <LinearGradient id="lifelineIce" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#5EE7FF" />
-          <Stop offset="1" stopColor="#9B8BFF" />
-        </LinearGradient>
-      </Defs>
-      <Path
-        d="M50 22 C61 41 70 50 70 61 a20 20 0 0 1 -40 0 C30 50 39 41 50 22 Z"
+      {/* 왼쪽 평탄부 → 스파이크 진입 (블루) */}
+      <Polyline
+        points="8,58 30,58 40,58 46,46"
         fill="none"
-        stroke="url(#lifelineIce)"
-        strokeWidth={4.6}
+        stroke={colors.primary}
+        strokeWidth={sw}
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
+      {/* QRS 스파이크 (레드) — 생명 신호 */}
       <Polyline
-        points="36,59 45,59 50,49 55,69 60,59 64,59"
+        points="46,46 52,74 58,26 64,66"
         fill="none"
-        stroke="#FF3B5C"
-        strokeWidth={4}
+        stroke={colors.emergency}
+        strokeWidth={sw}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* 스파이크 이후 평탄부 (블루) */}
+      <Polyline
+        points="64,66 72,58 92,58"
+        fill="none"
+        stroke={colors.primary}
+        strokeWidth={sw}
         strokeLinecap="round"
         strokeLinejoin="round"
       />

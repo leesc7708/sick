@@ -52,10 +52,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: 14,
+    minHeight: 60,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
   },
-  iconBox: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  arrow: { fontSize: 26, fontWeight: '300', color: colors.g300 },
+  iconBox: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
 });

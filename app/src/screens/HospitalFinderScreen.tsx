@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Linking, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
@@ -42,10 +42,16 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
     <View style={styles.wrap}>
       <AppBar title={t('hf_title')} onBack={() => navigation.goBack()} />
 
-      <View style={styles.tabs}>
-        {TABS.map((tab) => (
-          <Chip key={tab.k} label={t(`hf_${tab.k}`)} tone="primary" selected={kind === tab.k} onPress={() => setKind(tab.k)} />
-        ))}
+      {/* 탭은 세그먼트 컨트롤 (아래 필터 pill과 시각 분리) */}
+      <View style={styles.segment}>
+        {TABS.map((tab) => {
+          const on = kind === tab.k;
+          return (
+            <Pressable key={tab.k} style={[styles.seg, on && styles.segOn]} onPress={() => setKind(tab.k)}>
+              <Text style={[styles.segTxt, on && styles.segTxtOn]}>{t(`hf_${tab.k}`)}</Text>
+            </Pressable>
+          );
+        })}
       </View>
       <View style={styles.filters}>
         <Chip label={t('hf_open')} selected={openOnly} onPress={() => setOpenOnly((v) => !v)} />
@@ -70,9 +76,12 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
             </View>
 
             {kind === 'er' && typeof h.availableBeds === 'number' && (
-              <Text style={[typography.captionBold, { marginTop: 4, color: h.availableBeds > 0 ? colors.success : colors.emergency }]}>
-                {h.availableBeds > 0 ? `🟢 ${t('hf_beds')} ${h.availableBeds} (${t('hf_realtime')})` : `🔴 ${t('hf_full')}`}
-              </Text>
+              <View style={styles.bedRow}>
+                <View style={[styles.dot, { backgroundColor: h.availableBeds > 0 ? colors.success : colors.emergency }]} />
+                <Text style={[typography.captionBold, { color: h.availableBeds > 0 ? colors.success : colors.emergency }]}>
+                  {h.availableBeds > 0 ? `${t('hf_beds')} ${h.availableBeds} (${t('hf_realtime')})` : t('hf_full')}
+                </Text>
+              </View>
             )}
             {h.departments.length > 0 && (
               <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 4 }]}>{h.departments.join(' · ')}{h.isOpenNow ? ` · ${t('hf_open_now')}` : ''}</Text>
@@ -96,7 +105,13 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: colors.bg },
-  tabs: { flexDirection: 'row', paddingHorizontal: spacing.md, paddingTop: spacing.md },
+  segment: { flexDirection: 'row', backgroundColor: colors.g100, borderRadius: radius.lg, padding: 4, marginHorizontal: spacing.md, marginTop: spacing.md, marginBottom: spacing.sm },
+  seg: { flex: 1, paddingVertical: 9, borderRadius: radius.md, alignItems: 'center' },
+  segOn: { backgroundColor: colors.card, ...shadow.card },
+  segTxt: { ...typography.captionBold, color: colors.textMuted },
+  segTxtOn: { color: colors.text },
+  bedRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 6 },
+  dot: { width: 8, height: 8, borderRadius: 4 },
   filters: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.md },
   content: { padding: spacing.md, paddingBottom: 40 },
   card: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginBottom: spacing.sm },

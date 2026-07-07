@@ -65,4 +65,13 @@
 - **P0-① colors.ts**: primary #3182F6→#1B64DA(대비↑), emergency #F04452→#DA1E28(WHO 의료레드), warning→#F5850B, success→#0E9F6E, textMuted #8B95A1→#5B636E(야외가독 7:1 목표). work 오렌지는 배지 액센트로 강등 명시
 - **P0-② 라인 아이콘 통일**: components/Icon.tsx 신규(react-native-svg 기반 19종, 새 의존성 없이 기존 svg 활용). 이모지→SVG 자동 매핑(resolveIcon)으로 ListTile/PrimaryButton 2개만 수정 → 전 화면 자동 반영. ListTile 화살표도 chevron 아이콘화
 - **P0-③ 홈 119 위계**: 전체폭·최상단·64px로 승격(구: 보조버튼 flex1.6 > 119 flex1 역전 해소). 응급체크는 아래 보조로
-- 미리보기 시트(아이콘+팔레트+홈목업) HTML 제작. tsc 통과·빌드·배포 완료. 남은 P1(Pretendard폰트·ECG로고·ListTile60px)·P2(탭/필터분리·다크모드)
+- 미리보기 시트(아이콘+팔레트+홈목업) HTML 제작. tsc 통과·빌드·배포 완료
+
+### 2026-07-07 | 디자인 P1/P2 적용 (다크모드 제외)
+- **P1 Pretendard 폰트**: expo-font 설치 + Pretendard Regular/SemiBold/Bold 탑재(robot 브로슈어 자산 재활용), typography 전체 fontFamily 지정 + 숫자 tabular-nums(119·병상·거리). App.tsx useFonts 비차단 로드(실패 시 시스템폰트 폴백). dist 번들 확인
+- **P1 로고 ECG 교체**: LogoMark.tsx 청록·보라 물방울 폐기 → 생명선(ECG 맥박선) 블루+레드 2색. 팔레트 정합·헬스케어 잔재 제거
+- **P1 ListTile**: 최소높이 60px, 아이콘박스 44→48
+- **P2 병원찾기**: 탭을 세그먼트 컨트롤로(필터 pill과 시각 분리), 응급실 병상 상태 이모지→컬러도트 배지
+- **P2 진료과상담**: 결과카드 좌측 WHO 3색 바(빨강/주황/초록) 추가
+- tsc 통과·빌드·배포·미리보기 갱신 완료
+- ⏸️ **다크모드 보류(의도적)**: 정적 colors import 구조라 전 파일 테마 컨텍스트 전환 필요 = 큰 리팩터. 라이브 브라우저 검증 없이 blind 적용은 데모 훼손 위험 → 별도 검증가능 세션에서 전용 작업 권장. 앱아이콘(assets/icon.png) 재생성도 별도(genIcons.js)
