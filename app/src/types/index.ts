@@ -129,6 +129,8 @@ export interface HistoryItem {
 }
 
 export type RootStackParamList = {
+  Login: undefined;
+  Signup: undefined;
   Onboarding: undefined;
   Home: undefined;
   RedFlag: undefined;

@@ -11,6 +11,8 @@ import { typography } from '../theme/typography';
 import { DEPT_GUIDES } from '../data/departmentGuide';
 import { consultAI, ConsultResult } from '../services/deptConsult';
 import { storage } from '../services/storage';
+import { useAuth } from '../auth/AuthContext';
+import { canUseAI } from '../services/auth';
 import { RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
 import type { Lang } from '../i18n/translations';
@@ -43,6 +45,15 @@ const CONSENT: Record<string, Record<Lang, string>> = {
   },
   yes: { ko: '동의하고 AI 안내', en: 'Agree & use AI', zh: '同意并使用AI', ja: '同意してAI案内', vi: 'Đồng ý, dùng AI', th: 'ยินยอมและใช้ AI', es: 'Aceptar y usar IA' },
   no: { ko: '동의 안 함 (기본 안내)', en: 'No (basic only)', zh: '不同意（仅基本）', ja: '同意しない（基本のみ）', vi: 'Không (chỉ cơ bản)', th: 'ไม่ยินยอม (พื้นฐาน)', es: 'No (solo básico)' },
+  need_approval: {
+    ko: '⚠️ AI 자유상담은 관리자 승인 후 이용할 수 있어요. 지금은 기본 안내(빠른 선택)만 제공됩니다.',
+    en: '⚠️ Free-text AI consultation is available after manager approval. For now, only basic guidance (quick picks).',
+    zh: '⚠️ 自由文字AI咨询需管理员审批后使用。目前仅提供基本指引（快速选择）。',
+    ja: '⚠️ 自由入力のAI相談は管理者の承認後に利用できます。今は基本案内（クイック選択）のみ。',
+    vi: '⚠️ Tư vấn AI bằng văn bản tự do dùng được sau khi quản lý duyệt. Hiện chỉ có hướng dẫn cơ bản (chọn nhanh).',
+    th: '⚠️ การปรึกษา AI แบบพิมพ์อิสระใช้ได้หลังผู้จัดการอนุมัติ ตอนนี้มีเฉพาะคำแนะนำพื้นฐาน (เลือกด่วน)',
+    es: '⚠️ La consulta con IA de texto libre está disponible tras la aprobación del gestor. Por ahora, solo guía básica (opciones rápidas).',
+  },
 };
 
 const URGENCY_STYLE: Record<string, { bg: string; fg: string }> = {
@@ -69,6 +80,8 @@ const URGENCY_LABEL: Record<string, Record<Lang, string>> = {
 
 export function DeptConsultScreen({ navigation }: Props) {
   const { t, lang } = useLang();
+  const { account } = useAuth();
+  const aiAllowed = canUseAI(account); // 미승인(general)은 AI 자유상담 불가
   const [text, setText] = useState('');
   const [picked, setPicked] = useState<string[]>([]);
   const [results, setResults] = useState<ConsultResult[] | null>(null);
@@ -96,6 +109,11 @@ export function DeptConsultScreen({ navigation }: Props) {
     // 빠른칩만 있거나 자유문장이 없으면 해외 전송 없음 → 바로 실행
     if (picked.length || !text.trim()) {
       execute(true);
+      return;
+    }
+    // 미승인(general) 사용자는 AI 자유상담 불가 → 규칙기반만(해외 전송 없음)
+    if (!aiAllowed) {
+      execute(false);
       return;
     }
     // 자유문장(AI 경로) → 국외이전 동의 확인(1회)
@@ -130,7 +148,7 @@ export function DeptConsultScreen({ navigation }: Props) {
           style={[styles.input, { minHeight: 64 }]}
           multiline
         />
-        <Text style={[typography.small, { color: colors.textMuted, marginTop: 6 }]}>{C('notice')}</Text>
+        <Text style={[typography.small, { color: aiAllowed ? colors.textMuted : colors.warning, marginTop: 6 }]}>{aiAllowed ? C('notice') : C('need_approval')}</Text>
 
         <Text style={styles.label}>{t('dc_quick_label')}</Text>
         <View style={styles.chips}>

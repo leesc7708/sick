@@ -11,13 +11,23 @@ import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
 import { seedDemo } from '../services/demoSeed';
+import { useAuth } from '../auth/AuthContext';
+import { logout, Role } from '../services/auth';
 import { useLang } from '../i18n/LanguageContext';
 import { LANGS } from '../i18n/translations';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
+const ROLE_LABEL: Record<Role, string> = {
+  general: '일반사용자(미승인)',
+  worker: '근로자',
+  svisor: '현장관리자 (Svisor)',
+  ssvisor: '떠블에스바이저 (SSvisor)',
+};
+
 export function SettingsScreen({ navigation }: Props) {
   const [mode, setMode] = useState<AppMode>('work');
+  const { account } = useAuth();
   const { lang, setLang, t } = useLang();
 
   useFocusEffect(
@@ -100,6 +110,17 @@ export function SettingsScreen({ navigation }: Props) {
             보안상 AI 호출은 서버 프록시(Cloud Functions)로만 처리합니다. API 키를 앱에 저장하지 않습니다.
           </Text>
         </View>
+
+        {account && (
+          <View style={[styles.card, shadow.card, { marginTop: spacing.lg }]}>
+            <Text style={[typography.captionBold, { color: colors.textSecondary }]}>계정</Text>
+            <Text style={[typography.body, { color: colors.text, marginTop: 4 }]}>{account.name} ({account.username})</Text>
+            <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>
+              {ROLE_LABEL[account.role]} · {account.status === 'active' ? '승인됨' : account.status === 'pending' ? '승인 대기' : '거부됨'}
+            </Text>
+          </View>
+        )}
+        <PrimaryButton title="로그아웃" variant="outline" onPress={() => logout()} style={{ marginTop: spacing.md }} />
 
         <PrimaryButton title="🎬 데모 데이터 채우기" variant="secondary" onPress={fillDemo} style={{ marginTop: spacing.lg }} />
         <PrimaryButton title="모든 데이터 삭제" variant="outline" onPress={clearAll} style={{ marginTop: spacing.sm }} />

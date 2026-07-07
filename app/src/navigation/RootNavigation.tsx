@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { colors } from '../theme/colors';
 import { RootStackParamList } from '../types';
-import { storage } from '../services/storage';
+import { useAuth } from '../auth/AuthContext';
+import { LoginScreen } from '../screens/LoginScreen';
+import { SignupScreen } from '../screens/SignupScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { RedFlagScreen } from '../screens/RedFlagScreen';
@@ -35,6 +37,8 @@ const linking = {
   prefixes: ['lifeline://', 'https://lifeline-safety.web.app'],
   config: {
     screens: {
+      Login: 'login',
+      Signup: 'signup',
       Onboarding: 'onboarding',
       Home: 'home',
       RedFlag: 'red-flag',
@@ -56,18 +60,9 @@ const linking = {
 };
 
 export function RootNavigation() {
-  const [ready, setReady] = useState(false);
-  const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('Onboarding');
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    (async () => {
-      const profile = await storage.getProfile();
-      setInitialRoute(profile?.onboardingDone ? 'Home' : 'Onboarding');
-      setReady(true);
-    })();
-  }, []);
-
-  if (!ready) {
+  if (loading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -78,11 +73,17 @@ export function RootNavigation() {
   return (
     <NavigationContainer linking={linking}>
       <Stack.Navigator
-        initialRouteName={initialRoute}
         screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}
       >
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        {!user ? (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Signup" component={SignupScreen} />
+          </>
+        ) : (
+          <>
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="RedFlag" component={RedFlagScreen} />
         <Stack.Screen name="SymptomInput" component={SymptomInputScreen} />
         <Stack.Screen name="SymptomSummary" component={SymptomSummaryScreen} />
@@ -97,6 +98,8 @@ export function RootNavigation() {
         <Stack.Screen name="MyMedicines" component={MyMedicinesScreen} />
         <Stack.Screen name="History" component={HistoryScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );
