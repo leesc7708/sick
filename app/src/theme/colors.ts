@@ -1,25 +1,26 @@
-// 라이프라인 디자인 시스템 — 토스/당근 벤치마킹 (2026-06-08 리브랜딩)
-// 신뢰감 있는 토스 블루 + 응급 레드 포인트 + 현장(@work) 당근 오렌지 액센트
+// 라이프라인 디자인 시스템 — 토스/E-Gen/WHO 트리아지 벤치마킹 (2026-07-07 디자인팀 리비전)
+// 신뢰 블루(브랜드 단일) + WHO 응급 3색(빨강=즉시/주황=곧/초록=대기) + @work 오렌지는 배지 액센트로만
+// ⚠️ 오렌지(work)는 주버튼 배경으로 쓰지 말 것 — 브랜드 위계 유지
 
 export const colors = {
-  // brand (토스 블루 계열 — 주요 액션/신뢰)
-  primary: '#3182F6',
-  primaryDark: '#1B64DA',
+  // brand (신뢰 블루 — 주요 액션. 흰 배경 대비 강화를 위해 primaryDark 승격)
+  primary: '#1B64DA', // (구 #3182F6) 흰 배경 대비 ~5.9:1 AA 통과
+  primaryDark: '#154FB0',
   primaryLight: '#E8F2FE',
 
-  // 보조/상태
-  secondary: '#3182F6',
-  emergency: '#F04452', // 응급 레드 (가장 강한 경고)
-  danger: '#F04452',
-  warning: '#FF9500',
-  success: '#00C471', // 안전/완료 그린
-  info: '#3182F6',
+  // 보조/상태 (시맨틱 토큰: 의도상 primary와 동일값이나 명시적으로 분리 관리)
+  secondary: '#1B64DA',
+  emergency: '#DA1E28', // 응급 레드 (구 #F04452 핑크톤 → 의료 경고 레드로 조임, 대비 ↑)
+  danger: '#DA1E28',
+  warning: '#F5850B', // 주의(곧 진료) 오렌지
+  success: '#0E9F6E', // 안전/완료 그린 (구 #00C471 → 텍스트 대비 확보)
+  info: '#1B64DA',
 
-  // 응급 신호 3단계 + 위험도(기존 키 호환)
-  riskCritical: '#F04452',
-  riskHigh: '#FF6B35',
-  riskMedium: '#FF9500',
-  riskLow: '#00C471',
+  // 응급 신호 3단계(WHO 트리아지 정렬) + 위험도(기존 키 호환)
+  riskCritical: '#DA1E28',
+  riskHigh: '#F5850B',
+  riskMedium: '#F5850B',
+  riskLow: '#0E9F6E',
   riskUnknown: '#8B95A1',
 
   // 그레이 스케일 (토스 grey 팔레트)
@@ -40,9 +41,9 @@ export const colors = {
   border: '#E5E8EB',
   divider: '#F2F4F6',
 
-  text: '#191F28',
-  textSecondary: '#4E5968',
-  textMuted: '#8B95A1',
+  text: '#17181C',
+  textSecondary: '#444C56',
+  textMuted: '#5B636E', // (구 #8B95A1 대비 3.4:1 → ~5.8:1) 현장 야외 가독성
   textInverse: '#FFFFFF',
 
   // @work 현장 전용 강조 (당근 오렌지 톤)

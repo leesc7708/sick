@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
+import { Icon, resolveIcon } from './Icon';
 
 type Tone = 'default' | 'emergency' | 'work';
 
@@ -16,7 +17,10 @@ interface Props {
 
 export function ListTile({ icon, title, desc, onPress, tone = 'default', badge }: Props) {
   const iconBg =
-    tone === 'emergency' ? '#FFE9EA' : tone === 'work' ? colors.workLight : colors.primaryLight;
+    tone === 'emergency' ? '#FBE3E4' : tone === 'work' ? colors.workLight : colors.primaryLight;
+  const iconColor =
+    tone === 'emergency' ? colors.emergency : tone === 'work' ? colors.work : colors.primary;
+  const iconName = resolveIcon(icon);
   return (
     <Pressable
       onPress={onPress}
@@ -27,7 +31,7 @@ export function ListTile({ icon, title, desc, onPress, tone = 'default', badge }
       ]}
     >
       <View style={[styles.iconBox, { backgroundColor: iconBg }]}>
-        <Text style={{ fontSize: 22 }}>{icon}</Text>
+        {iconName ? <Icon name={iconName} size={24} color={iconColor} /> : <Text style={{ fontSize: 22 }}>{icon}</Text>}
       </View>
       <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -38,7 +42,7 @@ export function ListTile({ icon, title, desc, onPress, tone = 'default', badge }
           <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>{desc}</Text>
         ) : null}
       </View>
-      <Text style={styles.arrow}>›</Text>
+      <Icon name="chevron" size={20} color={colors.g400} />
     </Pressable>
   );
 }

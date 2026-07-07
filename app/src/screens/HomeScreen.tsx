@@ -71,19 +71,14 @@ export function HomeScreen({ navigation }: Props) {
 
         <LangSwitcher style={{ marginBottom: spacing.sm }} />
 
-        <View style={styles.modeToggle}>
+        {/* 생명 직결: 119를 전체폭·최상단·최대로 (디자인팀 P0 — 위계 정상화) */}
+        <PrimaryButton title="119 즉시 전화" icon="📞" variant="emergency" size="lg" style={styles.call119} onPress={() => Linking.openURL('tel:119')} />
+        <View style={{ height: spacing.sm }} />
+        <PrimaryButton title={t('emergency_check')} icon="🚨" variant="primary" size="md" onPress={() => navigation.navigate('RedFlag')} />
+
+        <View style={[styles.modeToggle, { marginTop: spacing.md }]}>
           <Chip label={t('mode_work')} tone="work" selected={isWork} onPress={() => changeMode('work')} />
           <Chip label={t('mode_general')} tone="primary" selected={!isWork} onPress={() => changeMode('general')} />
-        </View>
-
-        <View style={styles.emergencyRow}>
-          <View style={{ flex: 1 }}>
-            <PrimaryButton title="119" icon="📞" variant="emergency" size="lg" onPress={() => Linking.openURL('tel:119')} />
-          </View>
-          <View style={{ width: spacing.sm }} />
-          <View style={{ flex: 1.6 }}>
-            <PrimaryButton title={t('emergency_check')} icon="🚨" variant="primary" size="lg" onPress={() => navigation.navigate('RedFlag')} />
-          </View>
         </View>
 
         <ListTile icon="📝" title={t('symptom_organize')} desc={t('symptom_desc')}
@@ -134,5 +129,5 @@ const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md, marginTop: spacing.xs },
   modeToggle: { flexDirection: 'row', marginBottom: spacing.md },
-  emergencyRow: { flexDirection: 'row', marginBottom: spacing.md },
+  call119: { height: 64 },
 });

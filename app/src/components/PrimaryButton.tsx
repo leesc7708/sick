@@ -2,6 +2,7 @@ import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { colors, radius, spacing } from '../theme/colors';
 import { typography } from '../theme/typography';
+import { Icon, resolveIcon } from './Icon';
 
 type Variant = 'primary' | 'success' | 'emergency' | 'work' | 'secondary' | 'outline' | 'ghost';
 type Size = 'lg' | 'md' | 'sm';
@@ -48,6 +49,7 @@ export function PrimaryButton({
 }: Props) {
   const h = size === 'lg' ? 56 : size === 'sm' ? 44 : 52;
   const bordered = variant === 'outline' || variant === 'ghost';
+  const iconName = resolveIcon(icon);
   return (
     <Pressable
       onPress={onPress}
@@ -69,7 +71,15 @@ export function PrimaryButton({
         <ActivityIndicator color={FG[variant]} />
       ) : (
         <View style={styles.row}>
-          {icon ? <Text style={styles.icon}>{icon} </Text> : null}
+          {icon ? (
+            iconName ? (
+              <View style={{ marginRight: 7 }}>
+                <Icon name={iconName} size={size === 'sm' ? 17 : 19} color={FG[variant]} strokeWidth={2.2} />
+              </View>
+            ) : (
+              <Text style={styles.icon}>{icon} </Text>
+            )
+          ) : null}
           <Text style={[typography.button, { color: FG[variant], fontSize: size === 'sm' ? 14 : 16 }]}>
             {title}
           </Text>
