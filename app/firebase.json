@@ -1,24 +1,13 @@
 {
-  "hosting": [
-    {
-      "site": "lifeline-safety",
-      "public": "dist",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [
-        { "source": "/api/dept-consult", "function": { "functionId": "deptConsult", "region": "asia-northeast3" } },
-        { "source": "**", "destination": "/index.html" }
-      ]
-    },
-    {
-      "site": "wheresick-5617a",
-      "public": "dist",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [
-        { "source": "/api/dept-consult", "function": { "functionId": "deptConsult", "region": "asia-northeast3" } },
-        { "source": "**", "destination": "/index.html" }
-      ]
-    }
-  ],
+  "hosting": {
+    "site": "wheresick-5617a",
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      { "source": "/api/dept-consult", "function": { "functionId": "deptConsult", "region": "asia-northeast3" } },
+      { "source": "**", "destination": "/index.html" }
+    ]
+  },
   "functions": {
     "source": "functions"
   }
