@@ -1,0 +1,16 @@
+{
+  "name": "lifeline-functions",
+  "description": "Cloud Functions for Lifeline (Claude 진료과 상담 프록시)",
+  "engines": {
+    "node": "22"
+  },
+  "main": "index.js",
+  "scripts": {
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-functions": "^6.1.0",
+    "@anthropic-ai/sdk": "^0.78.0"
+  },
+  "private": true
+}

@@ -38,16 +38,44 @@ export function consultRuleBased(text: string, quickIds: string[] = []): Consult
 }
 
 /**
- * (확장 예정) AI 자유입력 상담.
- * 배포 시 Firebase Cloud Functions 엔드포인트를 호출해 Claude(권장: Haiku)로
- * "어느 진료과로 가면 되는지" 안내를 받는다. 진단·처방은 금지, 안내만.
- *
- * 예) const res = await fetch(FUNCTIONS_URL + '/deptConsult', {
- *       method: 'POST', body: JSON.stringify({ text }) });
- *
- * 지금은 규칙기반으로 폴백한다.
+ * AI 자유입력 상담.
+ *  - 빠른칩을 선택한 경우: 큐레이션된 규칙기반으로 즉시 응답(무료).
+ *  - 자유 문장: Cloud Functions 프록시(/api/dept-consult)를 통해 Claude(Haiku)로 안내.
+ *  - 네트워크/응답 실패 시 규칙기반으로 폴백(끊기지 않게).
+ * ⚠️ API 키는 서버(함수 .env)에만 있고 앱엔 없다.
  */
-export async function consultAI(text: string, quickIds: string[] = []): Promise<ConsultResult[]> {
-  // TODO: Cloud Functions 프록시 연동 후 아래 규칙기반 폴백을 교체/보완
+export async function consultAI(text: string, quickIds: string[] = [], lang = 'ko'): Promise<ConsultResult[]> {
+  // 빠른칩 선택은 즉시·무료 규칙기반
+  if (quickIds.length) return consultRuleBased(text, quickIds);
+
+  const t = (text || '').trim();
+  if (!t) return consultRuleBased(text, quickIds);
+
+  try {
+    const res = await fetch('/api/dept-consult', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: t, lang }),
+    });
+    const j = await res.json();
+    if (j?.ok && j.data?.dept) {
+      const d = j.data;
+      const urgency = ['emergency', 'soon', 'normal'].includes(d.urgency) ? d.urgency : 'normal';
+      const guide: DeptGuide = {
+        id: 'ai',
+        keywords: [],
+        symptom: t.length > 34 ? t.slice(0, 34) + '…' : t,
+        primaryDept: String(d.dept),
+        altDept: d.alt ? String(d.alt) : undefined,
+        reason: String(d.reason || ''),
+        confuseNote: d.tip ? String(d.tip) : undefined,
+        urgency,
+        work: false,
+      };
+      return [{ guide, score: 100 }];
+    }
+  } catch (e) {
+    // 무시하고 규칙기반 폴백
+  }
   return consultRuleBased(text, quickIds);
 }

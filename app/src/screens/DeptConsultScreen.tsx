@@ -9,7 +9,7 @@ import { Disclaimer } from '../components/Disclaimer';
 import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { DEPT_GUIDES } from '../data/departmentGuide';
-import { consultRuleBased, ConsultResult } from '../services/deptConsult';
+import { consultAI, ConsultResult } from '../services/deptConsult';
 import { RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
 
@@ -25,15 +25,23 @@ const URGENCY_STYLE: Record<string, { bg: string; fg: string; label: string }> =
 };
 
 export function DeptConsultScreen({ navigation }: Props) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [text, setText] = useState('');
   const [picked, setPicked] = useState<string[]>([]);
   const [results, setResults] = useState<ConsultResult[] | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const togglePick = (id: string) =>
     setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
 
-  const run = () => setResults(consultRuleBased(text, picked));
+  const run = async () => {
+    setLoading(true);
+    try {
+      setResults(await consultAI(text, picked, lang));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const goHospital = (dept: string) =>
     navigation.navigate('HospitalFinder', { kind: 'hospital', department: dept });
@@ -64,7 +72,7 @@ export function DeptConsultScreen({ navigation }: Props) {
         </View>
 
         <View style={{ marginTop: spacing.lg }}>
-          <PrimaryButton title={t('dc_run')} icon="🔎" size="lg" onPress={run} />
+          <PrimaryButton title={t('dc_run')} icon="🔎" size="lg" loading={loading} onPress={run} />
         </View>
 
         {results && results.length === 0 && (
