@@ -4,7 +4,7 @@
 //  - 나중: AI 자유입력 상담. 아래 consultAI()를 Cloud Functions 프록시로 연결.
 //    ⚠️ 보안·의료법상 클라이언트에 API 키를 넣지 말 것. 반드시 서버(Functions) 경유.
 // ─────────────────────────────────────────────────────────────
-import { DEPT_GUIDES, DeptGuide } from '../data/departmentGuide';
+import { DEPT_GUIDES, DeptGuide, GENERIC_GUIDE } from '../data/departmentGuide';
 
 export interface ConsultResult {
   guide: DeptGuide;
@@ -30,6 +30,9 @@ export function consultRuleBased(text: string, quickIds: string[] = []): Consult
 
     if (score > 0) results.push({ guide, score });
   }
+
+  // 아무 것도 못 찾으면 "못 찾았어요"로 막지 않고 1차 진료과(가정의학과/내과) 안내
+  if (results.length === 0) return [{ guide: GENERIC_GUIDE, score: 1 }];
 
   return results.sort((a, b) => b.score - a.score);
 }
