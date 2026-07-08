@@ -23,7 +23,14 @@
   - 색 위계: 홈 응급신호 버튼 solid→outline(119만 loud), 모드토글 주황Chip→세그먼트 컨트롤
   - FAB 스크롤 반응형(fabStore, 로그인·최상단 숨김) + 홈 하단여백 겹침 해소
   - Chip 터치타겟 44px, WorkCheck unfit 배너 위계 강화(아이콘+h3)+색 토큰화(emergency/warningLight)
-- 검증: tsc·빌드·배포·실브라우저 재캡처. 남은 디자인 P1/P2: 홈 섹션 그룹핑·로그인 레이아웃·병상 배지 승격·접근성 props (문서 라이프라인_3팀검토에 목록)
+- **디자인 P1/P2 추가 완료**(실브라우저 재캡처 검증):
+  - 로그인: 세로 중앙정렬+아이디/비번 라벨+placeholder 대비 / LangSwitcher 세로늘어남 회귀 수정(flexGrow:0)
+  - 홈 3섹션 그룹핑(건강·응급/현장@work/내 기록·설정, 다국어 라벨)
+  - 응급실 병상 상태 컬러 배지 승격(초록 가용병상N/빨강 만실 pill)
+  - 접근성 props(accessibilityRole/Label/State) — PrimaryButton·ListTile·Chip·세그먼트·역할pill
+- 검증: 매 배치 tsc·빌드·배포·실브라우저 스크린샷 확인(로그인·홈·워크체크·병원·표현집·증상정리 회귀 0). 자산 wheresick-5617a.web.app
+- 남은 디자인(저우선): @work 워드마크 pill화·빈상태 CTA·라운드 완전통일 (문서 라이프라인_3팀검토)
+- ⏳ 미구현 기능(P1, 디자인 아님): unfit WorkCheck '관리자 즉시 보고'가 아직 로컬저장만 → svisor 서버전송 필요(중처법 감사추적 실질화). 2계정 라이브 긴급 시연 녹화
 
 ### 2026-07-08 | 회원 승인·역할배정 화면(ssvisor 키스톤) + 2계정 e2e 검증
 - **발견**: 어제 만든 로그인·역할·크루 시스템에 **가입자 승인/역할부여 UI가 부재**(ManagerDashboard는 로컬스토리지 데모, 실제 승인기능 없음). ssvisor만 rules상 role/status 변경 가능한데 이를 실행할 화면이 없어 **활성 svisor·worker 생성 불가 → 2계정 e2e 자체가 막힘**. mmersum만 콘솔 수동설정 상태였음
