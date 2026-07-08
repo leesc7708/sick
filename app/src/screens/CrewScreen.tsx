@@ -54,7 +54,7 @@ export function CrewScreen({ navigation }: Props) {
 
   useEffect(() => {
     if (!sel) { setMembers([]); return; }
-    const u = watchMembers(sel.id, setMembers);
+    const u = watchMembers(sel.id, sel.ownerUid, setMembers);
     return u;
   }, [sel]);
 

@@ -64,6 +64,9 @@ export async function signup(input: {
     lang: input.lang,
   };
   await setDoc(doc(db, 'users', uid), { ...account, createdAt: serverTimestamp() });
+  // username 조회 전용 컬렉션(문서키=username) — users 본체 read를 축소(self||ssvisor)하면서도
+  // 관리자가 아이디로 워커를 get 조회할 수 있게 최소 정보만 별도 보관
+  await setDoc(doc(db, 'usernames', account.username), { uid, name: account.name, phone: account.phone });
   return account;
 }
 

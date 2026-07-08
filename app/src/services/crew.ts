@@ -59,14 +59,13 @@ export async function closeCrew(crewId: string) {
   await updateDoc(doc(db, 'crews', crewId), { status: 'closed', closedAt: serverTimestamp() });
 }
 
-// 아이디(username)로 워커 찾기
+// 아이디(username)로 워커 찾기 — usernames/{username} 단건 get (users 전체 list 권한 불필요)
 export async function findWorkerByUsername(username: string): Promise<{ uid: string; name: string; phone?: string } | null> {
   const clean = username.trim().toLowerCase();
-  const snap = await getDocs(query(collection(db, 'users'), where('username', '==', clean)));
-  if (snap.empty) return null;
-  const d = snap.docs[0];
-  const x = d.data() as any;
-  return { uid: d.id, name: x.name, phone: x.phone };
+  const snap = await getDoc(doc(db, 'usernames', clean));
+  if (!snap.exists()) return null;
+  const x = snap.data() as any;
+  return { uid: x.uid, name: x.name, phone: x.phone };
 }
 
 // 워커 강제 추가(이동 포함) — crewMemberships/{workerUid} 덮어쓰기
@@ -91,12 +90,13 @@ export function watchMyCrews(ownerUid: string, cb: (crews: Crew[]) => void) {
   });
 }
 
-// 특정 크루 멤버 실시간 구독
-export function watchMembers(crewId: string, cb: (m: Membership[]) => void) {
-  const q = query(collection(db, 'crewMemberships'), where('crewId', '==', crewId));
+// 특정 크루 멤버 실시간 구독 — read 규칙 축소(자기 크루=ownerUid)에 맞춰 ownerUid로 쿼리하고
+// crewId·status는 클라이언트에서 필터 (ownerUid 단일 필드 → 자동 인덱스, 복합 인덱스 불필요)
+export function watchMembers(crewId: string, ownerUid: string, cb: (m: Membership[]) => void) {
+  const q = query(collection(db, 'crewMemberships'), where('ownerUid', '==', ownerUid));
   return onSnapshot(q, (snap) => {
     const list = snap.docs.map((d) => d.data() as any) as Membership[];
-    cb(list.filter((m) => m.status === 'active'));
+    cb(list.filter((m) => m.crewId === crewId && m.status === 'active'));
   });
 }
 
