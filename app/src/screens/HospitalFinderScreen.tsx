@@ -77,10 +77,14 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
 
             {kind === 'er' && typeof h.availableBeds === 'number' && (
               <View style={styles.bedRow}>
-                <View style={[styles.dot, { backgroundColor: h.availableBeds > 0 ? colors.success : colors.emergency }]} />
-                <Text style={[typography.captionBold, { color: h.availableBeds > 0 ? colors.success : colors.emergency }]}>
-                  {h.availableBeds > 0 ? `${t('hf_beds')} ${h.availableBeds} (${t('hf_realtime')})` : t('hf_full')}
-                </Text>
+                <View style={[styles.bedBadge, { backgroundColor: h.availableBeds > 0 ? colors.success : colors.emergency }]}>
+                  <Text style={styles.bedBadgeTxt}>
+                    {h.availableBeds > 0 ? `${t('hf_beds')} ${h.availableBeds}` : t('hf_full')}
+                  </Text>
+                </View>
+                {h.availableBeds > 0 && (
+                  <Text style={[typography.small, { color: colors.textMuted }]}>{t('hf_realtime')}</Text>
+                )}
               </View>
             )}
             {h.departments.length > 0 && (
@@ -110,10 +114,11 @@ const styles = StyleSheet.create({
   segOn: { backgroundColor: colors.card, ...shadow.card },
   segTxt: { ...typography.captionBold, color: colors.textMuted },
   segTxtOn: { color: colors.text },
-  bedRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 6 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
+  bedRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 8 },
+  bedBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.pill, alignSelf: 'flex-start' },
+  bedBadgeTxt: { ...typography.captionBold, color: '#fff' },
   filters: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.md },
   content: { padding: spacing.md, paddingBottom: 40 },
-  card: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginBottom: spacing.sm },
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm },
   rowBtns: { flexDirection: 'row', marginTop: spacing.md },
 });
