@@ -113,6 +113,41 @@ export async function ackAlert(alertId: string, byUid: string) {
   await updateDoc(doc(db, 'alerts', alertId), { status: 'ack', ackBy: byUid, ackAt: serverTimestamp() });
 }
 
+// ── 작업 부적합 보고 (위험작업+부적합 시 관리자에게 서버 전송) ──
+// 중처법 감사추적: "관리자 즉시 보고"를 로컬기록이 아닌 실제 svisor 수신으로 실현
+export interface UnfitReport {
+  id: string;
+  workerUid: string;
+  workerName: string;
+  ownerUid: string;
+  crewId: string;
+  workType: string;
+  result: 'unfit';
+  workDate: string;
+  status: 'new' | 'ack';
+}
+
+export async function reportUnfit(worker: UserAccount, membership: Membership, workType: string) {
+  await addDoc(collection(db, 'workCheckReports'), {
+    workerUid: worker.uid, workerName: worker.name,
+    ownerUid: membership.ownerUid, crewId: membership.crewId,
+    workType, result: 'unfit', workDate: todayStr(), status: 'new', createdAt: serverTimestamp(),
+  });
+}
+
+// 관리자(크루 owner)에게 온 오늘의 부적합 보고 실시간 구독
+export function watchUnfitReports(ownerUid: string, cb: (r: UnfitReport[]) => void) {
+  const q = query(collection(db, 'workCheckReports'), where('ownerUid', '==', ownerUid));
+  return onSnapshot(q, (snap) => {
+    const list = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as UnfitReport[];
+    cb(list.filter((r) => r.workDate === todayStr() && (r.status === 'new' || r.status === 'ack')));
+  });
+}
+
+export async function ackUnfitReport(id: string, byUid: string) {
+  await updateDoc(doc(db, 'workCheckReports', id), { status: 'ack', ackBy: byUid, ackAt: serverTimestamp() });
+}
+
 // ── 워커 ──
 export async function getMyMembership(workerUid: string): Promise<Membership | null> {
   const snap = await getDoc(doc(db, 'crewMemberships', workerUid));

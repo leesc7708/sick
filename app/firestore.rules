@@ -49,6 +49,15 @@ service cloud.firestore {
         || (request.auth.uid == wuid && request.resource.data.status == 'left');
     }
 
+    // ── 작업 부적합 보고 (워커→자기 크루 관리자에게 전송) ──
+    match /workCheckReports/{id} {
+      allow create: if isSignedIn() && request.resource.data.workerUid == request.auth.uid;
+      allow read:   if isSignedIn() && (resource.data.workerUid == request.auth.uid
+                      || resource.data.ownerUid == request.auth.uid || isSsvisor());
+      allow update: if isSignedIn() && (resource.data.ownerUid == request.auth.uid || isSsvisor());
+      allow delete: if false;
+    }
+
     // ── 아이디 조회 전용 (문서키=username, 최소 정보) ──
     match /usernames/{uname} {
       allow get:    if isManager();                                                  // 관리자 단건 조회(워커 추가)

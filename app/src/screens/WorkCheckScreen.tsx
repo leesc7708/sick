@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -12,6 +12,8 @@ import { WORK_TYPES } from '../data/options';
 import { RootStackParamList } from '../types';
 import { storage } from '../services/storage';
 import { useLang } from '../i18n/LanguageContext';
+import { useAuth } from '../auth/AuthContext';
+import { getMyMembership, reportUnfit, Membership } from '../services/crew';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'WorkCheck'>;
 
@@ -22,7 +24,16 @@ const WT_KEY: Record<string, string> = {
 
 export function WorkCheckScreen({ navigation }: Props) {
   const { t } = useLang();
+  const { account } = useAuth();
+  const [membership, setMembership] = useState<Membership | null>(null);
   const [workType, setWorkType] = useState(WORK_TYPES[0]);
+
+  // 오늘 소속 크루 로드 → 부적합 시 관리자에게 서버 전송용
+  useEffect(() => {
+    if (account?.role === 'worker') {
+      getMyMembership(account.uid).then(setMembership).catch(() => setMembership(null));
+    }
+  }, [account]);
   // 안전문항 3종: 기본값 미선택(null)으로 능동 응답 강제 (통과 프리셋 제거 — 묵인편향 방지)
   const [sleepOk, setSleepOk] = useState<boolean | null>(null);
   const [noAlcohol, setNoAlcohol] = useState<boolean | null>(null);
@@ -60,8 +71,14 @@ export function WorkCheckScreen({ navigation }: Props) {
       result,
       advisedStop: result === 'unfit',
     });
+    // 위험작업 부적합(unfit)이고 오늘 소속 크루가 있으면 관리자에게 실제 서버 전송(로컬기록만이 아닌 실보고)
+    let reported = false;
+    if (result === 'unfit' && account && membership) {
+      try { await reportUnfit(account, membership, workType); reported = true; } catch {}
+    }
     const title = result === 'unfit' ? t('wc_unfit_t') : t('wc_submit');
-    const msg = result === 'unfit' ? t('wc_unfit_m') : result === 'caution' ? t('wc_warn_m') : t('wc_note');
+    let msg = result === 'unfit' ? t('wc_unfit_m') : result === 'caution' ? t('wc_warn_m') : t('wc_note');
+    if (result === 'unfit') msg += '\n\n' + (reported ? t('wc_reported') : t('wc_report_none'));
     Alert.alert(title, msg, [
       { text: t('ef_home'), onPress: () => navigation.goBack() },
     ]);

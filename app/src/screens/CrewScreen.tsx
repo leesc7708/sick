@@ -10,6 +10,7 @@ import { useAuth } from '../auth/AuthContext';
 import {
   Crew, Membership, Alert as CrewAlert, createCrew, closeCrew, findWorkerByUsername,
   addWorker, removeWorker, watchMyCrews, watchMembers, watchMyAlerts, ackAlert,
+  UnfitReport, watchUnfitReports, ackUnfitReport,
 } from '../services/crew';
 import { RootStackParamList } from '../types';
 
@@ -35,6 +36,7 @@ export function CrewScreen({ navigation }: Props) {
   const [sel, setSel] = useState<Crew | null>(null);
   const [members, setMembers] = useState<Membership[]>([]);
   const [alerts, setAlerts] = useState<CrewAlert[]>([]);
+  const [unfit, setUnfit] = useState<UnfitReport[]>([]);
   const [label, setLabel] = useState('');
   const [endTime, setEndTime] = useState('');
   const [uname, setUname] = useState('');
@@ -49,7 +51,8 @@ export function CrewScreen({ navigation }: Props) {
       prevAlertCount.current = a.filter((x) => x.status === 'new').length;
       setAlerts(a);
     });
-    return () => { un(); ua(); };
+    const uu = watchUnfitReports(account.uid, setUnfit);
+    return () => { un(); ua(); uu(); };
   }, [account]);
 
   useEffect(() => {
@@ -98,6 +101,22 @@ export function CrewScreen({ navigation }: Props) {
                   <Pressable onPress={() => (window as any).open?.(`https://map.kakao.com/?q=${a.lat},${a.lng}`)}><Text style={styles.mapBtn}>🗺️</Text></Pressable>
                 )}
                 <Pressable onPress={() => ack(a)} style={styles.ackBtn}><Text style={styles.ackTxt}>확인</Text></Pressable>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* 작업 부적합 보고 (워커의 작업 전 건강체크 unfit) */}
+        {unfit.filter((u) => u.status === 'new').length > 0 && (
+          <View style={styles.unfitCard}>
+            <Text style={[typography.h3, { color: colors.workDark }]}>⚠ 작업 부적합 보고 {unfit.filter((u) => u.status === 'new').length}건</Text>
+            {unfit.filter((u) => u.status === 'new').map((u) => (
+              <View key={u.id} style={styles.unfitRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[typography.bodyBold, { color: colors.text }]}>{u.workerName} · {u.workType}</Text>
+                  <Text style={[typography.small, { color: colors.textMuted }]}>작업 전 건강체크 부적합 — 작업 보류 권고됨</Text>
+                </View>
+                <Pressable onPress={() => ackUnfitReport(u.id, account.uid)} style={styles.ackBtn2}><Text style={styles.ackTxt2}>확인</Text></Pressable>
               </View>
             ))}
           </View>
@@ -158,6 +177,10 @@ const styles = StyleSheet.create({
   crewCard: { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm, borderColor: 'transparent', borderWidth: 1.5 },
   memberRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm },
   emCard: { backgroundColor: colors.emergency, borderRadius: radius.xl, padding: spacing.md, marginBottom: spacing.md },
+  unfitCard: { backgroundColor: colors.warningLight, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.md, borderWidth: 1, borderColor: colors.work },
+  unfitRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.06)', paddingTop: spacing.sm },
+  ackBtn2: { backgroundColor: colors.work, borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 8, marginLeft: 8 },
+  ackTxt2: { ...typography.captionBold, color: '#fff' },
   emRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.25)', paddingTop: spacing.sm },
   ackBtn: { backgroundColor: '#fff', borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 8, marginLeft: 8 },
   ackTxt: { ...typography.captionBold, color: colors.emergency },
