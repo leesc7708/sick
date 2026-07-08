@@ -22,26 +22,30 @@ const WT_KEY: Record<string, string> = {
 export function WorkCheckScreen({ navigation }: Props) {
   const { t } = useLang();
   const [workType, setWorkType] = useState(WORK_TYPES[0]);
-  const [sleepOk, setSleepOk] = useState(true);
-  const [noAlcohol, setNoAlcohol] = useState(true);
-  const [tookMeds, setTookMeds] = useState(true);
-  const [noDizziness, setNoDizziness] = useState(true);
+  // 안전문항 3종: 기본값 미선택(null)으로 능동 응답 강제 (통과 프리셋 제거 — 묵인편향 방지)
+  const [sleepOk, setSleepOk] = useState<boolean | null>(null);
+  const [noAlcohol, setNoAlcohol] = useState<boolean | null>(null);
+  const [noDizziness, setNoDizziness] = useState<boolean | null>(null);
+  // 복약 문항: 극성이 모호(약 없음/깜빡/진정제 후 졸림)해 판정에 넣으면 오탐 → 참고 정보로만 저장, result 무반영
+  const [tookMeds, setTookMeds] = useState<boolean | null>(null);
 
-  const allGood = sleepOk && noAlcohol && noDizziness;
+  const answered = sleepOk !== null && noAlcohol !== null && noDizziness !== null;
+  const allGood = sleepOk === true && noAlcohol === true && noDizziness === true;
   const isRisk = RISK_WORK.includes(workType);
-  // 위험작업 + 부적합 = unfit(작업 보류·보고 권고) / 일반작업 + 부적합 = caution / 그 외 = ok
-  const result: 'ok' | 'caution' | 'unfit' = allGood ? 'ok' : isRisk ? 'unfit' : 'caution';
-  const riskWarn = result === 'unfit'; // 기존 경고 배너 유지(위험작업 부적합 시)
+  // 3문항 전부 응답 후에만 판정. 위험작업+부적합=unfit(보류·보고) / 일반작업+부적합=caution / 그 외 ok
+  const result: 'ok' | 'caution' | 'unfit' | null = !answered ? null : allGood ? 'ok' : isRisk ? 'unfit' : 'caution';
+  const riskWarn = result === 'unfit';
 
-  const Question = ({ label, value, set }: { label: string; value: boolean; set: (v: boolean) => void }) => (
+  const Question = ({ label, value, set }: { label: string; value: boolean | null; set: (v: boolean) => void }) => (
     <View style={styles.q}>
       <Text style={[typography.body, { color: colors.text, flex: 1 }]}>{label}</Text>
-      <Chip label={t('wc_yes')} tone="primary" selected={value} onPress={() => set(true)} />
-      <Chip label={t('wc_no')} tone="red" selected={!value} onPress={() => set(false)} />
+      <Chip label={t('wc_yes')} tone="primary" selected={value === true} onPress={() => set(true)} />
+      <Chip label={t('wc_no')} tone="red" selected={value === false} onPress={() => set(false)} />
     </View>
   );
 
   const submit = async () => {
+    if (!answered || !result) return; // 3문항 미응답 시 제출 불가(버튼도 disabled)
     // 부적합도 '작업 완료'가 아니라 결과(result)를 정직하게 기록 —
     // 위험작업 부적합(unfit)은 advisedStop=true로 "보류·보고 권고"를 남겨 중처법상 '알고도 투입' 오해 방지
     await storage.addWorkCheck({
@@ -72,11 +76,18 @@ export function WorkCheckScreen({ navigation }: Props) {
           {WORK_TYPES.map((w) => <Chip key={w} label={t(WT_KEY[w])} tone="work" selected={workType === w} onPress={() => setWorkType(w)} />)}
         </View>
 
+        {/* 적합성 판정 문항 (3종, 응답 필수) */}
         <View style={[styles.card, shadow.card]}>
           <Question label={t('wc_q_sleep')} value={sleepOk} set={setSleepOk} />
           <Question label={t('wc_q_alcohol')} value={noAlcohol} set={setNoAlcohol} />
-          <Question label={t('wc_q_meds')} value={tookMeds} set={setTookMeds} />
           <Question label={t('wc_q_dizzy')} value={noDizziness} set={setNoDizziness} />
+        </View>
+
+        {/* 참고 정보 (복약) — 판정에 반영되지 않음, 사고 시 의료 맥락용으로만 기록 */}
+        <Text style={[styles.label, { marginTop: spacing.md }]}>{t('wc_ref_t')}</Text>
+        <View style={[styles.card, shadow.card, { marginTop: spacing.sm }]}>
+          <Question label={t('wc_q_meds')} value={tookMeds} set={setTookMeds} />
+          <Text style={[typography.small, { color: colors.textMuted, paddingHorizontal: 8, paddingBottom: 6 }]}>{t('wc_ref_m')}</Text>
         </View>
 
         {riskWarn && (
@@ -96,11 +107,15 @@ export function WorkCheckScreen({ navigation }: Props) {
       </ScrollView>
 
       <View style={styles.footer}>
+        {!answered && (
+          <Text style={[typography.small, { color: colors.textMuted, textAlign: 'center', marginBottom: spacing.sm }]}>{t('wc_answer_all')}</Text>
+        )}
         <PrimaryButton
           title={result === 'unfit' ? t('wc_submit_unfit') : t('wc_submit')}
           icon={result === 'unfit' ? '⚠️' : '✅'}
           variant={result === 'unfit' ? 'emergency' : result === 'caution' ? 'work' : 'success'}
           size="lg"
+          disabled={!answered}
           onPress={submit}
         />
       </View>

@@ -73,10 +73,10 @@ export type WorkCheckResult = 'ok' | 'caution' | 'unfit';
 export interface WorkHealthCheck {
   id: string;
   workType: string;
-  sleepOk: boolean;
-  noAlcohol: boolean;
-  tookMeds: boolean;
-  noDizziness: boolean;
+  sleepOk: boolean | null;
+  noAlcohol: boolean | null;
+  tookMeds: boolean | null; // 참고 정보 — result 판정 무반영
+  noDizziness: boolean | null;
   completedAt: string;
   result?: WorkCheckResult;
   advisedStop?: boolean;
