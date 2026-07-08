@@ -19,6 +19,7 @@ import { Role, isManager, isSsvisor } from '../services/auth';
 import { getMyMembership, sendEmergency, Membership } from '../services/crew';
 import { useRegisterScrollTop, fabStore } from '../utils/scrollTop';
 import { useLang } from '../i18n/LanguageContext';
+import type { Lang } from '../i18n/translations';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -26,11 +27,18 @@ const ROLE_LABEL: Record<Role, string> = {
   general: '일반사용자', worker: '근로자', svisor: '에스바이저', ssvisor: '떠블에스바이저',
 };
 
+// 홈 섹션 라벨 (다국어) — 롱리스트를 3그룹으로 구분
+const SEC: Record<'care' | 'work' | 'records', Record<Lang, string>> = {
+  care: { ko: '건강·응급', en: 'Health & Emergency', zh: '健康·急救', ja: '健康・救急', vi: 'Sức khỏe & Khẩn cấp', th: 'สุขภาพ·ฉุกเฉิน', es: 'Salud y Emergencia' },
+  work: { ko: '현장 @work', en: 'On-site @work', zh: '现场 @work', ja: '現場 @work', vi: 'Công trường @work', th: 'หน้างาน @work', es: 'En obra @work' },
+  records: { ko: '내 기록·설정', en: 'Records & Settings', zh: '我的记录·设置', ja: '記録・設定', vi: 'Hồ sơ & Cài đặt', th: 'บันทึก·ตั้งค่า', es: 'Registros y Ajustes' },
+};
+
 export function HomeScreen({ navigation }: Props) {
   const [mode, setMode] = useState<AppMode>('work');
   const { account } = useAuth();
   const [membership, setMembership] = useState<Membership | null>(null);
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const mgr = isManager(account);
   const scrollRef = useRef<ScrollView>(null);
   const toTop = useCallback(() => {
@@ -150,6 +158,8 @@ export function HomeScreen({ navigation }: Props) {
           })}
         </View>
 
+        {/* 건강·응급 */}
+        <Text style={styles.sectionLabel}>{SEC.care[lang]}</Text>
         <ListTile icon="📝" title={t('symptom_organize')} desc={t('symptom_desc')}
           onPress={() => navigation.navigate('SymptomInput')} />
         <ListTile icon="🗣️" title={t('phrasebook_title')} desc={t('phrasebook_desc')}
@@ -161,30 +171,34 @@ export function HomeScreen({ navigation }: Props) {
         <ListTile icon="🏥" title={t('find_hospital')} desc={t('find_hospital_desc')}
           onPress={() => navigation.navigate('HospitalFinder')} />
 
+        {/* 현장 @work */}
         {isWork && (
           <>
+            <Text style={styles.sectionLabel}>{SEC.work[lang]}</Text>
             <ListTile icon="⚠️" title={t('incident_report')} desc={t('incident_desc')} tone="emergency"
               badge={<Tag label="@work" tone="work" />}
               onPress={() => navigation.navigate('IncidentReport')} />
             <ListTile icon="✅" title={t('workcheck')} desc={t('workcheck_desc')} tone="work"
               badge={<Tag label="@work" tone="work" />}
               onPress={() => navigation.navigate('WorkCheck')} />
+            <ListTile icon="📋" title={t('docs')} desc={t('docs_desc')} tone="work"
+              badge={<Tag label="NEW" tone="new" />}
+              onPress={() => navigation.navigate('HealthRecords')} />
+            <ListTile icon="📊" title={t('manager')} desc={t('manager_desc')} tone="work"
+              badge={<Tag label="@work" tone="work" />}
+              onPress={() => navigation.navigate('ManagerDashboard')} />
           </>
         )}
 
-        <ListTile icon="📋" title={t('docs')} desc={t('docs_desc')} tone="work"
-          badge={<Tag label="NEW" tone="new" />}
-          onPress={() => navigation.navigate('HealthRecords')} />
-
+        {/* 내 기록·설정 */}
+        <Text style={styles.sectionLabel}>{SEC.records[lang]}</Text>
+        {!isWork && (
+          <ListTile icon="📋" title={t('docs')} desc={t('docs_desc')}
+            badge={<Tag label="NEW" tone="new" />}
+            onPress={() => navigation.navigate('HealthRecords')} />
+        )}
         <ListTile icon="💊" title={t('meds')} desc={t('meds_desc')}
           onPress={() => navigation.navigate('MyMedicines')} />
-
-        {isWork && (
-          <ListTile icon="📊" title={t('manager')} desc={t('manager_desc')} tone="work"
-            badge={<Tag label="@work" tone="work" />}
-            onPress={() => navigation.navigate('ManagerDashboard')} />
-        )}
-
         <ListTile icon="🕐" title={t('history')} desc={t('history_desc')}
           onPress={() => navigation.navigate('History')} />
         <ListTile icon="⚙️" title={t('settings')} desc={t('settings_desc')}
@@ -206,5 +220,6 @@ const styles = StyleSheet.create({
   segItem: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: radius.sm },
   segItemOn: { backgroundColor: colors.card, shadowColor: '#191F28', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.12, shadowRadius: 3, elevation: 1 },
   segTxt: { fontSize: 14, fontWeight: '700' },
+  sectionLabel: { ...typography.captionBold, color: colors.textMuted, marginTop: spacing.lg, marginBottom: spacing.sm, marginLeft: 4 },
   call119: { height: 64 },
 });

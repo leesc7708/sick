@@ -13,7 +13,7 @@ export function LangSwitcher({ style }: { style?: any }) {
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.row}
-      style={style}
+      style={[styles.wrap, style]}
     >
       {LANGS.map((l) => {
         const on = lang === l.code;
@@ -29,6 +29,7 @@ export function LangSwitcher({ style }: { style?: any }) {
 }
 
 const styles = StyleSheet.create({
+  wrap: { flexGrow: 0, alignSelf: 'stretch' }, // 가로 스크롤러가 부모 중앙정렬 시 세로로 늘어나는 것 방지
   row: { paddingVertical: 2, gap: 8 },
   chip: {
     flexDirection: 'row',

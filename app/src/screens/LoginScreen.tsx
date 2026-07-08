@@ -50,9 +50,11 @@ export function LoginScreen({ navigation }: Props) {
         <Text style={[typography.caption, { color: colors.textSecondary, marginBottom: 6 }]}>🌏 {t('pick_lang')}</Text>
         <LangSwitcher style={{ marginBottom: spacing.lg }} />
 
-        <TextInput value={username} onChangeText={setUsername} placeholder={t('id')} placeholderTextColor={colors.g400} autoCapitalize="none" style={styles.input} />
-        <TextInput value={pw} onChangeText={setPw} placeholder={t('pw')} placeholderTextColor={colors.g400} secureTextEntry style={styles.input} />
-        {err ? <Text style={[typography.caption, { color: colors.emergency, marginTop: 4 }]}>{err}</Text> : null}
+        <Text style={styles.label}>{t('id')}</Text>
+        <TextInput value={username} onChangeText={setUsername} placeholder={t('id')} placeholderTextColor={colors.g500} autoCapitalize="none" style={styles.input} />
+        <Text style={styles.label}>{t('pw')}</Text>
+        <TextInput value={pw} onChangeText={setPw} placeholder={t('pw')} placeholderTextColor={colors.g500} secureTextEntry style={styles.input} />
+        {err ? <Text style={[typography.caption, { color: colors.emergency, marginTop: 6 }]}>{err}</Text> : null}
 
         <View style={{ marginTop: spacing.lg }}>
           <PrimaryButton title={t('login')} size="lg" loading={busy} onPress={submit} />
@@ -67,7 +69,8 @@ export function LoginScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: spacing.lg, paddingTop: spacing.xl },
+  content: { padding: spacing.lg, flexGrow: 1, justifyContent: 'center' }, // 세로 중앙 정렬 → 하단 대공백 해소
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xl },
-  input: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.sm, ...typography.body, color: colors.text },
+  label: { ...typography.captionBold, color: colors.textSecondary, marginTop: spacing.md, marginBottom: 6 },
+  input: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.g300, borderRadius: radius.lg, padding: spacing.md, ...typography.body, color: colors.text },
 });
