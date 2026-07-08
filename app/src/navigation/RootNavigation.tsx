@@ -64,7 +64,7 @@ const linking = {
 };
 
 export function RootNavigation() {
-  const { user, loading } = useAuth();
+  const { user, onboarded, loading } = useAuth();
 
   if (loading) {
     return (
@@ -74,9 +74,13 @@ export function RootNavigation() {
     );
   }
 
+  // 로그인 상태에서 온보딩 미완료면 최초 1회 Onboarding으로 진입 (기존 유저도 소급)
+  const initialRoute = user ? (onboarded ? 'Home' : 'Onboarding') : 'Login';
+
   return (
     <NavigationContainer linking={linking}>
       <Stack.Navigator
+        initialRouteName={initialRoute}
         screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}
       >
         {!user ? (

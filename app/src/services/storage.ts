@@ -21,6 +21,7 @@ const KEYS = {
   lang: 'lifeline:lang',
   aiConsent: 'lifeline:aiConsent', // 국외이전(증상 텍스트 → 해외 AI) 동의 여부
   healthConsent: 'lifeline:healthConsent', // 민감정보(기저질환·알레르기·복용약) 수집·이용 동의 시각(ISO). 미동의=null
+  onboardedPrefix: 'lifeline:onboarded:', // + uid → 'yes'. 계정별 온보딩 완료. (기존 profile.onboardingDone은 기기공유라 라우팅 부적합 → 대체)
   phraseFaves: 'lifeline:phraseFaves', // 표현집 즐겨찾기 문장 id
   phraseRecents: 'lifeline:phraseRecents', // 표현집 최근 사용 문장 id
 };
@@ -57,6 +58,15 @@ export const storage = {
   async setHealthConsent(agreed: boolean): Promise<void> {
     if (agreed) await AsyncStorage.setItem(KEYS.healthConsent, new Date().toISOString());
     else await AsyncStorage.removeItem(KEYS.healthConsent);
+  },
+
+  // ── 온보딩 완료 여부 (계정별) — 로그인 후 최초 1회 온보딩 라우팅 게이팅용 ──
+  async getOnboarded(uid: string): Promise<boolean> {
+    return (await AsyncStorage.getItem(KEYS.onboardedPrefix + uid)) === 'yes';
+  },
+  async setOnboarded(uid: string, done: boolean): Promise<void> {
+    if (done) await AsyncStorage.setItem(KEYS.onboardedPrefix + uid, 'yes');
+    else await AsyncStorage.removeItem(KEYS.onboardedPrefix + uid);
   },
 
   // ── 표현집 즐겨찾기 / 최근 ──

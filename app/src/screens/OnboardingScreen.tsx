@@ -9,6 +9,7 @@ import { Disclaimer } from '../components/Disclaimer';
 import { LogoMark } from '../components/LogoMark';
 import { LangSwitcher } from '../components/LangSwitcher';
 import { useLang } from '../i18n/LanguageContext';
+import { useAuth } from '../auth/AuthContext';
 import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
@@ -34,6 +35,7 @@ const splitCsv = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean
 
 export function OnboardingScreen({ navigation }: Props) {
   const { t } = useLang();
+  const { user, markOnboarded } = useAuth();
   const [mode, setMode] = useState<AppMode | null>(null);
   const [ageBand, setAgeBand] = useState<string | null>(null);
   const [conditions, setConditions] = useState('');
@@ -59,6 +61,9 @@ export function OnboardingScreen({ navigation }: Props) {
       currentMedicines: healthConsent ? splitCsv(meds) : [],
       onboardingDone: true,
     });
+    // 계정별 온보딩 완료 기록 + 컨텍스트 즉시 반영 → 다음 로그인부터 Home 직행
+    if (user) await storage.setOnboarded(user.uid, true);
+    markOnboarded();
     navigation.replace('Home');
   };
 
