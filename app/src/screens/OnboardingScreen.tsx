@@ -35,7 +35,7 @@ const splitCsv = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean
 
 export function OnboardingScreen({ navigation }: Props) {
   const { t } = useLang();
-  const { user, markOnboarded } = useAuth();
+  const { user, onboarded, markOnboarded } = useAuth();
   const [mode, setMode] = useState<AppMode | null>(null);
   const [ageBand, setAgeBand] = useState<string | null>(null);
   const [conditions, setConditions] = useState('');
@@ -61,10 +61,13 @@ export function OnboardingScreen({ navigation }: Props) {
       currentMedicines: healthConsent ? splitCsv(meds) : [],
       onboardingDone: true,
     });
-    // 계정별 온보딩 완료 기록 + 컨텍스트 즉시 반영 → 다음 로그인부터 Home 직행
+    // 계정별 온보딩 완료 기록 + 컨텍스트 즉시 반영
+    const wasOnboarded = onboarded;
     if (user) await storage.setOnboarded(user.uid, true);
     markOnboarded();
-    navigation.replace('Home');
+    // 최초 온보딩: 축소 스택 → 전체 스택으로 스왑되며 RN이 Home(첫 화면)을 자동 표시(수동 이동 불필요)
+    // 설정에서 재진입(이미 onboarded, 전체 스택): 명시적으로 Home으로 복귀
+    if (wasOnboarded) navigation.replace('Home');
   };
 
   return (

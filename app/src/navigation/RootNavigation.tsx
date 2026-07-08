@@ -88,6 +88,12 @@ export function RootNavigation() {
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Signup" component={SignupScreen} />
           </>
+        ) : !onboarded ? (
+          // 온보딩 미완료: Home을 아예 스택에서 제외 → 로그인 전환/새로고침 어느 경로로도 온보딩을 반드시 통과
+          <>
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+          </>
         ) : (
           <>
         <Stack.Screen name="Home" component={HomeScreen} />
