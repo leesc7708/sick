@@ -69,6 +69,35 @@ export function UserAdminScreen({ navigation }: Props) {
       { text: '거부', style: 'destructive', onPress: () => apply(u, 'general', 'rejected', '거부') },
     ]);
 
+  // 역할 부여 전 확인 게이트 — 오조작(1탭 승격/강등) 방지
+  const confirmApply = (u: UserAccount, r: Role) => {
+    const doApply = () => apply(u, r, 'active', '변경');
+    // 총괄(떠블에스바이저) 부여: 최고권한 → 2단계 확인
+    if (r === 'ssvisor') {
+      return RNAlert.alert('총괄 권한 부여', `${u.name}(${u.username})에게 전체 DB 열람·전 현장 관리 권한을 부여합니다.`, [
+        { text: '취소', style: 'cancel' },
+        { text: '계속', onPress: () => RNAlert.alert('최종 확인', '정말 총괄 권한을 부여하시겠습니까?', [
+          { text: '취소', style: 'cancel' },
+          { text: '부여', style: 'destructive', onPress: doApply },
+        ]) },
+      ]);
+    }
+    // 이미 활성 유저의 역할 변경·강등: 1단계 확인(총괄 강등은 문구 강조)
+    if (u.status === 'active' && u.role !== r) {
+      const demoting = u.role === 'ssvisor';
+      return RNAlert.alert(
+        demoting ? '총괄 권한 해제' : '역할 변경',
+        `${u.name}님의 역할을 ${ROLE_LABEL[u.role]} → ${ROLE_LABEL[r]}(으)로 변경합니다.`,
+        [
+          { text: '취소', style: 'cancel' },
+          { text: '변경', style: 'destructive', onPress: doApply },
+        ],
+      );
+    }
+    // 신규 승인 대기자의 첫 활성화: 마찰 최소화 위해 무확인
+    doApply();
+  };
+
   const pending = users.filter((u) => u.status === 'pending');
   const others = users.filter((u) => u.status !== 'pending');
 
@@ -94,7 +123,7 @@ export function UserAdminScreen({ navigation }: Props) {
             <Pressable
               key={r}
               disabled={!!busy || activeNow}
-              onPress={() => apply(u, r, 'active', '변경')}
+              onPress={() => confirmApply(u, r)}
               style={[styles.roleBtn, activeNow && styles.roleBtnOn]}
             >
               <Text style={[styles.roleTxt, activeNow && styles.roleTxtOn]}>
