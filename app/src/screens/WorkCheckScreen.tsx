@@ -28,7 +28,10 @@ export function WorkCheckScreen({ navigation }: Props) {
   const [noDizziness, setNoDizziness] = useState(true);
 
   const allGood = sleepOk && noAlcohol && noDizziness;
-  const riskWarn = RISK_WORK.includes(workType) && !allGood;
+  const isRisk = RISK_WORK.includes(workType);
+  // 위험작업 + 부적합 = unfit(작업 보류·보고 권고) / 일반작업 + 부적합 = caution / 그 외 = ok
+  const result: 'ok' | 'caution' | 'unfit' = allGood ? 'ok' : isRisk ? 'unfit' : 'caution';
+  const riskWarn = result === 'unfit'; // 기존 경고 배너 유지(위험작업 부적합 시)
 
   const Question = ({ label, value, set }: { label: string; value: boolean; set: (v: boolean) => void }) => (
     <View style={styles.q}>
@@ -39,6 +42,8 @@ export function WorkCheckScreen({ navigation }: Props) {
   );
 
   const submit = async () => {
+    // 부적합도 '작업 완료'가 아니라 결과(result)를 정직하게 기록 —
+    // 위험작업 부적합(unfit)은 advisedStop=true로 "보류·보고 권고"를 남겨 중처법상 '알고도 투입' 오해 방지
     await storage.addWorkCheck({
       id: `wc_${Date.now()}`,
       workType,
@@ -47,8 +52,12 @@ export function WorkCheckScreen({ navigation }: Props) {
       tookMeds,
       noDizziness,
       completedAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
+      result,
+      advisedStop: result === 'unfit',
     });
-    Alert.alert(t('wc_submit'), riskWarn ? t('wc_warn_m') : t('wc_note'), [
+    const title = result === 'unfit' ? t('wc_unfit_t') : t('wc_submit');
+    const msg = result === 'unfit' ? t('wc_unfit_m') : result === 'caution' ? t('wc_warn_m') : t('wc_note');
+    Alert.alert(title, msg, [
       { text: t('ef_home'), onPress: () => navigation.goBack() },
     ]);
   };
@@ -71,6 +80,12 @@ export function WorkCheckScreen({ navigation }: Props) {
         </View>
 
         {riskWarn && (
+          <View style={[styles.unfit, shadow.card]}>
+            <Text style={[typography.bodyBold, { color: colors.emergency }]}>{t('wc_unfit_t')}</Text>
+            <Text style={[typography.caption, { color: colors.text, marginTop: 4 }]}>{t('wc_unfit_m')}</Text>
+          </View>
+        )}
+        {result === 'caution' && (
           <View style={[styles.warn, shadow.card]}>
             <Text style={[typography.bodyBold, { color: colors.warning }]}>{t('wc_warn_t')}</Text>
             <Text style={[typography.caption, { color: colors.text, marginTop: 4 }]}>{t('wc_warn_m')}</Text>
@@ -81,7 +96,13 @@ export function WorkCheckScreen({ navigation }: Props) {
       </ScrollView>
 
       <View style={styles.footer}>
-        <PrimaryButton title={t('wc_submit')} icon="✅" variant={riskWarn ? 'work' : 'success'} size="lg" onPress={submit} />
+        <PrimaryButton
+          title={result === 'unfit' ? t('wc_submit_unfit') : t('wc_submit')}
+          icon={result === 'unfit' ? '⚠️' : '✅'}
+          variant={result === 'unfit' ? 'emergency' : result === 'caution' ? 'work' : 'success'}
+          size="lg"
+          onPress={submit}
+        />
       </View>
     </View>
   );
@@ -95,5 +116,6 @@ const styles = StyleSheet.create({
   card: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.sm, marginTop: spacing.md },
   q: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 8 },
   warn: { backgroundColor: '#FFFAEC', borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.md, borderWidth: 1, borderColor: '#FFE6A8' },
+  unfit: { backgroundColor: '#FFF0EF', borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.md, borderWidth: 1.5, borderColor: '#F5B5B0' },
   footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.divider },
 });

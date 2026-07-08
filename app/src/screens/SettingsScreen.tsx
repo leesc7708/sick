@@ -125,6 +125,8 @@ export function SettingsScreen({ navigation }: Props) {
         <PrimaryButton title="🎬 데모 데이터 채우기" variant="secondary" onPress={fillDemo} style={{ marginTop: spacing.lg }} />
         <PrimaryButton title="모든 데이터 삭제" variant="outline" onPress={clearAll} style={{ marginTop: spacing.sm }} />
 
+        <PrimaryButton title={t('privacy_title')} variant="outline" size="sm" onPress={() => navigation.navigate('PrivacyPolicy')} style={{ marginTop: spacing.lg }} />
+
         <Text style={[typography.small, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.lg }]}>
           라이프라인 Lifeline · 데모 빌드{'\n'}의료·약 정보 출처: E-Gen / 심평원 / 식약처
         </Text>

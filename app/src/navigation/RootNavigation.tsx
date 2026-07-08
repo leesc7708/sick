@@ -9,6 +9,7 @@ import { LoginScreen } from '../screens/LoginScreen';
 import { SignupScreen } from '../screens/SignupScreen';
 import { CrewScreen } from '../screens/CrewScreen';
 import { UserAdminScreen } from '../screens/UserAdminScreen';
+import { PrivacyPolicyScreen } from '../screens/PrivacyPolicyScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { RedFlagScreen } from '../screens/RedFlagScreen';
@@ -100,6 +101,7 @@ export function RootNavigation() {
         <Stack.Screen name="ManagerDashboard" component={ManagerDashboardScreen} />
         <Stack.Screen name="Crew" component={CrewScreen} />
         <Stack.Screen name="UserAdmin" component={UserAdminScreen} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
         <Stack.Screen name="MyMedicines" component={MyMedicinesScreen} />
         <Stack.Screen name="History" component={HistoryScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />

@@ -67,6 +67,9 @@ export interface HealthCheckRecord {
 }
 
 // ── 작업 전 건강체크 (@work) ──
+// result: ok=양호 / caution=일반작업 부적합(주의) / unfit=위험작업 부적합(작업 보류·보고 권고)
+// advisedStop: 위험작업 부적합으로 "작업 보류·관리자 보고"를 권고했는지 — 중처법상 '알고도 투입' 오해 방지용 정직 기록
+export type WorkCheckResult = 'ok' | 'caution' | 'unfit';
 export interface WorkHealthCheck {
   id: string;
   workType: string;
@@ -75,6 +78,8 @@ export interface WorkHealthCheck {
   tookMeds: boolean;
   noDizziness: boolean;
   completedAt: string;
+  result?: WorkCheckResult;
+  advisedStop?: boolean;
 }
 
 // ── 사고·이상 보고 (@work) ──
@@ -146,6 +151,7 @@ export type RootStackParamList = {
   ManagerDashboard: undefined;
   Crew: undefined;
   UserAdmin: undefined;
+  PrivacyPolicy: undefined;
   MyMedicines: undefined;
   History: undefined;
   Settings: undefined;

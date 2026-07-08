@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -39,14 +39,24 @@ export function OnboardingScreen({ navigation }: Props) {
   const [conditions, setConditions] = useState('');
   const [allergies, setAllergies] = useState('');
   const [meds, setMeds] = useState('');
+  const [healthConsent, setHealthConsent] = useState(false);
+
+  const enteredSensitive = !!(conditions.trim() || allergies.trim() || meds.trim());
 
   const start = async () => {
+    // 민감정보(기저질환·알레르기·복용약)를 입력했는데 동의 안 했으면 저장하지 않고 안내
+    if (enteredSensitive && !healthConsent) {
+      Alert.alert(t('consent_h'), t('consent_required'));
+      return;
+    }
+    await storage.setHealthConsent(healthConsent && enteredSensitive);
     await storage.setProfile({
       mode: mode ?? 'work',
       age: AGE_BANDS.find((b) => b.label === ageBand)?.value,
-      conditions: splitCsv(conditions),
-      allergies: splitCsv(allergies),
-      currentMedicines: splitCsv(meds),
+      // 미동의 시 민감정보는 저장하지 않음(빈 배열)
+      conditions: healthConsent ? splitCsv(conditions) : [],
+      allergies: healthConsent ? splitCsv(allergies) : [],
+      currentMedicines: healthConsent ? splitCsv(meds) : [],
       onboardingDone: true,
     });
     navigation.replace('Home');
@@ -87,6 +97,21 @@ export function OnboardingScreen({ navigation }: Props) {
         <View style={styles.chips}>
           {AGE_BANDS.map((b) => <Chip key={b.label} label={b.label} selected={ageBand === b.label} onPress={() => setAgeBand(b.label)} />)}
         </View>
+
+        {/* 민감정보(건강) 수집·이용 동의 — Play Store 필수 요건 / 개인정보보호법 */}
+        <Pressable onPress={() => setHealthConsent((v) => !v)} style={[styles.consent, healthConsent && { borderColor: colors.primary, backgroundColor: colors.primaryLight }]}>
+          <View style={[styles.check, healthConsent && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
+            {healthConsent && <Text style={styles.checkMark}>✓</Text>}
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[typography.captionBold, { color: colors.text }]}>{t('consent_agree')}</Text>
+            <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>{t('consent_body')}</Text>
+            <Pressable onPress={() => navigation.navigate('PrivacyPolicy')} hitSlop={6}>
+              <Text style={[typography.small, { color: colors.primary, marginTop: 4, textDecorationLine: 'underline' }]}>{t('privacy_view')}</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+
         <Text style={styles.fieldLabel}>{t('conditions')}</Text>
         <TextInput value={conditions} onChangeText={setConditions} placeholder={t('ob_cond_ph')} placeholderTextColor={colors.g400} style={styles.input} />
         <Text style={styles.fieldLabel}>{t('allergies')}</Text>
@@ -116,4 +141,7 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
   input: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md, ...typography.body, color: colors.text },
   footer: { padding: spacing.lg, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.divider },
+  consent: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1.5, borderColor: colors.border, padding: spacing.md, marginTop: spacing.md },
+  check: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: colors.g300, alignItems: 'center', justifyContent: 'center', marginRight: spacing.sm, marginTop: 1 },
+  checkMark: { color: '#fff', fontSize: 14, fontWeight: '800', lineHeight: 16 },
 });

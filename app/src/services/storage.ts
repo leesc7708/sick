@@ -20,6 +20,7 @@ const KEYS = {
   myMedicines: 'safecall:myMedicines',
   lang: 'lifeline:lang',
   aiConsent: 'lifeline:aiConsent', // 국외이전(증상 텍스트 → 해외 AI) 동의 여부
+  healthConsent: 'lifeline:healthConsent', // 민감정보(기저질환·알레르기·복용약) 수집·이용 동의 시각(ISO). 미동의=null
   phraseFaves: 'lifeline:phraseFaves', // 표현집 즐겨찾기 문장 id
   phraseRecents: 'lifeline:phraseRecents', // 표현집 최근 사용 문장 id
 };
@@ -47,6 +48,15 @@ export const storage = {
   },
   async setAiConsent(v: boolean): Promise<void> {
     await AsyncStorage.setItem(KEYS.aiConsent, v ? 'yes' : 'no');
+  },
+
+  // ── 민감정보(건강) 수집·이용 동의 — 동의 시각 기록. 미동의 시 null ──
+  async getHealthConsent(): Promise<string | null> {
+    return AsyncStorage.getItem(KEYS.healthConsent);
+  },
+  async setHealthConsent(agreed: boolean): Promise<void> {
+    if (agreed) await AsyncStorage.setItem(KEYS.healthConsent, new Date().toISOString());
+    else await AsyncStorage.removeItem(KEYS.healthConsent);
   },
 
   // ── 표현집 즐겨찾기 / 최근 ──

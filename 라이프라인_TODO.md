@@ -7,6 +7,13 @@
 
 ---
 
+### 2026-07-08 | P0 2건: 부적합 자가체크 로그 재설계 + 민감정보 동의·개인정보 처리방침
+- **[P0] 부적합 자가체크→작업진행 로그 재설계**(중처법 역효과 해소): 기존엔 음주·수면부족·어지럼이어도 무조건 "체크 완료"로 저장 → '사업주가 부적합 알고도 투입' 증거화 위험. WorkHealthCheck에 result('ok'/'caution'/'unfit')·advisedStop 추가. **위험작업(밀폐·화학·고소)+부적합=unfit**→"작업 보류·관리자 즉시 보고" 강경 배너+빨강 버튼, 일반작업+부적합=caution(주의), 그 외 ok. 부적합도 정직하게 result로 기록(감사추적). 판정 로직 6케이스 검증 통과
+- **[P0] 민감정보 수집·이용 동의**(Play Store 필수/개인정보보호법): 온보딩에서 기저질환·알레르기·복용약을 무동의 수집하던 것 → 체크박스 동의 신설. 미동의+민감정보 입력 시 저장 차단·안내, 미동의 시 해당 필드 저장 안 함(빈 배열). storage.get/setHealthConsent(동의 시각 ISO 기록). 게이팅 로직 4케이스 검증 통과
+- **개인정보 처리방침 화면 신설**: PrivacyPolicyScreen + data/privacyPolicy.ts(ko/en 정식 7절: 수집항목·목적·저장위치·국외이전·보유파기·이용자권리·문의, 나머지 5개 언어 en 폴백). 실제 구조 정직 고지(민감정보=기기 로컬, 계정=Firebase 서울, AI상담 시만 국외이전). 온보딩 동의카드+설정에서 진입
+- 신규 t() 키 9개 7개 언어 전체 번역(wc_unfit_*·consent_*·privacy_*). tsc 통과·빌드·audio 복사·배포 완료
+- ⏳ 남은 P0: DeptConsult 결과화면 다국어(KB 언어필드화)·특수건진 유효기간 유해인자별 / P2: Cloud Functions·FCM·오프라인큐잉 / E-Gen키·KIPRIS(형님)
+
 ### 2026-07-08 | 회원 승인·역할배정 화면(ssvisor 키스톤) + 2계정 e2e 검증
 - **발견**: 어제 만든 로그인·역할·크루 시스템에 **가입자 승인/역할부여 UI가 부재**(ManagerDashboard는 로컬스토리지 데모, 실제 승인기능 없음). ssvisor만 rules상 role/status 변경 가능한데 이를 실행할 화면이 없어 **활성 svisor·worker 생성 불가 → 2계정 e2e 자체가 막힘**. mmersum만 콘솔 수동설정 상태였음
 - **UserAdminScreen 신설**(ssvisor 전용): listUsers()로 전체회원(승인대기 우선정렬) + 역할버튼(근로자/에스바이저/떠블에스바이저) 원터치 승인=active 승격 + 거부. auth.ts에 listUsers()·setUserRoleStatus() 추가. 홈에 ssvisor용 "회원 승인·역할 관리" 진입버튼. 본인 총괄권한 자가해제 방지
