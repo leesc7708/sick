@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useSyncExternalStore } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { colors } from '../theme/colors';
-import { activeScrollTop } from '../utils/scrollTop';
+import { activeScrollTop, fabStore } from '../utils/scrollTop';
 
-// 모든 화면 우하단 "맨 위로" 버튼
+// 우하단 "맨 위로" 버튼 — 충분히 스크롤한 화면에서만 노출(로그인·최상단에선 숨김)
 export function ScrollTopFab() {
+  const visible = useSyncExternalStore(fabStore.subscribe, fabStore.getSnapshot, () => false);
+  if (!visible) return null;
   return (
     <Pressable
       onPress={() => activeScrollTop.current?.()}

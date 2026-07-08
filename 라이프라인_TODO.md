@@ -14,6 +14,17 @@
 - 신규 t() 키 9개 7개 언어 전체 번역(wc_unfit_*·consent_*·privacy_*). tsc 통과·빌드·audio 복사·배포 완료
 - ⏳ 남은 P0: DeptConsult 결과화면 다국어(KB 언어필드화)·특수건진 유효기간 유해인자별 / P2: Cloud Functions·FCM·오프라인큐잉 / E-Gen키·KIPRIS(형님)
 
+### 2026-07-08 | P0 5건 구현 완료 + 외부 디자인팀 점검 반영(UI/UX 개선)
+- **P0 5건 전부 구현·배포·e2e**(계획: 라이프라인_P0실행계획_아키텍처): #5 위치정보 처리방침 / #1 온보딩 도달경로 복구 / #4 WorkCheck 기본값 미선택+tookMeds 참고분리 / #3 최고권한 변경 확인 다이얼로그 / #2 관리자 읽기범위 축소(rules). #2 e2e 14/0(svisor 전사 덤프 차단·usernames get·신 watchMembers·긴급 라우팅)
+- **#1 보강**(스크린샷서 발견): 로그인 전환 시 온보딩 건너뛰던 타이밍 버그 → user&&!onboarded면 Home을 스택에서 제외(RN auth 패턴). 실브라우저 재캡처로 온보딩 정상 진입 확인
+- **외부 디자인팀 실스크린샷 점검**(모바일 실렌더 5장 + 토큰): 진단=①흰-위-흰 저대비로 납작 ②채도색 무위계 적층 ③이모지/라인아이콘 혼재. TOP5 반영:
+  - 배경 #F9FAFB→#EEF1F4 + shadow.card 강화(0.06→0.10) → 카드 부양감(전 화면 즉효)
+  - 이모지→라인아이콘 통일(Icon.tsx vest/user/speech 추가, 온보딩 모드·홈 인사말)
+  - 색 위계: 홈 응급신호 버튼 solid→outline(119만 loud), 모드토글 주황Chip→세그먼트 컨트롤
+  - FAB 스크롤 반응형(fabStore, 로그인·최상단 숨김) + 홈 하단여백 겹침 해소
+  - Chip 터치타겟 44px, WorkCheck unfit 배너 위계 강화(아이콘+h3)+색 토큰화(emergency/warningLight)
+- 검증: tsc·빌드·배포·실브라우저 재캡처. 남은 디자인 P1/P2: 홈 섹션 그룹핑·로그인 레이아웃·병상 배지 승격·접근성 props (문서 라이프라인_3팀검토에 목록)
+
 ### 2026-07-08 | 회원 승인·역할배정 화면(ssvisor 키스톤) + 2계정 e2e 검증
 - **발견**: 어제 만든 로그인·역할·크루 시스템에 **가입자 승인/역할부여 UI가 부재**(ManagerDashboard는 로컬스토리지 데모, 실제 승인기능 없음). ssvisor만 rules상 role/status 변경 가능한데 이를 실행할 화면이 없어 **활성 svisor·worker 생성 불가 → 2계정 e2e 자체가 막힘**. mmersum만 콘솔 수동설정 상태였음
 - **UserAdminScreen 신설**(ssvisor 전용): listUsers()로 전체회원(승인대기 우선정렬) + 역할버튼(근로자/에스바이저/떠블에스바이저) 원터치 승인=active 승격 + 거부. auth.ts에 listUsers()·setUserRoleStatus() 추가. 홈에 ssvisor용 "회원 승인·역할 관리" 진입버튼. 본인 총괄권한 자가해제 방지

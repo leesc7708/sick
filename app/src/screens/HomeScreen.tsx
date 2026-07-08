@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { Alert as RNAlert, Linking, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert as RNAlert, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -7,7 +7,7 @@ import { ListTile } from '../components/ListTile';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Disclaimer } from '../components/Disclaimer';
 import { Tag } from '../components/Tag';
-import { Chip } from '../components/Chip';
+import { Icon } from '../components/Icon';
 import { LogoMark } from '../components/LogoMark';
 import { LangSwitcher } from '../components/LangSwitcher';
 import { colors, radius, spacing } from '../theme/colors';
@@ -17,7 +17,7 @@ import { storage } from '../services/storage';
 import { useAuth } from '../auth/AuthContext';
 import { Role, isManager, isSsvisor } from '../services/auth';
 import { getMyMembership, sendEmergency, Membership } from '../services/crew';
-import { useRegisterScrollTop } from '../utils/scrollTop';
+import { useRegisterScrollTop, fabStore } from '../utils/scrollTop';
 import { useLang } from '../i18n/LanguageContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
@@ -76,7 +76,12 @@ export function HomeScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={styles.content}
+        scrollEventThrottle={16}
+        onScroll={(e) => fabStore.onScroll(e.nativeEvent.contentOffset.y)}
+      >
         <View style={styles.header}>
           <LogoMark size={38} />
           <View style={{ marginLeft: 10 }}>
@@ -91,7 +96,8 @@ export function HomeScreen({ navigation }: Props) {
 
         {account && (
           <View style={styles.greet}>
-            <Text style={[typography.bodyBold, { color: colors.text }]}>👤 {account.name}님</Text>
+            <Icon name="user" size={17} color={colors.g600} />
+            <Text style={[typography.bodyBold, { color: colors.text, marginLeft: 6 }]}>{account.name}님</Text>
             <Text style={[typography.small, { color: account.status === 'active' ? colors.primary : colors.warning, marginLeft: 8 }]}>
               {ROLE_LABEL[account.role]}{account.status !== 'active' ? ' · 승인대기' : ''}
             </Text>
@@ -127,14 +133,21 @@ export function HomeScreen({ navigation }: Props) {
           <PrimaryButton title="회원 승인 · 역할 관리" icon="👥" variant="primary" size="md" style={{ marginBottom: spacing.sm }} onPress={() => navigation.navigate('UserAdmin')} />
         )}
 
-        {/* 생명 직결: 119를 전체폭·최상단·최대로 (디자인팀 P0 — 위계 정상화) */}
+        {/* 생명 직결: 119만 유일한 loud CTA(빨강). 응급신호 확인은 outline으로 위계 낮춤 */}
         <PrimaryButton title="119 즉시 전화" icon="📞" variant="emergency" size="lg" style={styles.call119} onPress={() => Linking.openURL('tel:119')} />
         <View style={{ height: spacing.sm }} />
-        <PrimaryButton title={t('emergency_check')} icon="🚨" variant="primary" size="md" onPress={() => navigation.navigate('RedFlag')} />
+        <PrimaryButton title={t('emergency_check')} icon="🚨" variant="outline" size="md" onPress={() => navigation.navigate('RedFlag')} />
 
-        <View style={[styles.modeToggle, { marginTop: spacing.md }]}>
-          <Chip label={t('mode_work')} tone="work" selected={isWork} onPress={() => changeMode('work')} />
-          <Chip label={t('mode_general')} tone="primary" selected={!isWork} onPress={() => changeMode('general')} />
+        {/* 모드 토글 — 세그먼트 컨트롤(회색 트랙 + 흰 선택칩). 주황 solid 막대 제거 */}
+        <View style={styles.segment}>
+          {([['work', t('mode_work')], ['general', t('mode_general')]] as [AppMode, string][]).map(([key, label]) => {
+            const on = (key === 'work') === isWork;
+            return (
+              <Pressable key={key} onPress={() => changeMode(key)} style={[styles.segItem, on && styles.segItemOn]}>
+                <Text style={[styles.segTxt, { color: on ? colors.text : colors.textMuted }]}>{label}</Text>
+              </Pressable>
+            );
+          })}
         </View>
 
         <ListTile icon="📝" title={t('symptom_organize')} desc={t('symptom_desc')}
@@ -185,10 +198,13 @@ export function HomeScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: spacing.md, paddingBottom: spacing.xxl },
+  content: { padding: spacing.md, paddingBottom: 96 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md, marginTop: spacing.xs },
   greet: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
   crewBanner: { backgroundColor: colors.workLight, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm },
-  modeToggle: { flexDirection: 'row', marginBottom: spacing.md },
+  segment: { flexDirection: 'row', backgroundColor: colors.g200, borderRadius: radius.md, padding: 4, marginTop: spacing.md, marginBottom: spacing.md },
+  segItem: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: radius.sm },
+  segItemOn: { backgroundColor: colors.card, shadowColor: '#191F28', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.12, shadowRadius: 3, elevation: 1 },
+  segTxt: { fontSize: 14, fontWeight: '700' },
   call119: { height: 64 },
 });

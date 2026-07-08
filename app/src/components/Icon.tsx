@@ -11,11 +11,12 @@ import Svg, { Path, Circle, Rect, Line, Polyline } from 'react-native-svg';
 export type IconName =
   | 'document' | 'file' | 'clipboard' | 'stethoscope' | 'hospital' | 'alert'
   | 'check' | 'pill' | 'chart' | 'clock' | 'settings' | 'phone' | 'search'
-  | 'link' | 'upload' | 'plus' | 'map' | 'people' | 'chevron';
+  | 'link' | 'upload' | 'plus' | 'map' | 'people' | 'chevron' | 'vest' | 'user' | 'speech';
 
 const KNOWN: IconName[] = [
   'document', 'file', 'clipboard', 'stethoscope', 'hospital', 'alert', 'check', 'pill',
   'chart', 'clock', 'settings', 'phone', 'search', 'link', 'upload', 'plus', 'map', 'people', 'chevron',
+  'vest', 'user', 'speech',
 ];
 
 // 이모지 → 아이콘 이름 매핑 (기존 화면의 icon="📝" 를 손대지 않고 자동 변환)
@@ -40,6 +41,10 @@ const EMOJI_MAP: Record<string, IconName> = {
   '+': 'plus',
   '🗺️': 'map',
   '👥': 'people',
+  '🦺': 'vest',
+  '🙂': 'user',
+  '👤': 'user',
+  '🗣️': 'speech',
 };
 
 /** 문자열(이모지 또는 아이콘 이름)을 아이콘 이름으로 해석. 못 찾으면 null(→ 원문 텍스트 폴백) */
@@ -184,6 +189,22 @@ export function Icon({ name, size = 24, color = '#17181C', strokeWidth = 2 }: { 
       </>
     ),
     chevron: <Polyline points="9 6 15 12 9 18" {...p} />,
+    vest: (
+      <>
+        <Path d="M9 3l3 3 3-3" {...p} />
+        <Path d="M8 3L5 5v15h14V5l-3-2" {...p} />
+        <Line x1={12} y1={6} x2={12} y2={20} {...p} />
+      </>
+    ),
+    user: (
+      <>
+        <Circle cx={12} cy={8} r={4} {...p} />
+        <Path d="M5 21a7 7 0 0 1 14 0" {...p} />
+      </>
+    ),
+    speech: (
+      <Path d="M21 12a8 8 0 0 1-8 8H4l2.5-3A8 8 0 1 1 21 12z" {...p} />
+    ),
   };
 
   return (

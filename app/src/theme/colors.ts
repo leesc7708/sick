@@ -35,11 +35,16 @@ export const colors = {
   g800: '#333D4B',
   g900: '#191F28',
 
-  // 시맨틱
-  bg: '#F9FAFB',
+  // 시맨틱 (배경을 한 단계 낮춰 흰 카드가 떠 보이게 — 저대비 '납작함' 해소)
+  bg: '#EEF1F4', // (구 #F9FAFB) 카드/배경 명도차 확보
   card: '#FFFFFF',
   border: '#E5E8EB',
   divider: '#F2F4F6',
+
+  // 상태 배경(옅은 톤) — 하드코딩 색 대체용 토큰
+  emergencyLight: '#FDECEC',
+  warningLight: '#FFF4E5',
+  successLight: '#E7F6F0',
 
   text: '#17181C',
   textSecondary: '#444C56',
@@ -80,8 +85,8 @@ export const shadow = {
   card: {
     shadowColor: '#191F28',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
+    shadowOpacity: 0.10, // (구 0.06) 카드 부양감 강화
+    shadowRadius: 8, // (구 12) 더 또렷한 그림자
     elevation: 2,
   },
   floating: {

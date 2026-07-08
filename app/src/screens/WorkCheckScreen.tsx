@@ -5,6 +5,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
 import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { Icon } from '../components/Icon';
 import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { WORK_TYPES } from '../data/options';
@@ -92,8 +93,11 @@ export function WorkCheckScreen({ navigation }: Props) {
 
         {riskWarn && (
           <View style={[styles.unfit, shadow.card]}>
-            <Text style={[typography.bodyBold, { color: colors.emergency }]}>{t('wc_unfit_t')}</Text>
-            <Text style={[typography.caption, { color: colors.text, marginTop: 4 }]}>{t('wc_unfit_m')}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Icon name="alert" size={24} color={colors.emergency} />
+              <Text style={[typography.h3, { color: colors.emergency, marginLeft: 8, flex: 1 }]}>{t('wc_unfit_t')}</Text>
+            </View>
+            <Text style={[typography.body, { color: colors.text, marginTop: 6 }]}>{t('wc_unfit_m')}</Text>
           </View>
         )}
         {result === 'caution' && (
@@ -130,7 +134,7 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
   card: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.sm, marginTop: spacing.md },
   q: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 8 },
-  warn: { backgroundColor: '#FFFAEC', borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.md, borderWidth: 1, borderColor: '#FFE6A8' },
-  unfit: { backgroundColor: '#FFF0EF', borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.md, borderWidth: 1.5, borderColor: '#F5B5B0' },
+  warn: { backgroundColor: colors.warningLight, borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.md, borderWidth: 1, borderColor: colors.warning },
+  unfit: { backgroundColor: colors.emergencyLight, borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.md, borderWidth: 1.5, borderColor: colors.emergency },
   footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.divider },
 });

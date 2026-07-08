@@ -40,8 +40,8 @@ const styles = StyleSheet.create({
   chip: {
     borderWidth: 1.5,
     borderRadius: radius.pill,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
+    paddingVertical: 11, // 현장·장갑 터치타겟 ~44px 확보 (구 8)
+    paddingHorizontal: 16,
     marginRight: 8,
     marginBottom: 8,
   },

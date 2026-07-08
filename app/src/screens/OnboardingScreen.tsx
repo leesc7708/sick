@@ -8,6 +8,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { Disclaimer } from '../components/Disclaimer';
 import { LogoMark } from '../components/LogoMark';
 import { LangSwitcher } from '../components/LangSwitcher';
+import { Icon } from '../components/Icon';
 import { useLang } from '../i18n/LanguageContext';
 import { useAuth } from '../auth/AuthContext';
 import { colors, radius, spacing, shadow } from '../theme/colors';
@@ -90,7 +91,9 @@ export function OnboardingScreen({ navigation }: Props) {
               onPress={() => setMode(m.key)}
               style={[styles.modeCard, shadow.card, on && { borderColor: colors.primary, borderWidth: 2, backgroundColor: colors.primaryLight }]}
             >
-              <Text style={styles.modeEmoji}>{m.emoji}</Text>
+              <View style={styles.modeIcon}>
+                <Icon name={m.key === 'work' ? 'vest' : 'user'} size={26} color={on ? colors.primary : colors.g600} />
+              </View>
               <View style={{ flex: 1 }}>
                 <Text style={[typography.h3, { color: colors.text }]}>{t(m.key === 'work' ? 'mode_work' : 'mode_general')}</Text>
                 <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>{t(m.key === 'work' ? 'mode_work_desc' : 'mode_general_desc')}</Text>
@@ -143,7 +146,7 @@ const styles = StyleSheet.create({
   sectionLabel: { ...typography.h3, color: colors.text, marginTop: spacing.xl, marginBottom: spacing.md },
   fieldLabel: { ...typography.captionBold, color: colors.textSecondary, marginTop: spacing.md, marginBottom: spacing.sm },
   modeCard: { backgroundColor: colors.card, borderRadius: radius.xl, borderWidth: 2, borderColor: 'transparent', padding: spacing.md, flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
-  modeEmoji: { fontSize: 32, marginRight: spacing.md },
+  modeIcon: { width: 48, height: 48, borderRadius: radius.lg, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center', marginRight: spacing.md },
   radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: colors.g300, alignItems: 'center', justifyContent: 'center' },
   radioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.primary },
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
