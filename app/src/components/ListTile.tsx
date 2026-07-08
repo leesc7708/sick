@@ -24,6 +24,8 @@ export function ListTile({ icon, title, desc, onPress, tone = 'default', badge }
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={desc ? `${title}, ${desc}` : title}
       style={({ pressed }) => [
         styles.tile,
         shadow.card,

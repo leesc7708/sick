@@ -151,7 +151,7 @@ export function HomeScreen({ navigation }: Props) {
           {([['work', t('mode_work')], ['general', t('mode_general')]] as [AppMode, string][]).map(([key, label]) => {
             const on = (key === 'work') === isWork;
             return (
-              <Pressable key={key} onPress={() => changeMode(key)} style={[styles.segItem, on && styles.segItemOn]}>
+              <Pressable key={key} onPress={() => changeMode(key)} accessibilityRole="button" accessibilityState={{ selected: on }} accessibilityLabel={label} style={[styles.segItem, on && styles.segItemOn]}>
                 <Text style={[styles.segTxt, { color: on ? colors.text : colors.textMuted }]}>{label}</Text>
               </Pressable>
             );

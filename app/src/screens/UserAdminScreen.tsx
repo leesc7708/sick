@@ -124,6 +124,9 @@ export function UserAdminScreen({ navigation }: Props) {
               key={r}
               disabled={!!busy || activeNow}
               onPress={() => confirmApply(u, r)}
+              accessibilityRole="button"
+              accessibilityLabel={`${u.name}을(를) ${ROLE_LABEL[r]}로 승인`}
+              accessibilityState={{ disabled: !!busy || activeNow, selected: activeNow }}
               style={[styles.roleBtn, activeNow && styles.roleBtnOn]}
             >
               <Text style={[styles.roleTxt, activeNow && styles.roleTxtOn]}>
