@@ -3,7 +3,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import {
+  doc, getDoc, setDoc, updateDoc, getDocs, collection, serverTimestamp,
+} from 'firebase/firestore';
 import { auth, db } from './firebase';
 import type { Lang } from '../i18n/translations';
 
@@ -81,4 +83,27 @@ export async function fetchAccount(uid: string): Promise<UserAccount | null> {
 // 승인된(활성) 근로자 이상만 AI 사용 가능. general/pending은 불가.
 export function canUseAI(acc: UserAccount | null): boolean {
   return !!acc && acc.status === 'active' && acc.role !== 'general';
+}
+
+// ── ssvisor(총괄) 전용: 회원 승인·역할배정 ──
+// firestore.rules에서 ssvisor만 users의 role/status 변경 가능.
+// 전체 유저 목록(가입 최신순). 관리자 이상만 read 통과.
+export async function listUsers(): Promise<UserAccount[]> {
+  const snap = await getDocs(collection(db, 'users'));
+  const list = snap.docs.map((d) => ({ uid: d.id, ...(d.data() as any) })) as UserAccount[];
+  // 승인 대기(pending) 먼저, 그다음 최신 가입순
+  return list.sort((a, b) => {
+    if (a.status !== b.status) {
+      if (a.status === 'pending') return -1;
+      if (b.status === 'pending') return 1;
+    }
+    const ta = a.createdAt?.seconds ?? 0;
+    const tb = b.createdAt?.seconds ?? 0;
+    return tb - ta;
+  });
+}
+
+// 역할·상태 동시 변경 (승인=active로 승격 + 역할 부여, 거부=rejected)
+export async function setUserRoleStatus(uid: string, role: Role, status: AccountStatus): Promise<void> {
+  await updateDoc(doc(db, 'users', uid), { role, status });
 }

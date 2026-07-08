@@ -15,7 +15,7 @@ import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
 import { useAuth } from '../auth/AuthContext';
-import { Role, isManager } from '../services/auth';
+import { Role, isManager, isSsvisor } from '../services/auth';
 import { getMyMembership, sendEmergency, Membership } from '../services/crew';
 import { useRegisterScrollTop } from '../utils/scrollTop';
 import { useLang } from '../i18n/LanguageContext';
@@ -120,6 +120,11 @@ export function HomeScreen({ navigation }: Props) {
         {/* 관리자(에스바이저/떠블에스바이저): 현장 그룹 관리 */}
         {mgr && (
           <PrimaryButton title="현장 그룹 · 긴급 관리" icon="📊" variant="work" size="lg" style={{ marginBottom: spacing.sm }} onPress={() => navigation.navigate('Crew')} />
+        )}
+
+        {/* 총괄(떠블에스바이저): 회원 승인·역할 배정 */}
+        {isSsvisor(account) && (
+          <PrimaryButton title="회원 승인 · 역할 관리" icon="👥" variant="primary" size="md" style={{ marginBottom: spacing.sm }} onPress={() => navigation.navigate('UserAdmin')} />
         )}
 
         {/* 생명 직결: 119를 전체폭·최상단·최대로 (디자인팀 P0 — 위계 정상화) */}

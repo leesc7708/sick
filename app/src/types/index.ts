@@ -145,6 +145,7 @@ export type RootStackParamList = {
   IncidentReport: undefined;
   ManagerDashboard: undefined;
   Crew: undefined;
+  UserAdmin: undefined;
   MyMedicines: undefined;
   History: undefined;
   Settings: undefined;

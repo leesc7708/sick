@@ -7,6 +7,15 @@
 
 ---
 
+### 2026-07-08 | 회원 승인·역할배정 화면(ssvisor 키스톤) + 2계정 e2e 검증
+- **발견**: 어제 만든 로그인·역할·크루 시스템에 **가입자 승인/역할부여 UI가 부재**(ManagerDashboard는 로컬스토리지 데모, 실제 승인기능 없음). ssvisor만 rules상 role/status 변경 가능한데 이를 실행할 화면이 없어 **활성 svisor·worker 생성 불가 → 2계정 e2e 자체가 막힘**. mmersum만 콘솔 수동설정 상태였음
+- **UserAdminScreen 신설**(ssvisor 전용): listUsers()로 전체회원(승인대기 우선정렬) + 역할버튼(근로자/에스바이저/떠블에스바이저) 원터치 승인=active 승격 + 거부. auth.ts에 listUsers()·setUserRoleStatus() 추가. 홈에 ssvisor용 "회원 승인·역할 관리" 진입버튼. 본인 총괄권한 자가해제 방지
+- **2계정 e2e 실백엔드 검증 14/0 통과**(실 Firebase SDK+실 firestore.rules 관통, tools 스크립트 scratchpad): 가입→ssvisor승격(gcloud REST)→회원목록조회→워커승인→**워커 자가 권한상승 시도 거부(rules 차단 확인)**→크루생성→아이디검색→워커추가→소속조회→긴급알림생성→관리자 라우팅수신→ack→자기이탈. 테스트데이터 자동정리
+- tsc 통과·빌드·audio-ko 102개 복사·hosting 배포 완료(wheresick-5617a.web.app)
+- ⏳ 남은것 그대로: P2 Cloud Functions(멤버십 하드닝·미응답3분 확산)·FCM 웹푸시·오프라인큐잉 / 남은 P0(DeptConsult 결과 다국어·민감정보 동의·부적합자가체크 로그·특수건진 유효기간) / E-Gen키·KIPRIS(형님). ⚠️브라우저 UI 픽셀 실테스트는 별도(로직·규칙 e2e는 통과)
+
+---
+
 ## 🔴 P0 — 제출 전 반드시 (말과 실물 일치 회복)
 
 - [ ] **구버전 위반 화면 격리/제거** — `SymptomResultScreen`(병명·확률 배지), `ai.ts`의 `realAnalyze`/`SYSTEM_PROMPT`/`MOCK_PATTERNS`, `MedicineSearch`/`MedicineDetail`/`InteractionCheck`, `mockMedicines.ts`, `redFlagKeywords.ts`, `storage.getApiKey/setApiKey/KEYS.apiKey`, 미사용 `FloatingSOS`.
