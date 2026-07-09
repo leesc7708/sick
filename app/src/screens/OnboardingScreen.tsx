@@ -11,7 +11,8 @@ import { LangSwitcher } from '../components/LangSwitcher';
 import { Icon } from '../components/Icon';
 import { useLang } from '../i18n/LanguageContext';
 import { useAuth } from '../auth/AuthContext';
-import { colors, radius, spacing, shadow } from '../theme/colors';
+import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
@@ -35,6 +36,7 @@ const AGE_BANDS: { label: string; value: number }[] = [
 const splitCsv = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean);
 
 export function OnboardingScreen({ navigation }: Props) {
+  const colors = useTheme();
   const { t } = useLang();
   const { user, onboarded, markOnboarded } = useAuth();
   const [mode, setMode] = useState<AppMode | null>(null);
@@ -72,7 +74,7 @@ export function OnboardingScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={styles.body}>
         <Text style={[typography.captionBold, { color: colors.textMuted, marginBottom: spacing.xs }]}>{t('lang_select')}</Text>
         <LangSwitcher style={{ marginBottom: spacing.lg }} />
@@ -82,36 +84,36 @@ export function OnboardingScreen({ navigation }: Props) {
           {t('tagline_work')}
         </Text>
 
-        <Text style={styles.sectionLabel}>{t('choose_mode')}</Text>
+        <Text style={[styles.sectionLabel, { color: colors.text }]}>{t('choose_mode')}</Text>
         {MODES.map((m) => {
           const on = mode === m.key;
           return (
             <Pressable
               key={m.key}
               onPress={() => setMode(m.key)}
-              style={[styles.modeCard, shadow.card, on && { borderColor: colors.primary, borderWidth: 2, backgroundColor: colors.primaryLight }]}
+              style={[styles.modeCard, shadow.card, { backgroundColor: colors.card }, on && { borderColor: colors.primary, borderWidth: 2, backgroundColor: colors.primaryLight }]}
             >
-              <View style={styles.modeIcon}>
+              <View style={[styles.modeIcon, { backgroundColor: colors.primaryLight }]}>
                 <Icon name={m.key === 'work' ? 'vest' : 'user'} size={26} color={on ? colors.primary : colors.g600} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={[typography.h3, { color: colors.text }]}>{t(m.key === 'work' ? 'mode_work' : 'mode_general')}</Text>
                 <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>{t(m.key === 'work' ? 'mode_work_desc' : 'mode_general_desc')}</Text>
               </View>
-              <View style={[styles.radio, on && { borderColor: colors.primary }]}>{on && <View style={styles.radioDot} />}</View>
+              <View style={[styles.radio, { borderColor: colors.g300 }, on && { borderColor: colors.primary }]}>{on && <View style={[styles.radioDot, { backgroundColor: colors.primary }]} />}</View>
             </Pressable>
           );
         })}
 
-        <Text style={styles.sectionLabel}>{t('profile_optional')}</Text>
-        <Text style={styles.fieldLabel}>{t('age_band')}</Text>
+        <Text style={[styles.sectionLabel, { color: colors.text }]}>{t('profile_optional')}</Text>
+        <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('age_band')}</Text>
         <View style={styles.chips}>
           {AGE_BANDS.map((b) => <Chip key={b.label} label={b.label} selected={ageBand === b.label} onPress={() => setAgeBand(b.label)} />)}
         </View>
 
         {/* 민감정보(건강) 수집·이용 동의 — Play Store 필수 요건 / 개인정보보호법 */}
-        <Pressable onPress={() => setHealthConsent((v) => !v)} style={[styles.consent, healthConsent && { borderColor: colors.primary, backgroundColor: colors.primaryLight }]}>
-          <View style={[styles.check, healthConsent && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
+        <Pressable onPress={() => setHealthConsent((v) => !v)} style={[styles.consent, { backgroundColor: colors.card, borderColor: colors.border }, healthConsent && { borderColor: colors.primary, backgroundColor: colors.primaryLight }]}>
+          <View style={[styles.check, { borderColor: colors.g300 }, healthConsent && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
             {healthConsent && <Text style={styles.checkMark}>✓</Text>}
           </View>
           <View style={{ flex: 1 }}>
@@ -123,17 +125,17 @@ export function OnboardingScreen({ navigation }: Props) {
           </View>
         </Pressable>
 
-        <Text style={styles.fieldLabel}>{t('conditions')}</Text>
-        <TextInput value={conditions} onChangeText={setConditions} placeholder={t('ob_cond_ph')} placeholderTextColor={colors.g400} style={styles.input} />
-        <Text style={styles.fieldLabel}>{t('allergies')}</Text>
-        <TextInput value={allergies} onChangeText={setAllergies} placeholder={t('ob_alg_ph')} placeholderTextColor={colors.g400} style={styles.input} />
-        <Text style={styles.fieldLabel}>{t('current_meds')}</Text>
-        <TextInput value={meds} onChangeText={setMeds} placeholder={t('ob_meds_ph')} placeholderTextColor={colors.g400} style={styles.input} />
+        <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('conditions')}</Text>
+        <TextInput value={conditions} onChangeText={setConditions} placeholder={t('ob_cond_ph')} placeholderTextColor={colors.g500} style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
+        <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('allergies')}</Text>
+        <TextInput value={allergies} onChangeText={setAllergies} placeholder={t('ob_alg_ph')} placeholderTextColor={colors.g500} style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
+        <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('current_meds')}</Text>
+        <TextInput value={meds} onChangeText={setMeds} placeholder={t('ob_meds_ph')} placeholderTextColor={colors.g500} style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
 
         <Disclaimer compact text={t('disclaimer')} />
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: colors.bg, borderTopColor: colors.divider }]}>
         <PrimaryButton title={t('start')} size="lg" disabled={!mode} onPress={start} />
       </View>
     </SafeAreaView>
@@ -141,18 +143,18 @@ export function OnboardingScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: _staticColors.bg },
   body: { padding: spacing.lg, paddingTop: spacing.xl, paddingBottom: spacing.md },
-  sectionLabel: { ...typography.h3, color: colors.text, marginTop: spacing.xl, marginBottom: spacing.md },
-  fieldLabel: { ...typography.captionBold, color: colors.textSecondary, marginTop: spacing.md, marginBottom: spacing.sm },
-  modeCard: { backgroundColor: colors.card, borderRadius: radius.xl, borderWidth: 2, borderColor: 'transparent', padding: spacing.md, flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
-  modeIcon: { width: 48, height: 48, borderRadius: radius.lg, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center', marginRight: spacing.md },
-  radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: colors.g300, alignItems: 'center', justifyContent: 'center' },
-  radioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.primary },
+  sectionLabel: { ...typography.h3, color: _staticColors.text, marginTop: spacing.xl, marginBottom: spacing.md },
+  fieldLabel: { ...typography.captionBold, color: _staticColors.textSecondary, marginTop: spacing.md, marginBottom: spacing.sm },
+  modeCard: { backgroundColor: _staticColors.card, borderRadius: radius.xl, borderWidth: 2, borderColor: 'transparent', padding: spacing.md, flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
+  modeIcon: { width: 48, height: 48, borderRadius: radius.lg, backgroundColor: _staticColors.primaryLight, alignItems: 'center', justifyContent: 'center', marginRight: spacing.md },
+  radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: _staticColors.g300, alignItems: 'center', justifyContent: 'center' },
+  radioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: _staticColors.primary },
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
-  input: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md, ...typography.body, color: colors.text },
-  footer: { padding: spacing.lg, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.divider },
-  consent: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1.5, borderColor: colors.border, padding: spacing.md, marginTop: spacing.md },
-  check: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: colors.g300, alignItems: 'center', justifyContent: 'center', marginRight: spacing.sm, marginTop: 1 },
+  input: { backgroundColor: _staticColors.card, borderWidth: 1, borderColor: _staticColors.border, borderRadius: radius.lg, padding: spacing.md, ...typography.body, color: _staticColors.text },
+  footer: { padding: spacing.lg, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: _staticColors.divider },
+  consent: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: _staticColors.card, borderRadius: radius.lg, borderWidth: 1.5, borderColor: _staticColors.border, padding: spacing.md, marginTop: spacing.md },
+  check: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: _staticColors.g300, alignItems: 'center', justifyContent: 'center', marginRight: spacing.sm, marginTop: 1 },
   checkMark: { color: '#fff', fontSize: 14, fontWeight: '800', lineHeight: 16 },
 });

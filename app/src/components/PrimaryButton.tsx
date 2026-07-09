@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { colors, radius, spacing } from '../theme/colors';
+import { radius, spacing } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { Icon, resolveIcon } from './Icon';
 
@@ -18,25 +19,6 @@ interface Props {
   style?: ViewStyle;
 }
 
-const BG: Record<Variant, string> = {
-  primary: colors.primary,
-  success: colors.success,
-  emergency: colors.emergency,
-  work: colors.work,
-  secondary: colors.g100,
-  outline: 'transparent',
-  ghost: 'transparent',
-};
-const FG: Record<Variant, string> = {
-  primary: '#fff',
-  success: '#fff',
-  emergency: '#fff',
-  work: '#fff',
-  secondary: colors.g800,
-  outline: colors.primary,
-  ghost: colors.g700,
-};
-
 export function PrimaryButton({
   title,
   onPress,
@@ -47,6 +29,15 @@ export function PrimaryButton({
   disabled,
   style,
 }: Props) {
+  const c = useTheme();
+  const BG: Record<Variant, string> = {
+    primary: c.primary, success: c.success, emergency: c.emergency, work: c.work,
+    secondary: c.g100, outline: 'transparent', ghost: 'transparent',
+  };
+  const FG: Record<Variant, string> = {
+    primary: '#fff', success: '#fff', emergency: '#fff', work: '#fff',
+    secondary: c.g800, outline: c.primary, ghost: c.g700,
+  };
   const h = size === 'lg' ? 56 : size === 'sm' ? 44 : 52;
   const bordered = variant === 'outline' || variant === 'ghost';
   const iconName = resolveIcon(icon);
@@ -62,7 +53,7 @@ export function PrimaryButton({
         {
           height: h,
           backgroundColor: BG[variant],
-          borderColor: variant === 'outline' ? colors.primary : colors.g200,
+          borderColor: variant === 'outline' ? c.primary : c.g200,
           borderWidth: bordered ? 1.5 : 0,
         },
         pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },

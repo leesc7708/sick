@@ -1,7 +1,8 @@
 import React, { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '../theme/colors';
+import { spacing } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 
 interface Props {
@@ -12,14 +13,15 @@ interface Props {
 }
 
 export function AppBar({ title, onBack, right, emergency }: Props) {
-  const bg = emergency ? colors.emergency : colors.card;
-  const fg = emergency ? '#fff' : colors.text;
+  const c = useTheme();
+  const bg = emergency ? c.emergency : c.card;
+  const fg = emergency ? '#fff' : c.text;
   return (
-    <SafeAreaView edges={['top']} style={{ backgroundColor: bg }}>
+    <SafeAreaView edges={['top']} style={{ backgroundColor: bg, borderBottomWidth: emergency ? 0 : StyleSheet.hairlineWidth, borderBottomColor: c.border }}>
       <View style={styles.bar}>
         {onBack ? (
           <Pressable onPress={onBack} hitSlop={12} style={styles.side}>
-            <Text style={[styles.back, { color: emergency ? '#fff' : colors.g800 }]}>‹</Text>
+            <Text style={[styles.back, { color: emergency ? '#fff' : c.g800 }]}>‹</Text>
           </Pressable>
         ) : (
           <View style={styles.side} />

@@ -6,7 +6,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
 import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { colors, radius, spacing, shadow } from '../theme/colors';
+import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
+import { useTheme, useThemeMode } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
@@ -29,6 +30,8 @@ export function SettingsScreen({ navigation }: Props) {
   const [mode, setMode] = useState<AppMode>('work');
   const { account } = useAuth();
   const { lang, setLang, t } = useLang();
+  const colors = useTheme();
+  const { mode: themeMode, setMode: setThemeMode } = useThemeMode();
 
   useFocusEffect(
     useCallback(() => {
@@ -79,10 +82,19 @@ export function SettingsScreen({ navigation }: Props) {
     ]);
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
       <AppBar title="설정" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={[styles.card, shadow.card]}>
+        {/* 화면 테마 — 누구나 원탭 라이트/다크 전환 (기본 라이트) */}
+        <View style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
+          <Text style={[typography.bodyBold, { color: colors.text }]}>🎨 화면 테마</Text>
+          <View style={styles.chips}>
+            <Chip label="라이트" tone="primary" selected={themeMode === 'light'} onPress={() => setThemeMode('light')} />
+            <Chip label="다크" tone="primary" selected={themeMode === 'dark'} onPress={() => setThemeMode('dark')} />
+          </View>
+        </View>
+
+        <View style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
           <Text style={[typography.bodyBold, { color: colors.text }]}>🦺 모드</Text>
           <View style={styles.chips}>
             <Chip label="현장 모드" tone="work" selected={mode === 'work'} onPress={() => changeMode('work')} />
@@ -90,7 +102,7 @@ export function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
 
-        <View style={[styles.card, shadow.card]}>
+        <View style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
           <Text style={[typography.bodyBold, { color: colors.text }]}>🌐 {t('lang_label')}</Text>
           <View style={styles.chips}>
             {LANGS.map((l) => (
@@ -99,12 +111,12 @@ export function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
 
-        <View style={[styles.card, shadow.card]}>
+        <View style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
           <Text style={[typography.bodyBold, { color: colors.text }]}>🔔 알림</Text>
           <Text style={[typography.caption, { color: colors.textMuted, marginTop: 4 }]}>검진 만료·복약 알림 (데모)</Text>
         </View>
 
-        <View style={[styles.card, shadow.card, { borderWidth: 1, borderColor: '#FFD9D6' }]}>
+        <View style={[styles.card, shadow.card, { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border }]}>
           <Text style={[typography.bodyBold, { color: colors.g500, textDecorationLine: 'line-through' }]}>✖ Claude API 키 입력 (제거됨)</Text>
           <Text style={[typography.small, { color: colors.textMuted, marginTop: 4 }]}>
             보안상 AI 호출은 서버 프록시(Cloud Functions)로만 처리합니다. API 키를 앱에 저장하지 않습니다.
@@ -132,8 +144,8 @@ export function SettingsScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
+  wrap: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.md, paddingBottom: 40 },
-  card: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.sm },
+  card: { borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.sm },
 });

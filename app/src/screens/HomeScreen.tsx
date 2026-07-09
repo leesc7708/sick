@@ -10,7 +10,8 @@ import { Tag } from '../components/Tag';
 import { Icon } from '../components/Icon';
 import { LogoMark } from '../components/LogoMark';
 import { LangSwitcher } from '../components/LangSwitcher';
-import { colors, radius, spacing } from '../theme/colors';
+import { colors as _staticColors, radius, spacing } from '../theme/colors';
+import { useTheme, useThemeMode } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { AppMode, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
@@ -35,6 +36,8 @@ const SEC: Record<'care' | 'work' | 'records', Record<Lang, string>> = {
 };
 
 export function HomeScreen({ navigation }: Props) {
+  const colors = useTheme(); // JSX의 colors.* 를 활성 테마로 (StyleSheet 색은 사용처에서 덮음)
+  const { mode: themeMode, toggle: toggleTheme } = useThemeMode();
   const [mode, setMode] = useState<AppMode>('work');
   const { account } = useAuth();
   const [membership, setMembership] = useState<Membership | null>(null);
@@ -83,7 +86,7 @@ export function HomeScreen({ navigation }: Props) {
   const isWork = mode === 'work';
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={styles.content}
@@ -100,14 +103,18 @@ export function HomeScreen({ navigation }: Props) {
               {isWork ? t('tagline_work') : t('tagline_general')}
             </Text>
           </View>
+          {/* 라이트·다크 전환 (누구나 원탭) */}
+          <Pressable onPress={toggleTheme} hitSlop={10} accessibilityRole="button" accessibilityLabel="라이트·다크 전환" style={{ padding: 6, marginLeft: 6 }}>
+            <Text style={{ fontSize: 20 }}>{themeMode === 'dark' ? '☀️' : '🌙'}</Text>
+          </Pressable>
         </View>
 
         {/* 계정 진입: 이름·역할 표시 + 탭하면 내 계정(로그아웃 등). 미승인 시 아바타에 주황 점 */}
         {account && (
-          <Pressable style={styles.acctRow} onPress={() => navigation.navigate('Account')} accessibilityRole="button" accessibilityLabel={account.name}>
-            <View style={styles.acctAvatar}>
+          <Pressable style={[styles.acctRow, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={() => navigation.navigate('Account')} accessibilityRole="button" accessibilityLabel={account.name}>
+            <View style={[styles.acctAvatar, { backgroundColor: colors.g100 }]}>
               <Icon name="user" size={18} color={colors.g600} />
-              {account.status !== 'active' && <View style={styles.acctDot} />}
+              {account.status !== 'active' && <View style={[styles.acctDot, { backgroundColor: colors.warning, borderColor: colors.card }]} />}
             </View>
             <Text style={[typography.bodyBold, { color: colors.text, marginLeft: 10 }]}>{account.name}님</Text>
             <Text style={[typography.small, { color: account.status === 'active' ? colors.primary : colors.warning, marginLeft: 8 }]}>
@@ -122,7 +129,7 @@ export function HomeScreen({ navigation }: Props) {
 
         {/* 워커: 오늘 소속 그룹 + 관리자에게 긴급 */}
         {account?.role === 'worker' && (
-          <View style={styles.crewBanner}>
+          <View style={[styles.crewBanner, { backgroundColor: colors.workLight }]}>
             {membership ? (
               <>
                 <Text style={[typography.captionBold, { color: colors.work }]}>오늘 소속: {membership.label}</Text>
@@ -156,11 +163,11 @@ export function HomeScreen({ navigation }: Props) {
         <PrimaryButton title={t('aed_title')} icon="🫀" variant="outline" size="md" onPress={() => navigation.navigate('AedFinder')} />
 
         {/* 모드 토글 — 세그먼트 컨트롤(회색 트랙 + 흰 선택칩). 주황 solid 막대 제거 */}
-        <View style={styles.segment}>
+        <View style={[styles.segment, { backgroundColor: colors.g200 }]}>
           {([['work', t('mode_work')], ['general', t('mode_general')]] as [AppMode, string][]).map(([key, label]) => {
             const on = (key === 'work') === isWork;
             return (
-              <Pressable key={key} onPress={() => changeMode(key)} accessibilityRole="button" accessibilityState={{ selected: on }} accessibilityLabel={label} style={[styles.segItem, on && styles.segItemOn]}>
+              <Pressable key={key} onPress={() => changeMode(key)} accessibilityRole="button" accessibilityState={{ selected: on }} accessibilityLabel={label} style={[styles.segItem, on && [styles.segItemOn, { backgroundColor: colors.card }]]}>
                 <Text style={[styles.segTxt, { color: on ? colors.text : colors.textMuted }]}>{label}</Text>
               </Pressable>
             );
@@ -168,7 +175,7 @@ export function HomeScreen({ navigation }: Props) {
         </View>
 
         {/* 건강·응급 */}
-        <Text style={styles.sectionLabel}>{SEC.care[lang]}</Text>
+        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{SEC.care[lang]}</Text>
         <ListTile icon="📝" title={t('symptom_organize')} desc={t('symptom_desc')}
           onPress={() => navigation.navigate('SymptomInput')} />
         <ListTile icon="🗣️" title={t('phrasebook_title')} desc={t('phrasebook_desc')}
@@ -183,7 +190,7 @@ export function HomeScreen({ navigation }: Props) {
         {/* 현장 @work */}
         {isWork && (
           <>
-            <Text style={styles.sectionLabel}>{SEC.work[lang]}</Text>
+            <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{SEC.work[lang]}</Text>
             <ListTile icon="⚠️" title={t('incident_report')} desc={t('incident_desc')} tone="emergency"
               badge={<Tag label="@work" tone="work" />}
               onPress={() => navigation.navigate('IncidentReport')} />
@@ -200,7 +207,7 @@ export function HomeScreen({ navigation }: Props) {
         )}
 
         {/* 내 기록·설정 */}
-        <Text style={styles.sectionLabel}>{SEC.records[lang]}</Text>
+        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{SEC.records[lang]}</Text>
         {!isWork && (
           <ListTile icon="📋" title={t('docs')} desc={t('docs_desc')}
             badge={<Tag label="NEW" tone="new" />}
@@ -220,17 +227,18 @@ export function HomeScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  // 색은 렌더 시 useTheme()로 덮음 — 여기 값은 정적 기본(라이트)일 뿐
+  safe: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.md, paddingBottom: 96 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md, marginTop: spacing.xs },
-  acctRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, paddingVertical: 10, paddingHorizontal: 12, marginBottom: spacing.sm },
-  acctAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: colors.g100, alignItems: 'center', justifyContent: 'center' },
-  acctDot: { position: 'absolute', top: 4, right: 4, width: 9, height: 9, borderRadius: 5, backgroundColor: colors.warning, borderWidth: 1.5, borderColor: colors.card },
-  crewBanner: { backgroundColor: colors.workLight, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm },
-  segment: { flexDirection: 'row', backgroundColor: colors.g200, borderRadius: radius.md, padding: 4, marginTop: spacing.md, marginBottom: spacing.md },
+  acctRow: { flexDirection: 'row', alignItems: 'center', borderRadius: radius.lg, borderWidth: 1, paddingVertical: 10, paddingHorizontal: 12, marginBottom: spacing.sm },
+  acctAvatar: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  acctDot: { position: 'absolute', top: 4, right: 4, width: 9, height: 9, borderRadius: 5, borderWidth: 1.5 },
+  crewBanner: { borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm },
+  segment: { flexDirection: 'row', borderRadius: radius.md, padding: 4, marginTop: spacing.md, marginBottom: spacing.md },
   segItem: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: radius.sm },
-  segItemOn: { backgroundColor: colors.card, shadowColor: '#191F28', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.12, shadowRadius: 3, elevation: 1 },
+  segItemOn: { shadowColor: '#191F28', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.12, shadowRadius: 3, elevation: 1 },
   segTxt: { fontSize: 14, fontWeight: '700' },
-  sectionLabel: { ...typography.captionBold, color: colors.textMuted, marginTop: spacing.lg, marginBottom: spacing.sm, marginLeft: 4 },
+  sectionLabel: { ...typography.captionBold, marginTop: spacing.lg, marginBottom: spacing.sm, marginLeft: 4 },
   call119: { height: 64 },
 });

@@ -4,7 +4,8 @@ import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
-import { colors, radius, spacing, shadow } from '../theme/colors';
+import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { HistoryItem, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
@@ -14,6 +15,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'History'>;
 const ICON: Record<string, string> = { symptom: '📝', incident: '⚠️', workcheck: '✅' };
 
 export function HistoryScreen({ navigation }: Props) {
+  const colors = useTheme();
   const [items, setItems] = useState<HistoryItem[]>([]);
 
   useFocusEffect(
@@ -33,20 +35,20 @@ export function HistoryScreen({ navigation }: Props) {
   );
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
       <AppBar title="지난 기록" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         {items.length === 0 && (
           <Text style={[typography.body, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.xl }]}>아직 기록이 없어요.</Text>
         )}
         {items.map((it) => (
-          <View key={it.id} style={[styles.card, shadow.card]}>
+          <View key={it.id} style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
             <Text style={{ fontSize: 20, marginRight: 12 }}>{ICON[it.kind]}</Text>
             <View style={{ flex: 1 }}>
               <Text style={[typography.bodyBold, { color: colors.text }]}>{it.title}</Text>
               {it.subtitle ? <Text style={[typography.caption, { color: colors.textMuted }]}>{it.subtitle}</Text> : null}
             </View>
-            <Text style={[typography.small, { color: colors.g400 }]}>{it.date}</Text>
+            <Text style={[typography.small, { color: colors.textMuted }]}>{it.date}</Text>
           </View>
         ))}
         {items.length > 0 && (
@@ -58,7 +60,8 @@ export function HistoryScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
+  // 색은 렌더 시 useTheme()로 덮음 — 여기 값은 정적 기본(라이트)일 뿐
+  wrap: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.md, paddingBottom: 40 },
-  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center' },
+  card: { backgroundColor: _staticColors.card, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center' },
 });

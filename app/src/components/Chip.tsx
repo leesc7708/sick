@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { colors, radius } from '../theme/colors';
+import { radius } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 
 type Tone = 'default' | 'red' | 'work' | 'primary';
 
@@ -11,14 +12,14 @@ interface Props {
   onPress?: () => void;
 }
 
-const ON: Record<Tone, { bg: string; fg: string }> = {
-  default: { bg: colors.g800, fg: '#fff' },
-  red: { bg: colors.emergency, fg: '#fff' },
-  work: { bg: colors.work, fg: '#fff' },
-  primary: { bg: colors.primary, fg: '#fff' },
-};
-
 export function Chip({ label, selected, tone = 'default', onPress }: Props) {
+  const c = useTheme();
+  const ON: Record<Tone, { bg: string; fg: string }> = {
+    default: { bg: c.g800, fg: c.textInverse },
+    red: { bg: c.emergency, fg: '#fff' },
+    work: { bg: c.work, fg: '#fff' },
+    primary: { bg: c.primary, fg: '#fff' },
+  };
   const on = ON[tone];
   return (
     <Pressable
@@ -30,11 +31,11 @@ export function Chip({ label, selected, tone = 'default', onPress }: Props) {
         styles.chip,
         selected
           ? { backgroundColor: on.bg, borderColor: on.bg }
-          : { backgroundColor: colors.card, borderColor: colors.border },
+          : { backgroundColor: c.card, borderColor: c.border },
         pressed && { opacity: 0.8 },
       ]}
     >
-      <Text style={[styles.txt, { color: selected ? on.fg : colors.textSecondary }]}>{label}</Text>
+      <Text style={[styles.txt, { color: selected ? on.fg : c.textSecondary }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -43,7 +44,7 @@ const styles = StyleSheet.create({
   chip: {
     borderWidth: 1.5,
     borderRadius: radius.pill,
-    paddingVertical: 11, // 현장·장갑 터치타겟 ~44px 확보 (구 8)
+    paddingVertical: 11,
     paddingHorizontal: 16,
     marginRight: 8,
     marginBottom: 8,

@@ -6,7 +6,8 @@ import { AppBar } from '../components/AppBar';
 import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Icon } from '../components/Icon';
-import { colors, radius, spacing, shadow } from '../theme/colors';
+import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { WORK_TYPES } from '../data/options';
 import { RootStackParamList } from '../types';
@@ -24,6 +25,7 @@ const WT_KEY: Record<string, string> = {
 
 export function WorkCheckScreen({ navigation }: Props) {
   const { t } = useLang();
+  const colors = useTheme();
   const { account } = useAuth();
   const [membership, setMembership] = useState<Membership | null>(null);
   const [workType, setWorkType] = useState(WORK_TYPES[0]);
@@ -85,31 +87,31 @@ export function WorkCheckScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
       <AppBar title={t('wc_title')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[typography.h2, { color: colors.text }]}>{t('wc_today')}</Text>
-        <Text style={styles.label}>{t('wc_work_type')}</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('wc_work_type')}</Text>
         <View style={styles.chips}>
           {WORK_TYPES.map((w) => <Chip key={w} label={t(WT_KEY[w])} tone="work" selected={workType === w} onPress={() => setWorkType(w)} />)}
         </View>
 
         {/* 적합성 판정 문항 (3종, 응답 필수) */}
-        <View style={[styles.card, shadow.card]}>
+        <View style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
           <Question label={t('wc_q_sleep')} value={sleepOk} set={setSleepOk} />
           <Question label={t('wc_q_alcohol')} value={noAlcohol} set={setNoAlcohol} />
           <Question label={t('wc_q_dizzy')} value={noDizziness} set={setNoDizziness} />
         </View>
 
         {/* 참고 정보 (복약) — 판정에 반영되지 않음, 사고 시 의료 맥락용으로만 기록 */}
-        <Text style={[styles.label, { marginTop: spacing.md }]}>{t('wc_ref_t')}</Text>
-        <View style={[styles.card, shadow.card, { marginTop: spacing.sm }]}>
+        <Text style={[styles.label, { marginTop: spacing.md, color: colors.textSecondary }]}>{t('wc_ref_t')}</Text>
+        <View style={[styles.card, shadow.card, { marginTop: spacing.sm, backgroundColor: colors.card }]}>
           <Question label={t('wc_q_meds')} value={tookMeds} set={setTookMeds} />
           <Text style={[typography.small, { color: colors.textMuted, paddingHorizontal: 8, paddingBottom: 6 }]}>{t('wc_ref_m')}</Text>
         </View>
 
         {riskWarn && (
-          <View style={[styles.unfit, shadow.card]}>
+          <View style={[styles.unfit, shadow.card, { backgroundColor: colors.emergencyLight, borderColor: colors.emergency }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Icon name="alert" size={24} color={colors.emergency} />
               <Text style={[typography.h3, { color: colors.emergency, marginLeft: 8, flex: 1 }]}>{t('wc_unfit_t')}</Text>
@@ -118,7 +120,7 @@ export function WorkCheckScreen({ navigation }: Props) {
           </View>
         )}
         {result === 'caution' && (
-          <View style={[styles.warn, shadow.card]}>
+          <View style={[styles.warn, shadow.card, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}>
             <Text style={[typography.bodyBold, { color: colors.warning }]}>{t('wc_warn_t')}</Text>
             <Text style={[typography.caption, { color: colors.text, marginTop: 4 }]}>{t('wc_warn_m')}</Text>
           </View>
@@ -127,7 +129,7 @@ export function WorkCheckScreen({ navigation }: Props) {
         <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.md }]}>{t('wc_note')}</Text>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { borderTopColor: colors.divider }]}>
         {!answered && (
           <Text style={[typography.small, { color: colors.textMuted, textAlign: 'center', marginBottom: spacing.sm }]}>{t('wc_answer_all')}</Text>
         )}
@@ -145,13 +147,14 @@ export function WorkCheckScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
+  // 색은 렌더 시 useTheme()로 덮음 — 여기 값은 정적 기본(라이트)일 뿐
+  wrap: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.md, paddingBottom: 40 },
-  label: { ...typography.captionBold, color: colors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
+  label: { ...typography.captionBold, color: _staticColors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
-  card: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.sm, marginTop: spacing.md },
+  card: { backgroundColor: _staticColors.card, borderRadius: radius.xl, padding: spacing.sm, marginTop: spacing.md },
   q: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 8 },
-  warn: { backgroundColor: colors.warningLight, borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.md, borderWidth: 1, borderColor: colors.warning },
-  unfit: { backgroundColor: colors.emergencyLight, borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.md, borderWidth: 1.5, borderColor: colors.emergency },
-  footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.divider },
+  warn: { backgroundColor: _staticColors.warningLight, borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.md, borderWidth: 1, borderColor: _staticColors.warning },
+  unfit: { backgroundColor: _staticColors.emergencyLight, borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.md, borderWidth: 1.5, borderColor: _staticColors.emergency },
+  footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: _staticColors.divider },
 });

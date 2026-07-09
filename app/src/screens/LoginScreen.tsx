@@ -6,7 +6,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LogoMark } from '../components/LogoMark';
 import { LangSwitcher } from '../components/LangSwitcher';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { colors, radius, spacing } from '../theme/colors';
+import { colors as _staticColors, radius, spacing } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { login } from '../services/auth';
 import { RootStackParamList } from '../types';
@@ -25,6 +26,7 @@ const UI: Record<string, Record<Lang, string>> = {
 };
 
 export function LoginScreen({ navigation }: Props) {
+  const colors = useTheme(); // JSX colors.* 를 활성 테마로 (StyleSheet 색은 사용처에서 덮음)
   const { lang } = useLang();
   const t = (k: string) => UI[k][lang];
   const [username, setUsername] = useState('');
@@ -40,7 +42,7 @@ export function LoginScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <LogoMark size={44} />
@@ -50,10 +52,10 @@ export function LoginScreen({ navigation }: Props) {
         <Text style={[typography.caption, { color: colors.textSecondary, marginBottom: 6 }]}>🌏 {t('pick_lang')}</Text>
         <LangSwitcher style={{ marginBottom: spacing.lg }} />
 
-        <Text style={styles.label}>{t('id')}</Text>
-        <TextInput value={username} onChangeText={setUsername} placeholder={t('id')} placeholderTextColor={colors.g500} autoCapitalize="none" style={styles.input} />
-        <Text style={styles.label}>{t('pw')}</Text>
-        <TextInput value={pw} onChangeText={setPw} placeholder={t('pw')} placeholderTextColor={colors.g500} secureTextEntry style={styles.input} />
+        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('id')}</Text>
+        <TextInput value={username} onChangeText={setUsername} placeholder={t('id')} placeholderTextColor={colors.g500} autoCapitalize="none" style={[styles.input, { backgroundColor: colors.card, borderColor: colors.g300, color: colors.text }]} />
+        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('pw')}</Text>
+        <TextInput value={pw} onChangeText={setPw} placeholder={t('pw')} placeholderTextColor={colors.g500} secureTextEntry style={[styles.input, { backgroundColor: colors.card, borderColor: colors.g300, color: colors.text }]} />
         {err ? <Text style={[typography.caption, { color: colors.emergency, marginTop: 6 }]}>{err}</Text> : null}
 
         <View style={{ marginTop: spacing.lg }}>
@@ -68,9 +70,9 @@ export function LoginScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.lg, flexGrow: 1, justifyContent: 'center' }, // 세로 중앙 정렬 → 하단 대공백 해소
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xl },
-  label: { ...typography.captionBold, color: colors.textSecondary, marginTop: spacing.md, marginBottom: 6 },
-  input: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.g300, borderRadius: radius.lg, padding: spacing.md, ...typography.body, color: colors.text },
+  label: { ...typography.captionBold, color: _staticColors.textSecondary, marginTop: spacing.md, marginBottom: 6 },
+  input: { backgroundColor: _staticColors.card, borderWidth: 1, borderColor: _staticColors.g300, borderRadius: radius.lg, padding: spacing.md, ...typography.body, color: _staticColors.text },
 });

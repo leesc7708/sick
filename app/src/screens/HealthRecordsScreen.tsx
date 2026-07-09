@@ -7,7 +7,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { AppBar } from '../components/AppBar';
 import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { colors, radius, spacing, shadow } from '../theme/colors';
+import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { DOC_INFO, HEALTH_CHECK_TYPES } from '../data/options';
 import { HealthCheckRecord, HealthCheckType, RootStackParamList } from '../types';
@@ -23,6 +24,7 @@ function daysLeft(expire?: string): number | null {
 }
 
 export function HealthRecordsScreen({ navigation }: Props) {
+  const colors = useTheme();
   const [records, setRecords] = useState<HealthCheckRecord[]>([]);
   const [pickType, setPickType] = useState<HealthCheckType>('특수건강진단');
   const scrollRef = useRef<ScrollView>(null);
@@ -91,7 +93,7 @@ export function HealthRecordsScreen({ navigation }: Props) {
     ]);
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
       <AppBar title="현장 서류함" onBack={() => navigation.goBack()} />
       <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
         <Text style={[typography.h2, { color: colors.text }]}>한 번 올려두면{'\n'}어디서든 제출</Text>
@@ -99,7 +101,7 @@ export function HealthRecordsScreen({ navigation }: Props) {
           현장 입구에서 QR로 바로 보여줄 수 있어요. 민감 정보라 기기에 안전하게 보관됩니다.
         </Text>
 
-        <Text style={styles.label}>추가할 분류</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>추가할 분류</Text>
         <View style={styles.chips}>
           {HEALTH_CHECK_TYPES.map((t) => (
             <Chip key={t} label={t} tone="work" selected={pickType === t} onPress={() => setPickType(t as HealthCheckType)} />
@@ -108,7 +110,7 @@ export function HealthRecordsScreen({ navigation }: Props) {
         <Text style={[typography.small, { color: colors.textSecondary, marginTop: 2, lineHeight: 18 }]}>ℹ️ {DOC_INFO[pickType]}</Text>
 
         {records.length === 0 && (
-          <View style={[styles.empty, shadow.card]}>
+          <View style={[styles.empty, shadow.card, { backgroundColor: colors.card }]}>
             <Text style={{ fontSize: 32 }}>📋</Text>
             <Text style={[typography.body, { color: colors.textMuted, marginTop: 8, textAlign: 'center' }]}>아직 등록된 검진기록이 없어요.{'\n'}아래에서 추가해 보세요.</Text>
           </View>
@@ -117,10 +119,10 @@ export function HealthRecordsScreen({ navigation }: Props) {
         {records.map((r) => {
           const left = daysLeft(r.expireDate);
           return (
-            <View key={r.id} style={[styles.card, shadow.card]}>
+            <View key={r.id} style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {r.fileType === 'image' && r.fileUri ? (
-                  <Image source={{ uri: r.fileUri }} style={styles.thumb} />
+                  <Image source={{ uri: r.fileUri }} style={[styles.thumb, { backgroundColor: colors.g100 }]} />
                 ) : (
                   <Text style={{ fontSize: 22, marginRight: 10 }}>{r.fileType === 'pdf' ? '📄' : '🖼️'}</Text>
                 )}
@@ -128,7 +130,7 @@ export function HealthRecordsScreen({ navigation }: Props) {
                   <Text style={[typography.bodyBold, { color: colors.text }]}>{r.type}</Text>
                   <Text style={[typography.small, { color: colors.textMuted }]} numberOfLines={1}>{r.title}</Text>
                 </View>
-                <Text style={[typography.small, { color: colors.g400 }]}>{r.fileType.toUpperCase()}</Text>
+                <Text style={[typography.small, { color: colors.textMuted }]}>{r.fileType.toUpperCase()}</Text>
               </View>
 
               <View style={{ flexDirection: 'row', marginTop: 8, flexWrap: 'wrap' }}>
@@ -151,7 +153,7 @@ export function HealthRecordsScreen({ navigation }: Props) {
         })}
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { borderTopColor: colors.divider }]}>
         <PrimaryButton title={`${pickType} 추가`} icon="＋" variant="work" size="lg" onPress={onAdd} />
       </View>
     </View>
@@ -159,13 +161,14 @@ export function HealthRecordsScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
+  // 색은 렌더 시 useTheme()로 덮음 — 여기 값은 정적 기본(라이트)일 뿐
+  wrap: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.md, paddingBottom: 40 },
-  label: { ...typography.captionBold, color: colors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
+  label: { ...typography.captionBold, color: _staticColors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
-  empty: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.xl, alignItems: 'center', marginTop: spacing.md },
-  card: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.sm },
-  thumb: { width: 38, height: 38, borderRadius: 8, marginRight: 10, backgroundColor: colors.g100 },
+  empty: { backgroundColor: _staticColors.card, borderRadius: radius.xl, padding: spacing.xl, alignItems: 'center', marginTop: spacing.md },
+  card: { backgroundColor: _staticColors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.sm },
+  thumb: { width: 38, height: 38, borderRadius: 8, marginRight: 10, backgroundColor: _staticColors.g100 },
   rowBtns: { flexDirection: 'row', marginTop: spacing.md },
-  footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.divider },
+  footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: _staticColors.divider },
 });

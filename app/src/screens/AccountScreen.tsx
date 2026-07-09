@@ -5,7 +5,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Icon } from '../components/Icon';
-import { colors, radius, spacing, shadow } from '../theme/colors';
+import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { RootStackParamList } from '../types';
 import { useAuth } from '../auth/AuthContext';
@@ -36,12 +37,13 @@ const ROLE: Record<Role, Record<Lang, string>> = {
   ssvisor: { ko: '총괄 관리자', en: 'General manager', zh: '总管', ja: '総括管理者', vi: 'Tổng quản lý', th: 'ผู้จัดการรวม', es: 'Gerente general' },
 };
 const STATUS: Record<AccountStatus, { label: Record<Lang, string>; color: string }> = {
-  active: { color: colors.success, label: { ko: '승인됨', en: 'Approved', zh: '已批准', ja: '承認済み', vi: 'Đã duyệt', th: 'อนุมัติแล้ว', es: 'Aprobado' } },
-  pending: { color: colors.warning, label: { ko: '승인 대기', en: 'Pending', zh: '待批准', ja: '承認待ち', vi: 'Chờ duyệt', th: 'รออนุมัติ', es: 'Pendiente' } },
-  rejected: { color: colors.emergency, label: { ko: '거부됨', en: 'Rejected', zh: '已拒绝', ja: '拒否', vi: 'Bị từ chối', th: 'ถูกปฏิเสธ', es: 'Rechazado' } },
+  active: { color: _staticColors.success, label: { ko: '승인됨', en: 'Approved', zh: '已批准', ja: '承認済み', vi: 'Đã duyệt', th: 'อนุมัติแล้ว', es: 'Aprobado' } },
+  pending: { color: _staticColors.warning, label: { ko: '승인 대기', en: 'Pending', zh: '待批准', ja: '承認待ち', vi: 'Chờ duyệt', th: 'รออนุมัติ', es: 'Pendiente' } },
+  rejected: { color: _staticColors.emergency, label: { ko: '거부됨', en: 'Rejected', zh: '已拒绝', ja: '拒否', vi: 'Bị từ chối', th: 'ถูกปฏิเสธ', es: 'Rechazado' } },
 };
 
 export function AccountScreen({ navigation }: Props) {
+  const colors = useTheme();
   const { account } = useAuth();
   const { lang } = useLang();
   const [membership, setMembership] = useState<Membership | null>(null);
@@ -56,32 +58,34 @@ export function AccountScreen({ navigation }: Props) {
 
   if (!account) {
     return (
-      <View style={styles.wrap}>
+      <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
         <AppBar title={tr('title', lang)} onBack={() => navigation.goBack()} />
       </View>
     );
   }
 
   const st = STATUS[account.status];
+  // 상태 배지 색은 활성 테마의 고대비 시맨틱 색으로 (라이트/다크 모두 명확)
+  const statusColor = account.status === 'active' ? colors.success : account.status === 'pending' ? colors.warning : colors.emergency;
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
       <AppBar title={tr('title', lang)} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         {/* 이름 + 역할/상태 배지 */}
-        <View style={[styles.card, shadow.card]}>
+        <View style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={styles.avatar}><Icon name="user" size={24} color={colors.primary} /></View>
+            <View style={[styles.avatar, { backgroundColor: colors.g200 }]}><Icon name="user" size={24} color={colors.primary} /></View>
             <View style={{ marginLeft: 12, flex: 1 }}>
               <Text style={[typography.h3, { color: colors.text }]}>{account.name}</Text>
               <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>{tr('id', lang)}: {account.username}</Text>
             </View>
           </View>
           <View style={styles.badgeRow}>
-            <View style={[styles.badge, { backgroundColor: colors.g100 }]}>
+            <View style={[styles.badge, { backgroundColor: colors.g200 }]}>
               <Text style={[styles.badgeTxt, { color: colors.textSecondary }]}>{tr('role', lang)}: {ROLE[account.role][lang]}</Text>
             </View>
-            <View style={[styles.badge, { backgroundColor: st.color }]}>
+            <View style={[styles.badge, { backgroundColor: statusColor }]}>
               <Text style={[styles.badgeTxt, { color: '#fff' }]}>{st.label[lang]}</Text>
             </View>
           </View>
@@ -89,7 +93,7 @@ export function AccountScreen({ navigation }: Props) {
 
         {/* 미승인 안내 배너 */}
         {account.status === 'pending' && (
-          <View style={styles.pendingBanner}>
+          <View style={[styles.pendingBanner, { backgroundColor: colors.warningLight, borderLeftColor: colors.warning }]}>
             <Icon name="user" size={16} color={colors.warning} />
             <Text style={[typography.small, { color: colors.text, marginLeft: 8, flex: 1 }]}>{tr('pending', lang)}</Text>
           </View>
@@ -97,7 +101,7 @@ export function AccountScreen({ navigation }: Props) {
 
         {/* 소속 현장(근로자) */}
         {account.role === 'worker' && (
-          <View style={[styles.card, shadow.card]}>
+          <View style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
             <Text style={[typography.captionBold, { color: colors.textSecondary }]}>{tr('site', lang)}</Text>
             {membership ? (
               <Text style={[typography.body, { color: colors.text, marginTop: 4 }]}>{membership.label} · {membership.ownerName}</Text>
@@ -114,16 +118,16 @@ export function AccountScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
+  wrap: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.md, paddingBottom: 40 },
-  card: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.sm },
-  avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.g100, alignItems: 'center', justifyContent: 'center' },
+  card: { backgroundColor: _staticColors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.sm },
+  avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: _staticColors.g100, alignItems: 'center', justifyContent: 'center' },
   badgeRow: { flexDirection: 'row', marginTop: spacing.md, gap: 8 },
   badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: radius.pill },
   badgeTxt: { ...typography.captionBold },
   pendingBanner: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFAEC',
-    borderRadius: radius.md, borderLeftWidth: 4, borderLeftColor: colors.warning,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: _staticColors.warningLight,
+    borderRadius: radius.md, borderLeftWidth: 4, borderLeftColor: _staticColors.warning,
     padding: spacing.md, marginTop: spacing.sm,
   },
 });

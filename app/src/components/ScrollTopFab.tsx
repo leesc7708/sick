@@ -1,18 +1,20 @@
 import React, { useSyncExternalStore } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { colors } from '../theme/colors';
+import { colors as _staticColors } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { activeScrollTop, fabStore } from '../utils/scrollTop';
 
 // 우하단 "맨 위로" 버튼 — 충분히 스크롤한 화면에서만 노출(로그인·최상단에선 숨김)
 export function ScrollTopFab() {
   const visible = useSyncExternalStore(fabStore.subscribe, fabStore.getSnapshot, () => false);
+  const colors = useTheme();
   if (!visible) return null;
   return (
     <Pressable
       onPress={() => activeScrollTop.current?.()}
-      style={({ pressed }) => [styles.fab, pressed && { opacity: 0.65, transform: [{ scale: 0.94 }] }]}
+      style={({ pressed }) => [styles.fab, { backgroundColor: colors.g800 }, pressed && { opacity: 0.65, transform: [{ scale: 0.94 }] }]}
     >
-      <Text style={styles.arrow}>↑</Text>
+      <Text style={[styles.arrow, { color: colors.textInverse }]}>↑</Text>
     </Pressable>
   );
 }
@@ -25,7 +27,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.g800,
+    backgroundColor: _staticColors.g800,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',

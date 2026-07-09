@@ -5,7 +5,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
 import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { colors, radius, spacing, shadow } from '../theme/colors';
+import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { PHRASE_GROUPS, PHRASES, STAFF_QUESTIONS, Phrase, StaffQuestion, PhraseGroupId } from '../data/emergencyPhrases';
 import { speak, playPhraseAudio, stopSpeaking } from '../services/speak';
@@ -39,6 +40,7 @@ interface Active { big: string; sub: string; noVoice: boolean; id: string; speak
 
 export function PhrasebookScreen({ navigation }: Props) {
   const { lang } = useLang();
+  const colors = useTheme();
   const t = (k: string) => UI[k][lang];
   const [mode, setMode] = useState<'self' | 'staff'>('self');
   const [group, setGroup] = useState<PhraseGroupId | null>(null);
@@ -65,11 +67,11 @@ export function PhrasebookScreen({ navigation }: Props) {
 
   // 문장 한 줄 (즐겨찾기 별 + 재생)
   const phraseRow = (p: Phrase) => (
-    <Pressable key={p.id} onPress={() => playSelf(p)} style={[styles.phrase, shadow.card, active?.id === p.id && { borderColor: colors.primary, borderWidth: 1.5 }]}>
+    <Pressable key={p.id} onPress={() => playSelf(p)} style={[styles.phrase, shadow.card, { backgroundColor: colors.card }, active?.id === p.id && { borderColor: colors.primary, borderWidth: 1.5 }]}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.phraseText}>{p.text[lang]}</Text>
+        <Text style={[styles.phraseText, { color: colors.text }]}>{p.text[lang]}</Text>
         {lang !== 'ko' && <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>{p.ko}</Text>}
-        <Pressable onPress={() => report(p.text[lang])} hitSlop={8}><Text style={styles.reportTxt}>{UI.report[lang]}</Text></Pressable>
+        <Pressable onPress={() => report(p.text[lang])} hitSlop={8}><Text style={[styles.reportTxt, { color: colors.textMuted }]}>{UI.report[lang]}</Text></Pressable>
       </View>
       <Pressable onPress={() => toggleFave(p.id)} hitSlop={8}><Text style={styles.star}>{faves.includes(p.id) ? '⭐' : '☆'}</Text></Pressable>
       <Text style={styles.playIcon}>🔊</Text>
@@ -107,7 +109,7 @@ export function PhrasebookScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
       <AppBar title={t('title')} onBack={handleBack} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.modeRow}>
@@ -116,10 +118,10 @@ export function PhrasebookScreen({ navigation }: Props) {
         </View>
 
         {active && (
-          <View style={[styles.activeCard, shadow.card]}>
+          <View style={[styles.activeCard, shadow.card, { backgroundColor: colors.primaryLight }]}>
             {active.showHint && <Text style={[typography.small, { color: colors.primary, marginBottom: 4 }]}>{t('showThis')}</Text>}
             {!active.showHint && active.sub ? <Text style={[typography.small, { color: colors.textMuted, marginBottom: 4 }]}>{active.sub}</Text> : null}
-            <Text style={styles.activeBig}>{active.big}</Text>
+            <Text style={[styles.activeBig, { color: colors.text }]}>{active.big}</Text>
             {active.showHint && active.sub ? <Text style={[typography.caption, { color: colors.textMuted, marginTop: 6 }]}>{active.sub}</Text> : null}
             {active.noVoice && <Text style={[typography.small, { color: colors.warning, marginTop: 6 }]}>🔇 {t('soundOff')}</Text>}
             <View style={{ flexDirection: 'row', marginTop: spacing.md }}>
@@ -133,9 +135,9 @@ export function PhrasebookScreen({ navigation }: Props) {
           <>
             <Text style={[typography.body, { color: colors.textSecondary, marginBottom: spacing.md }]}>{t('staff_lead')}</Text>
             {STAFF_QUESTIONS.map((q) => (
-              <Pressable key={q.id} onPress={() => playStaff(q)} style={[styles.phrase, shadow.card, active?.id === q.id && { borderColor: colors.work, borderWidth: 1.5 }]}>
+              <Pressable key={q.id} onPress={() => playStaff(q)} style={[styles.phrase, shadow.card, { backgroundColor: colors.card }, active?.id === q.id && { borderColor: colors.work, borderWidth: 1.5 }]}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.phraseText}>{q.ko}</Text>
+                  <Text style={[styles.phraseText, { color: colors.text }]}>{q.ko}</Text>
                   <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>{q.text[lang]}</Text>
                 </View>
                 <Text style={styles.playIcon}>🔊</Text>
@@ -155,23 +157,23 @@ export function PhrasebookScreen({ navigation }: Props) {
               </Pressable>
             ))}
 
-            {byId(faves).length > 0 && (<><Text style={styles.section}>{t('fave')}</Text>{byId(faves).map(phraseRow)}</>)}
-            {byId(recents).length > 0 && (<><Text style={styles.section}>{t('recent')}</Text>{byId(recents).map(phraseRow)}</>)}
+            {byId(faves).length > 0 && (<><Text style={[styles.section, { color: colors.textSecondary }]}>{t('fave')}</Text>{byId(faves).map(phraseRow)}</>)}
+            {byId(recents).length > 0 && (<><Text style={[styles.section, { color: colors.textSecondary }]}>{t('recent')}</Text>{byId(recents).map(phraseRow)}</>)}
 
-            <Text style={styles.section}>{t('where')}</Text>
+            <Text style={[styles.section, { color: colors.textSecondary }]}>{t('where')}</Text>
             <View style={styles.grid}>
               {parts.map((g) => (
-                <Pressable key={g.id} onPress={() => { setGroup(g.id); stopSpeaking(); }} style={[styles.cell, shadow.card]}>
+                <Pressable key={g.id} onPress={() => { setGroup(g.id); stopSpeaking(); }} style={[styles.cell, shadow.card, { backgroundColor: colors.card }]}>
                   <Text style={styles.cellIcon}>{g.icon}</Text>
-                  <Text style={styles.cellLabel}>{g.label[lang]}</Text>
+                  <Text style={[styles.cellLabel, { color: colors.text }]}>{g.label[lang]}</Text>
                 </Pressable>
               ))}
             </View>
             <View style={[styles.grid, { marginTop: spacing.sm }]}>
               {info.map((g) => (
-                <Pressable key={g.id} onPress={() => { setGroup(g.id); stopSpeaking(); }} style={[styles.cell, shadow.card]}>
+                <Pressable key={g.id} onPress={() => { setGroup(g.id); stopSpeaking(); }} style={[styles.cell, shadow.card, { backgroundColor: colors.card }]}>
                   <Text style={styles.cellIcon}>{g.icon}</Text>
-                  <Text style={styles.cellLabel}>{g.label[lang]}</Text>
+                  <Text style={[styles.cellLabel, { color: colors.text }]}>{g.label[lang]}</Text>
                 </Pressable>
               ))}
             </View>
@@ -183,7 +185,7 @@ export function PhrasebookScreen({ navigation }: Props) {
             <Pressable onPress={() => { setGroup(null); setActive(null); }} style={styles.backBtn}>
               <Text style={[typography.bodyBold, { color: colors.primary }]}>{t('back')}</Text>
             </Pressable>
-            <Text style={styles.groupTitle}>{groupObj.icon}  {groupObj.label[lang]}</Text>
+            <Text style={[styles.groupTitle, { color: colors.text }]}>{groupObj.icon}  {groupObj.label[lang]}</Text>
             {(group === 'emergency' || group === 'work') && (
               <View style={{ marginBottom: spacing.sm }}>
                 <PrimaryButton title={t('call119')} icon="📞" variant="emergency" size="lg" onPress={() => Linking.openURL('tel:119')} />
@@ -200,23 +202,24 @@ export function PhrasebookScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
+  // 색은 렌더 시 useTheme()로 덮음 — 여기 값은 정적 기본(라이트)일 뿐
+  wrap: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.md, paddingBottom: 48 },
   modeRow: { flexDirection: 'row', marginBottom: spacing.md },
-  section: { ...typography.captionBold, color: colors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
+  section: { ...typography.captionBold, color: _staticColors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
   urgentBtn: { borderRadius: radius.xl, paddingVertical: 18, paddingHorizontal: spacing.lg, marginBottom: spacing.sm, alignItems: 'center' },
   urgentTxt: { ...typography.button, color: '#fff', fontSize: 18 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  cell: { width: '31.5%', backgroundColor: colors.card, borderRadius: radius.lg, paddingVertical: spacing.md, alignItems: 'center' },
+  cell: { width: '31.5%', backgroundColor: _staticColors.card, borderRadius: radius.lg, paddingVertical: spacing.md, alignItems: 'center' },
   cellIcon: { fontSize: 30 },
-  cellLabel: { ...typography.captionBold, color: colors.text, marginTop: 6, textAlign: 'center' },
+  cellLabel: { ...typography.captionBold, color: _staticColors.text, marginTop: 6, textAlign: 'center' },
   backBtn: { paddingVertical: spacing.sm },
-  groupTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-  phrase: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm, borderColor: 'transparent', borderWidth: 1.5 },
-  phraseText: { ...typography.bodyBold, color: colors.text, fontSize: 17 },
-  reportTxt: { ...typography.small, color: colors.g400, marginTop: 8, textDecorationLine: 'underline' },
+  groupTitle: { ...typography.h3, color: _staticColors.text, marginBottom: spacing.md },
+  phrase: { flexDirection: 'row', alignItems: 'center', backgroundColor: _staticColors.card, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm, borderColor: 'transparent', borderWidth: 1.5 },
+  phraseText: { ...typography.bodyBold, color: _staticColors.text, fontSize: 17 },
+  reportTxt: { ...typography.small, color: _staticColors.g400, marginTop: 8, textDecorationLine: 'underline' },
   star: { fontSize: 24, marginLeft: spacing.sm },
   playIcon: { fontSize: 30, marginLeft: spacing.sm },
-  activeCard: { backgroundColor: colors.primaryLight, borderRadius: radius.xl, padding: spacing.lg, marginBottom: spacing.md },
-  activeBig: { fontSize: 26, fontWeight: '800', color: colors.text, lineHeight: 34 },
+  activeCard: { backgroundColor: _staticColors.primaryLight, borderRadius: radius.xl, padding: spacing.lg, marginBottom: spacing.md },
+  activeBig: { fontSize: 26, fontWeight: '800', color: _staticColors.text, lineHeight: 34 },
 });

@@ -5,7 +5,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Disclaimer } from '../components/Disclaimer';
-import { colors, radius, spacing, shadow } from '../theme/colors';
+import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { RootStackParamList, SymptomMemo } from '../types';
 import { storage } from '../services/storage';
@@ -18,6 +19,7 @@ import * as Sharing from 'expo-sharing';
 type Props = NativeStackScreenProps<RootStackParamList, 'SymptomSummary'>;
 
 export function SymptomSummaryScreen({ navigation, route }: Props) {
+  const colors = useTheme();
   const memoId = route.params?.memoId;
   const [memo, setMemo] = useState<SymptomMemo | null>(null);
   const [ai, setAi] = useState<AiSummary | null>(null);
@@ -46,8 +48,8 @@ export function SymptomSummaryScreen({ navigation, route }: Props) {
   const urgency = memo ? assessUrgency(memo) : null;
   const actions = memo ? careActions(memo, lang) : [];
   const U = {
-    red: { c: colors.emergency, bg: '#FFF5F5', e: '🔴' },
-    yellow: { c: colors.warning, bg: '#FFFAEC', e: '🟡' },
+    red: { c: colors.emergency, bg: colors.emergencyLight, e: '🔴' },
+    yellow: { c: colors.warning, bg: colors.warningLight, e: '🟡' },
     gray: { c: colors.g500, bg: colors.g50, e: '⚪' },
   };
   const u = urgency ? U[urgency] : null;
@@ -72,7 +74,7 @@ export function SymptomSummaryScreen({ navigation, route }: Props) {
   };
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
       <AppBar title="진료 요약 카드" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[typography.h2, { color: colors.text }]}>병원에서 이 화면을{'\n'}보여주세요</Text>
@@ -92,21 +94,21 @@ export function SymptomSummaryScreen({ navigation, route }: Props) {
         )}
 
         {actions.length > 0 && (
-          <View style={[styles.careCard, shadow.card]}>
+          <View style={[styles.careCard, shadow.card, { backgroundColor: colors.card }]}>
             <Text style={[typography.h3, { color: colors.text }]}>🤖 AI 의견 · 지금 할 수 있는 대처</Text>
             <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>AI 의견은 참고사항입니다. 정확한 판단은 의료진에게 받으세요.</Text>
             {actions.map((a, i) => (
               <View key={i} style={styles.careRow}>
-                <Text style={styles.careDot}>•</Text>
+                <Text style={[styles.careDot, { color: colors.work }]}>•</Text>
                 <Text style={[typography.body, { color: colors.text, flex: 1 }]}>{a}</Text>
               </View>
             ))}
           </View>
         )}
 
-        <View style={[styles.card, shadow.card]}>
+        <View style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
           {rows.map(([k, v]) => (
-            <View key={k} style={styles.row}>
+            <View key={k} style={[styles.row, { borderBottomColor: colors.divider }]}>
               <Text style={[typography.caption, { color: colors.textMuted, width: 92 }]}>{k}</Text>
               <Text style={[typography.bodyBold, { color: colors.text, flex: 1 }]}>{v}</Text>
             </View>
@@ -114,7 +116,7 @@ export function SymptomSummaryScreen({ navigation, route }: Props) {
         </View>
 
         {ai && (
-          <View style={[styles.aiCard, shadow.card]}>
+          <View style={[styles.aiCard, shadow.card, { backgroundColor: colors.primaryLight, borderColor: colors.border }]}>
             <Text style={[typography.captionBold, { color: colors.primary }]}>📝 요약</Text>
             <Text style={[typography.body, { color: colors.text, marginTop: 4 }]}>{ai.summary}</Text>
             <Text style={[typography.captionBold, { color: colors.primary, marginTop: spacing.md }]}>💡 병원에서 물어볼 질문</Text>
@@ -130,7 +132,7 @@ export function SymptomSummaryScreen({ navigation, route }: Props) {
         <Disclaimer compact />
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { borderTopColor: colors.divider }]}>
         <View style={styles.rowBtns}>
           <View style={{ flex: 1 }}><PrimaryButton title="병원 찾기" icon="🏥" variant="primary" onPress={() => navigation.navigate('HospitalFinder')} /></View>
           <View style={{ width: spacing.sm }} />
@@ -143,15 +145,16 @@ export function SymptomSummaryScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
+  // 색은 렌더 시 useTheme()로 덮음 — 여기 값은 정적 기본(라이트)일 뿐
+  wrap: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.md, paddingBottom: 40 },
-  card: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md },
-  row: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.divider },
-  aiCard: { backgroundColor: '#F4F9FF', borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md, borderWidth: 1, borderColor: '#D8E9FF' },
-  footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.divider },
+  card: { backgroundColor: _staticColors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md },
+  row: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: _staticColors.divider },
+  aiCard: { backgroundColor: _staticColors.primaryLight, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md, borderWidth: 1, borderColor: _staticColors.border },
+  footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: _staticColors.divider },
   rowBtns: { flexDirection: 'row' },
   urgent: { borderWidth: 1.5, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md },
-  careCard: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md },
+  careCard: { backgroundColor: _staticColors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md },
   careRow: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 8 },
-  careDot: { color: colors.work, fontSize: 16, fontWeight: '900', marginRight: 8, lineHeight: 22 },
+  careDot: { color: _staticColors.work, fontSize: 16, fontWeight: '900', marginRight: 8, lineHeight: 22 },
 });

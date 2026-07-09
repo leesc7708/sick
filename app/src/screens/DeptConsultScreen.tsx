@@ -6,7 +6,8 @@ import { AppBar } from '../components/AppBar';
 import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Disclaimer } from '../components/Disclaimer';
-import { colors, radius, spacing, shadow } from '../theme/colors';
+import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { DEPT_GUIDES } from '../data/departmentGuide';
 import { consultAI, ConsultResult } from '../services/deptConsult';
@@ -56,11 +57,12 @@ const CONSENT: Record<string, Record<Lang, string>> = {
   },
 };
 
-const URGENCY_STYLE: Record<string, { bg: string; fg: string }> = {
-  emergency: { bg: '#FDECEC', fg: colors.emergency },
-  soon: { bg: '#FFF4E5', fg: colors.warning },
-  normal: { bg: '#EAF5EE', fg: colors.success },
-};
+// [주석보존] 모듈 스코프 정적 색 → 테마 전환 위해 컴포넌트 내부(useTheme 기반)로 이전 (2026-07-09):
+// const URGENCY_STYLE: Record<string, { bg: string; fg: string }> = {
+//   emergency: { bg: '#FDECEC', fg: colors.emergency },
+//   soon: { bg: '#FFF4E5', fg: colors.warning },
+//   normal: { bg: '#EAF5EE', fg: colors.success },
+// };
 
 // 위급도 라벨 7개 언어 (모든 결과 카드가 자국어로)
 const URGENCY_LABEL: Record<string, Record<Lang, string>> = {
@@ -80,6 +82,13 @@ const URGENCY_LABEL: Record<string, Record<Lang, string>> = {
 
 export function DeptConsultScreen({ navigation }: Props) {
   const { t, lang } = useLang();
+  const colors = useTheme();
+  // 위급도 색: 응급 빨강·주황·초록은 두 테마 모두 고대비 유지, 배경 틴트만 테마화
+  const URGENCY_STYLE: Record<string, { bg: string; fg: string }> = {
+    emergency: { bg: colors.emergencyLight, fg: colors.emergency },
+    soon: { bg: colors.warningLight, fg: colors.warning },
+    normal: { bg: colors.successLight, fg: colors.success },
+  };
   const { account } = useAuth();
   const aiAllowed = canUseAI(account); // 미승인(general)은 AI 자유상담 불가
   const [text, setText] = useState('');
@@ -134,23 +143,23 @@ export function DeptConsultScreen({ navigation }: Props) {
   const quickGuides = QUICK.map((id) => DEPT_GUIDES.find((g) => g.id === id)).filter(Boolean) as typeof DEPT_GUIDES;
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
       <AppBar title={t('dc_title')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[typography.body, { color: colors.textSecondary }]}>{t('dc_lead')}</Text>
 
-        <Text style={styles.label}>{t('dc_input_label')}</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dc_input_label')}</Text>
         <TextInput
           value={text}
           onChangeText={setText}
           placeholder={t('dc_input_ph')}
-          placeholderTextColor={colors.g400}
-          style={[styles.input, { minHeight: 64 }]}
+          placeholderTextColor={colors.g500}
+          style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }, { minHeight: 64 }]}
           multiline
         />
         <Text style={[typography.small, { color: aiAllowed ? colors.textMuted : colors.warning, marginTop: 6 }]}>{aiAllowed ? C('notice') : C('need_approval')}</Text>
 
-        <Text style={styles.label}>{t('dc_quick_label')}</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('dc_quick_label')}</Text>
         <View style={styles.chips}>
           {quickGuides.map((g) => (
             <Chip key={g.id} label={g.symptom} tone={g.work ? 'work' : 'primary'} selected={picked.includes(g.id)} onPress={() => togglePick(g.id)} />
@@ -165,7 +174,7 @@ export function DeptConsultScreen({ navigation }: Props) {
         </View>
 
         {results && results.length === 0 && (
-          <View style={[styles.card, shadow.card, { marginTop: spacing.lg }]}>
+          <View style={[styles.card, shadow.card, { backgroundColor: colors.card }, { marginTop: spacing.lg }]}>
             <Text style={[typography.bodyBold, { color: colors.text }]}>{t('dc_none_title')}</Text>
             <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 6 }]}>{t('dc_none_desc')}</Text>
             <View style={{ marginTop: spacing.md }}>
@@ -181,16 +190,16 @@ export function DeptConsultScreen({ navigation }: Props) {
                 <PrimaryButton title={t('ef_call119')} icon="📞" variant="emergency" size="lg" onPress={() => Linking.openURL('tel:119')} />
               </View>
             )}
-            <Text style={[styles.label, { marginTop: spacing.xl }]}>{t('dc_result_label')}</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }, { marginTop: spacing.xl }]}>{t('dc_result_label')}</Text>
             {results.map(({ guide }, idx) => {
               const u = URGENCY_STYLE[guide.urgency];
               return (
-                <View key={guide.id} style={[styles.card, shadow.card, { borderLeftWidth: 5, borderLeftColor: u.fg }]}>
+                <View key={guide.id} style={[styles.card, shadow.card, { backgroundColor: colors.card }, { borderLeftWidth: 5, borderLeftColor: u.fg }]}>
                   {idx === 0 && <Text style={[typography.small, { color: colors.primary, marginBottom: 4 }]}>{t('dc_best')}</Text>}
                   <Text style={[typography.bodyBold, { color: colors.text }]}>{guide.symptom}</Text>
 
                   <View style={styles.deptRow}>
-                    <View style={styles.deptBadge}><Text style={styles.deptBadgeTxt}>{guide.primaryDept}</Text></View>
+                    <View style={[styles.deptBadge, { backgroundColor: colors.primary }]}><Text style={[styles.deptBadgeTxt, { color: colors.textInverse }]}>{guide.primaryDept}</Text></View>
                     {guide.altDept && (
                       <Text style={[typography.caption, { color: colors.textMuted, marginLeft: 8 }]}>
                         {t('dc_or')} {guide.altDept}
@@ -200,7 +209,7 @@ export function DeptConsultScreen({ navigation }: Props) {
 
                   <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 8 }]}>{guide.reason}</Text>
                   {guide.confuseNote && (
-                    <View style={styles.tipBox}>
+                    <View style={[styles.tipBox, { backgroundColor: colors.g100 }]}>
                       <Text style={[typography.caption, { color: colors.g800 }]}>💡 {guide.confuseNote}</Text>
                     </View>
                   )}
@@ -220,7 +229,7 @@ export function DeptConsultScreen({ navigation }: Props) {
         )}
 
         {/* 정직 고지: 지금은 규칙기반, AI 자유상담은 준비 중 */}
-        <View style={[styles.aiNote]}>
+        <View style={[styles.aiNote, { backgroundColor: colors.g50 }]}>
           <Text style={[typography.small, { color: colors.textMuted }]}>{t('dc_ai_note')}</Text>
         </View>
 
@@ -231,16 +240,17 @@ export function DeptConsultScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
+  // 색은 렌더 시 useTheme()로 덮음 — 여기 값은 정적 기본(라이트)일 뿐
+  wrap: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.md, paddingBottom: 40 },
-  label: { ...typography.captionBold, color: colors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
-  input: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md, ...typography.body, color: colors.text },
+  label: { ...typography.captionBold, color: _staticColors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
+  input: { backgroundColor: _staticColors.card, borderWidth: 1, borderColor: _staticColors.border, borderRadius: radius.lg, padding: spacing.md, ...typography.body, color: _staticColors.text },
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
-  card: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginBottom: spacing.sm },
+  card: { backgroundColor: _staticColors.card, borderRadius: radius.xl, padding: spacing.md, marginBottom: spacing.sm },
   deptRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm },
-  deptBadge: { backgroundColor: colors.primary, borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 6 },
-  deptBadgeTxt: { ...typography.captionBold, color: colors.textInverse },
-  tipBox: { backgroundColor: colors.g100, borderRadius: radius.lg, padding: spacing.sm, marginTop: spacing.sm },
+  deptBadge: { backgroundColor: _staticColors.primary, borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 6 },
+  deptBadgeTxt: { ...typography.captionBold, color: _staticColors.textInverse },
+  tipBox: { backgroundColor: _staticColors.g100, borderRadius: radius.lg, padding: spacing.sm, marginTop: spacing.sm },
   urgency: { borderRadius: radius.lg, padding: spacing.sm, marginTop: spacing.sm },
-  aiNote: { backgroundColor: colors.g50, borderRadius: radius.lg, padding: spacing.sm, marginTop: spacing.lg },
+  aiNote: { backgroundColor: _staticColors.g50, borderRadius: radius.lg, padding: spacing.sm, marginTop: spacing.lg },
 });

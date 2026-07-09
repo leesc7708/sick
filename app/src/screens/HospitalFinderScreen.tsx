@@ -5,7 +5,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
 import { Chip } from '../components/Chip';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { colors, radius, spacing, shadow } from '../theme/colors';
+import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { FACILITIES } from '../data/facilities';
 import { FacilityKind, Hospital, RootStackParamList } from '../types';
@@ -22,6 +23,7 @@ const TABS: { k: FacilityKind; label: string }[] = [
 
 export function HospitalFinderScreen({ navigation, route }: Props) {
   const { t } = useLang();
+  const colors = useTheme();
   // 진료과 상담에서 넘어온 경우: 병원 탭 + 해당 진료과 필터로 진입
   const [kind, setKind] = useState<FacilityKind>(route.params?.kind ?? (route.params?.department ? 'hospital' : 'er'));
   const [dept, setDept] = useState<string | undefined>(route.params?.department);
@@ -99,22 +101,22 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
   const route2 = (h: Hospital) => Linking.openURL(`https://map.kakao.com/?q=${encodeURIComponent(mapQuery(h.name))}`);
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
       <AppBar title={t('hf_title')} onBack={() => navigation.goBack()} />
 
       {/* 탭은 세그먼트 컨트롤 (아래 필터 pill과 시각 분리) */}
-      <View style={styles.segment}>
+      <View style={[styles.segment, { backgroundColor: colors.g100 }]}>
         {TABS.map((tab) => {
           const on = !severeMode && kind === tab.k;
           return (
-            <Pressable key={tab.k} style={[styles.seg, on && styles.segOn]} onPress={() => { setSevereMode(false); setKind(tab.k); }}>
-              <Text style={[styles.segTxt, on && styles.segTxtOn]}>{t(`hf_${tab.k}`)}</Text>
+            <Pressable key={tab.k} style={[styles.seg, on && [styles.segOn, { backgroundColor: colors.card }]]} onPress={() => { setSevereMode(false); setKind(tab.k); }}>
+              <Text style={[styles.segTxt, { color: colors.textMuted }, on && { color: colors.text }]}>{t(`hf_${tab.k}`)}</Text>
             </Pressable>
           );
         })}
         {/* 추가: 중증질환 수용 가능(실데이터) 뷰 전환 */}
-        <Pressable style={[styles.seg, severeMode && styles.segOn]} onPress={() => setSevereMode(true)}>
-          <Text style={[styles.segTxt, severeMode && styles.segTxtOn]}>{t('hf_severe')}</Text>
+        <Pressable style={[styles.seg, severeMode && [styles.segOn, { backgroundColor: colors.card }]]} onPress={() => setSevereMode(true)}>
+          <Text style={[styles.segTxt, { color: colors.textMuted }, severeMode && { color: colors.text }]}>{t('hf_severe')}</Text>
         </Pressable>
       </View>
       {!severeMode && (
@@ -154,18 +156,18 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
 
           {!sevLoading &&
             severeList.map((h) => (
-              <View key={h.hpid || h.name} style={[styles.card, shadow.card]}>
+              <View key={h.hpid || h.name} style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={[typography.bodyBold, { color: colors.text, flex: 1 }]}>{h.name}</Text>
-                  <View style={[styles.bedBadge, { backgroundColor: h.acceptCount > 0 ? colors.success : colors.g800 }]}>
+                  <View style={[styles.bedBadge, { backgroundColor: h.acceptCount > 0 ? colors.success : colors.g500 }]}>
                     <Text style={styles.bedBadgeTxt}>{h.acceptCount > 0 ? `${h.acceptCount} ${t('sev_accept')}` : t('sev_no_accept')}</Text>
                   </View>
                 </View>
                 {h.available.length > 0 && (
                   <View style={styles.tagWrap}>
                     {h.available.slice(0, 6).map((a) => (
-                      <View key={a.code} style={styles.tag}>
-                        <Text style={styles.tagTxt}>{a.label}</Text>
+                      <View key={a.code} style={[styles.tag, { backgroundColor: colors.g100 }]}>
+                        <Text style={[styles.tagTxt, { color: colors.textSecondary }]}>{a.label}</Text>
                       </View>
                     ))}
                     {h.available.length > 6 && (
@@ -181,7 +183,7 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
             <>
               <Text style={[typography.bodyBold, { color: colors.text, marginTop: spacing.lg, marginBottom: spacing.sm }]}>{t('sev_trauma_title')}</Text>
               {trauma.map((c) => (
-                <View key={c.hpid || c.name} style={[styles.card, shadow.card]}>
+                <View key={c.hpid || c.name} style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
                   <Text style={[typography.bodyBold, { color: colors.text }]}>{c.name}</Text>
                   {!!c.addr && <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 2 }]}>{c.addr}</Text>}
                   <View style={styles.rowBtns}>
@@ -227,7 +229,7 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
               return <Text style={[typography.body, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.lg }]}>{t('hf_empty')}</Text>;
             }
             return shown.map((h) => (
-              <View key={h.hpid || h.name} style={[styles.card, shadow.card]}>
+              <View key={h.hpid || h.name} style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={[typography.bodyBold, { color: colors.text, flex: 1 }]}>{h.name}</Text>
                   {typeof h.erBeds === 'number' && (
@@ -260,7 +262,7 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
           <Text style={[typography.body, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.xl }]}>{t('hf_empty')}</Text>
         )}
         {list.map((h) => (
-          <View key={h.id} style={[styles.card, shadow.card]}>
+          <View key={h.id} style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={[typography.bodyBold, { color: colors.text, flex: 1 }]}>{h.name}</Text>
               <Text style={[typography.caption, { color: colors.textMuted }]}>{h.distanceKm}km</Text>
@@ -292,20 +294,21 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
-  segment: { flexDirection: 'row', backgroundColor: colors.g100, borderRadius: radius.lg, padding: 4, marginHorizontal: spacing.md, marginTop: spacing.md, marginBottom: spacing.sm },
+  // 색은 렌더 시 useTheme()로 덮음 — 여기 값은 정적 기본(라이트)일 뿐
+  wrap: { flex: 1, backgroundColor: _staticColors.bg },
+  segment: { flexDirection: 'row', backgroundColor: _staticColors.g100, borderRadius: radius.lg, padding: 4, marginHorizontal: spacing.md, marginTop: spacing.md, marginBottom: spacing.sm },
   seg: { flex: 1, paddingVertical: 9, borderRadius: radius.md, alignItems: 'center' },
-  segOn: { backgroundColor: colors.card, ...shadow.card },
-  segTxt: { ...typography.captionBold, color: colors.textMuted },
-  segTxtOn: { color: colors.text },
+  segOn: { backgroundColor: _staticColors.card, ...shadow.card },
+  segTxt: { ...typography.captionBold, color: _staticColors.textMuted },
+  segTxtOn: { color: _staticColors.text },
   bedRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 8 },
   bedBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.pill, alignSelf: 'flex-start' },
   bedBadgeTxt: { ...typography.captionBold, color: '#fff' },
   filters: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.md },
   content: { padding: spacing.md, paddingBottom: 40 },
-  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm },
+  card: { backgroundColor: _staticColors.card, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm },
   rowBtns: { flexDirection: 'row', marginTop: spacing.md },
   tagWrap: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8, gap: 6 },
-  tag: { backgroundColor: colors.g100, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 4 },
-  tagTxt: { ...typography.small, color: colors.textSecondary },
+  tag: { backgroundColor: _staticColors.g100, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 4 },
+  tagTxt: { ...typography.small, color: _staticColors.textSecondary },
 });

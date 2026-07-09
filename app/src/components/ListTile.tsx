@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, radius, shadow } from '../theme/colors';
+import { radius, shadow } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { Icon, resolveIcon } from './Icon';
 
@@ -16,10 +17,11 @@ interface Props {
 }
 
 export function ListTile({ icon, title, desc, onPress, tone = 'default', badge }: Props) {
+  const c = useTheme();
   const iconBg =
-    tone === 'emergency' ? '#FBE3E4' : tone === 'work' ? colors.workLight : colors.primaryLight;
+    tone === 'emergency' ? c.emergencyLight : tone === 'work' ? c.workLight : c.primaryLight;
   const iconColor =
-    tone === 'emergency' ? colors.emergency : tone === 'work' ? colors.work : colors.primary;
+    tone === 'emergency' ? c.emergency : tone === 'work' ? c.work : c.primary;
   const iconName = resolveIcon(icon);
   return (
     <Pressable
@@ -28,6 +30,7 @@ export function ListTile({ icon, title, desc, onPress, tone = 'default', badge }
       accessibilityLabel={desc ? `${title}, ${desc}` : title}
       style={({ pressed }) => [
         styles.tile,
+        { backgroundColor: c.card, borderColor: c.border },
         shadow.card,
         pressed && { opacity: 0.9, transform: [{ scale: 0.995 }] },
       ]}
@@ -37,22 +40,22 @@ export function ListTile({ icon, title, desc, onPress, tone = 'default', badge }
       </View>
       <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={[typography.bodyBold, { color: colors.text }]}>{title}</Text>
+          <Text style={[typography.bodyBold, { color: c.text }]}>{title}</Text>
           {badge ? <View style={{ marginLeft: 6 }}>{badge}</View> : null}
         </View>
         {desc ? (
-          <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>{desc}</Text>
+          <Text style={[typography.caption, { color: c.textMuted, marginTop: 2 }]}>{desc}</Text>
         ) : null}
       </View>
-      <Icon name="chevron" size={20} color={colors.g400} />
+      <Icon name="chevron" size={20} color={c.g500} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   tile: {
-    backgroundColor: colors.card,
     borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
     padding: 14,
     minHeight: 60,
     flexDirection: 'row',

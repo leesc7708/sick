@@ -6,7 +6,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
 import { LangSwitcher } from '../components/LangSwitcher';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { colors, radius, spacing } from '../theme/colors';
+import { colors as _staticColors, radius, spacing } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { signup, isValidUsername } from '../services/auth';
 import { RootStackParamList } from '../types';
@@ -32,6 +33,7 @@ const UI: Record<string, Record<Lang, string>> = {
 };
 
 export function SignupScreen({ navigation }: Props) {
+  const colors = useTheme();
   const { lang } = useLang();
   const t = (k: string) => UI[k][lang];
   const [f, setF] = useState({ username: '', pw: '', name: '', phone: '' });
@@ -56,14 +58,14 @@ export function SignupScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
       <AppBar title={t('title')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         <LangSwitcher style={{ marginBottom: spacing.md }} />
-        <TextInput value={f.username} onChangeText={(v) => set('username', v)} placeholder={t('id')} placeholderTextColor={colors.g400} autoCapitalize="none" style={styles.input} />
-        <TextInput value={f.pw} onChangeText={(v) => set('pw', v)} placeholder={t('pw')} placeholderTextColor={colors.g400} secureTextEntry style={styles.input} />
-        <TextInput value={f.name} onChangeText={(v) => set('name', v)} placeholder={t('name')} placeholderTextColor={colors.g400} style={styles.input} />
-        <TextInput value={f.phone} onChangeText={(v) => set('phone', v)} placeholder={t('phone')} placeholderTextColor={colors.g400} keyboardType="phone-pad" style={styles.input} />
+        <TextInput value={f.username} onChangeText={(v) => set('username', v)} placeholder={t('id')} placeholderTextColor={colors.g500} autoCapitalize="none" style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
+        <TextInput value={f.pw} onChangeText={(v) => set('pw', v)} placeholder={t('pw')} placeholderTextColor={colors.g500} secureTextEntry style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
+        <TextInput value={f.name} onChangeText={(v) => set('name', v)} placeholder={t('name')} placeholderTextColor={colors.g500} style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
+        <TextInput value={f.phone} onChangeText={(v) => set('phone', v)} placeholder={t('phone')} placeholderTextColor={colors.g500} keyboardType="phone-pad" style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
 
         {err ? <Text style={[typography.caption, { color: colors.emergency, marginTop: spacing.md }]}>{err}</Text> : null}
         <View style={{ marginTop: spacing.lg }}>
@@ -75,7 +77,7 @@ export function SignupScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.lg },
-  input: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.sm, ...typography.body, color: colors.text },
+  input: { backgroundColor: _staticColors.card, borderWidth: 1, borderColor: _staticColors.border, borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.sm, ...typography.body, color: _staticColors.text },
 });

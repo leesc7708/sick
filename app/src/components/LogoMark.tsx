@@ -1,10 +1,11 @@
 import React from 'react';
 import Svg, { Polyline } from 'react-native-svg';
-import { colors } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 
 // 라이프라인 심볼 — 생명선(ECG 맥박선). 신뢰 블루 라인 + 응급 레드 스파이크(2색).
 // (구 청록·보라 물방울 폐기 — 헬스·뷰티 잔재 제거, 안전/응급 팔레트 정합)
 export function LogoMark({ size = 40 }: { size?: number }) {
+  const colors = useTheme();
   const sw = 7;
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">

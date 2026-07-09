@@ -4,7 +4,8 @@ import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
-import { colors, radius, spacing, shadow } from '../theme/colors';
+import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { useAuth } from '../auth/AuthContext';
 import {
@@ -24,6 +25,7 @@ const STATUS_LABEL: Record<AccountStatus, string> = {
 const ASSIGNABLE: Role[] = ['worker', 'svisor', 'ssvisor'];
 
 export function UserAdminScreen({ navigation }: Props) {
+  const colors = useTheme();
   const { account } = useAuth();
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [busy, setBusy] = useState<string | null>(null); // 처리 중 uid
@@ -39,7 +41,7 @@ export function UserAdminScreen({ navigation }: Props) {
   // 총괄(ssvisor)만 접근 가능
   if (!isSsvisor(account)) {
     return (
-      <View style={styles.wrap}>
+      <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
         <AppBar title="회원 관리" onBack={() => navigation.goBack()} />
         <View style={styles.content}>
           <Text style={[typography.body, { color: colors.textMuted }]}>
@@ -102,7 +104,7 @@ export function UserAdminScreen({ navigation }: Props) {
   const others = users.filter((u) => u.status !== 'pending');
 
   const Card = ({ u }: { u: UserAccount }) => (
-    <View style={[styles.card, shadow.card]}>
+    <View style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={{ flex: 1 }}>
           <Text style={[typography.bodyBold, { color: colors.text }]}>
@@ -127,9 +129,9 @@ export function UserAdminScreen({ navigation }: Props) {
               accessibilityRole="button"
               accessibilityLabel={`${u.name}을(를) ${ROLE_LABEL[r]}로 승인`}
               accessibilityState={{ disabled: !!busy || activeNow, selected: activeNow }}
-              style={[styles.roleBtn, activeNow && styles.roleBtnOn]}
+              style={[styles.roleBtn, { backgroundColor: colors.bg, borderColor: colors.border }, activeNow && [styles.roleBtnOn, { backgroundColor: colors.primary, borderColor: colors.primary }]]}
             >
-              <Text style={[styles.roleTxt, activeNow && styles.roleTxtOn]}>
+              <Text style={[styles.roleTxt, { color: colors.textSecondary }, activeNow && styles.roleTxtOn]}>
                 {activeNow ? '✓ ' : ''}{ROLE_LABEL[r]}
               </Text>
             </Pressable>
@@ -146,15 +148,15 @@ export function UserAdminScreen({ navigation }: Props) {
   );
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
       <AppBar title="회원 승인 · 역할 관리" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.h}>승인 대기 ({pending.length})</Text>
+        <Text style={[styles.h, { color: colors.textSecondary }]}>승인 대기 ({pending.length})</Text>
         {pending.length === 0
           ? <Text style={[typography.caption, { color: colors.textMuted }]}>대기 중인 가입자가 없습니다.</Text>
           : pending.map((u) => <Card key={u.uid} u={u} />)}
 
-        <Text style={styles.h}>전체 회원 ({others.length})</Text>
+        <Text style={[styles.h, { color: colors.textSecondary }]}>전체 회원 ({others.length})</Text>
         {others.map((u) => <Card key={u.uid} u={u} />)}
 
         {msg ? <Text style={[typography.caption, { color: colors.emergency, marginTop: spacing.md }]}>{msg}</Text> : null}
@@ -168,14 +170,15 @@ export function UserAdminScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
+  // 색은 렌더 시 useTheme()로 덮음 — 여기 값은 정적 기본(라이트)일 뿐
+  wrap: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.md, paddingBottom: 40 },
-  h: { ...typography.captionBold, color: colors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
-  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm },
+  h: { ...typography.captionBold, color: _staticColors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
+  card: { backgroundColor: _staticColors.card, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm },
   btnRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.sm, gap: 8 },
-  roleBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg },
-  roleBtnOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  roleTxt: { ...typography.captionBold, color: colors.textSecondary },
+  roleBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.pill, borderWidth: 1, borderColor: _staticColors.border, backgroundColor: _staticColors.bg },
+  roleBtnOn: { backgroundColor: _staticColors.primary, borderColor: _staticColors.primary },
+  roleTxt: { ...typography.captionBold, color: _staticColors.textSecondary },
   roleTxtOn: { color: '#fff' },
   rejectBtn: { alignSelf: 'flex-end', marginTop: spacing.sm, paddingHorizontal: 6, paddingVertical: 2 },
 });

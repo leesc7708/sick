@@ -4,7 +4,8 @@ import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { colors, radius, spacing, shadow } from '../theme/colors';
+import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { RED_FLAGS, evaluateRedFlags } from '../data/redFlags';
 import { RedFlagItem, RedFlagResult, RootStackParamList, UserProfile } from '../types';
@@ -60,6 +61,7 @@ const FIRST_STEPS: Record<Lang, string[]> = {
 };
 
 export function RedFlagScreen({ navigation }: Props) {
+  const colors = useTheme(); // JSX의 colors.* 를 활성 테마로 (StyleSheet 색은 사용처에서 덮음)
   const [sel, setSel] = useState<string[]>([]);
   const [result, setResult] = useState<RedFlagResult | null>(null);
   const { lang, t } = useLang();
@@ -87,7 +89,7 @@ export function RedFlagScreen({ navigation }: Props) {
   };
 
   const Info = ({ label, value }: { label: string; value: string }) => (
-    <View style={styles.infoRow}>
+    <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
       <Text style={[typography.caption, { color: colors.textMuted, width: 96 }]}>{label}</Text>
       <Text style={[typography.bodyBold, { color: colors.text, flex: 1 }]}>{value}</Text>
     </View>
@@ -95,16 +97,16 @@ export function RedFlagScreen({ navigation }: Props) {
 
   const toneColor =
     result?.level === 'red' ? colors.emergency : result?.level === 'yellow' ? colors.warning : colors.g500;
-  const toneBg = result?.level === 'red' ? '#FFF5F5' : result?.level === 'yellow' ? '#FFFAEC' : colors.g50;
+  const toneBg = result?.level === 'red' ? colors.emergencyLight : result?.level === 'yellow' ? colors.warningLight : colors.g50;
 
   const Row = ({ item }: { item: RedFlagItem }) => {
     const on = sel.includes(item.id);
     return (
       <Pressable
         onPress={() => toggle(item.id)}
-        style={[styles.row, on && { borderColor: colors.emergency, backgroundColor: '#FFF5F5' }]}
+        style={[styles.row, { backgroundColor: colors.card, borderColor: colors.border }, on && { borderColor: colors.emergency, backgroundColor: colors.emergencyLight }]}
       >
-        <View style={[styles.box, on && { backgroundColor: colors.emergency, borderColor: colors.emergency }]}>
+        <View style={[styles.box, { borderColor: colors.g300 }, on && { backgroundColor: colors.emergency, borderColor: colors.emergency }]}>
           {on && <Text style={styles.check}>✓</Text>}
         </View>
         <Text style={[typography.body, { color: colors.text, flex: 1 }]}>{item.label[lang]}</Text>
@@ -113,16 +115,16 @@ export function RedFlagScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
       <AppBar title={t('ef_title')} emergency onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[typography.h2, { color: colors.text }]}>{t('ef_select')}</Text>
         <Text style={[typography.caption, { color: colors.textMuted, marginTop: 6 }]}>{t('ef_note')}</Text>
 
-        <Text style={styles.sectionLabel}>{t('ef_sec_work')}</Text>
+        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>{t('ef_sec_work')}</Text>
         {workItems.map((item) => <Row key={item.id} item={item} />)}
 
-        <Text style={styles.sectionLabel}>{t('ef_sec_general')}</Text>
+        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>{t('ef_sec_general')}</Text>
         {generalItems.map((item) => <Row key={item.id} item={item} />)}
 
         {result && (
@@ -137,7 +139,7 @@ export function RedFlagScreen({ navigation }: Props) {
 
         {result?.level === 'red' && (
           <>
-            <View style={[styles.infoCard, shadow.card]}>
+            <View style={[styles.infoCard, shadow.card, { backgroundColor: colors.card, borderColor: colors.emergency }]}>
               <Text style={[typography.h3, { color: colors.emergency }]}>{t('ef_show_title')}</Text>
               <Text style={[typography.small, { color: colors.textMuted, marginTop: 2, marginBottom: spacing.sm }]}>{t('ef_show_note')}</Text>
               <Info label={t('ef_loc')} value="GPS (demo)" />
@@ -146,11 +148,11 @@ export function RedFlagScreen({ navigation }: Props) {
               <Info label={t('ef_meds')} value={(profile?.currentMedicines ?? []).join(', ') || '-'} />
               <Info label={t('ef_alg')} value={(profile?.allergies ?? []).join(', ') || '-'} />
             </View>
-            <View style={[styles.aidCard, shadow.card]}>
+            <View style={[styles.aidCard, shadow.card, { backgroundColor: colors.card }]}>
               <Text style={[typography.h3, { color: colors.text }]}>{t('ef_first_title')}</Text>
               {FIRST_STEPS[lang].map((s, i) => (
                 <View key={i} style={styles.aidRow}>
-                  <Text style={styles.aidDot}>•</Text>
+                  <Text style={[styles.aidDot, { color: colors.emergency }]}>•</Text>
                   <Text style={[typography.body, { color: colors.text, flex: 1 }]}>{s}</Text>
                 </View>
               ))}
@@ -159,7 +161,7 @@ export function RedFlagScreen({ navigation }: Props) {
         )}
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { borderTopColor: colors.divider, backgroundColor: colors.bg }]}>
         {!result ? (
           <PrimaryButton title={t('ef_result_check')} variant="emergency" size="lg" disabled={!sel.length} onPress={() => setResult(evaluateRedFlags(sel))} />
         ) : result.level === 'red' ? (
@@ -190,15 +192,16 @@ export function RedFlagScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
+  // 색은 렌더 시 useTheme()로 덮음 — 여기 값은 정적 기본(라이트)일 뿐
+  wrap: { flex: 1, backgroundColor: _staticColors.bg },
   content: { padding: spacing.md, paddingBottom: 40 },
-  sectionLabel: { ...typography.captionBold, color: colors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
+  sectionLabel: { ...typography.captionBold, color: _staticColors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: _staticColors.card,
     borderWidth: 1.5,
-    borderColor: colors.border,
+    borderColor: _staticColors.border,
     borderRadius: radius.lg,
     padding: 14,
     marginBottom: spacing.sm,
@@ -208,7 +211,7 @@ const styles = StyleSheet.create({
     height: 26,
     borderRadius: 8,
     borderWidth: 2,
-    borderColor: colors.g300,
+    borderColor: _staticColors.g300,
     marginRight: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -218,13 +221,13 @@ const styles = StyleSheet.create({
   footer: {
     padding: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: colors.divider,
-    backgroundColor: colors.bg,
+    borderTopColor: _staticColors.divider,
+    backgroundColor: _staticColors.bg,
   },
   rowBtns: { flexDirection: 'row' },
-  infoCard: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md, borderWidth: 1.5, borderColor: '#FFD9D6' },
-  infoRow: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: colors.divider },
-  aidCard: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md },
+  infoCard: { backgroundColor: _staticColors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md, borderWidth: 1.5, borderColor: _staticColors.emergency },
+  infoRow: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: _staticColors.divider },
+  aidCard: { backgroundColor: _staticColors.card, borderRadius: radius.xl, padding: spacing.md, marginTop: spacing.md },
   aidRow: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 8 },
-  aidDot: { color: colors.emergency, fontSize: 16, fontWeight: '900', marginRight: 8, lineHeight: 22 },
+  aidDot: { color: _staticColors.emergency, fontSize: 16, fontWeight: '900', marginRight: 8, lineHeight: 22 },
 });
