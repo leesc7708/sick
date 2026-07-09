@@ -157,3 +157,150 @@ exports.egenBeds = onRequest(
     }
   }
 );
+
+// ─────────────────────────────────────────────────────────────
+// E-Gen 중증질환자 수용가능정보 프록시 (공공데이터포털 국립중앙의료원)
+//  - 오퍼레이션: getSrsillDissAceptncPosblInfoInqire (시도/시군구 단위)
+//  - 응답은 병원별 MKioskTy1~27 필드(수용 가능 여부: "Y"/"불가능"/"정보미제공")로 옴.
+//    → 각 코드가 어떤 중증질환인지 라벨로 매핑해 "수용 가능한 질환 목록"으로 정규화.
+//  - 서비스키는 서버(.env의 EGEN_SERVICE_KEY)에만. rewrite(/api/egen-severe)로 동일 출처.
+//  - 호출 예: GET /api/egen-severe?stage1=서울특별시&stage2=강남구
+//  - 반환: { ok, total, hospitals:[{hpid,name,acceptCount,available:[{code,label}]}] }
+//  ※ 이 오퍼레이션 응답에는 전화번호가 없다(가용병상 API/기관정보 API에서 별도 조회 필요).
+// 매핑 출처: E-Gen 공식 코드표(MKioskTy1~27 = 중증질환 27종). 검증: 실호출 resultCode "00".
+// ─────────────────────────────────────────────────────────────
+const EGEN_SEVERE_BASE = 'http://apis.data.go.kr/B552657/ErmctInfoInqireService/getSrsillDissAceptncPosblInfoInqire';
+
+// MKioskTy 코드 → 중증질환 한글 라벨 (E-Gen 표준 코드표 Y0010~Y0172)
+const SEVERE_LABELS = {
+  MKioskTy1: '심근경색 재관류',
+  MKioskTy2: '뇌경색 재관류',
+  MKioskTy3: '거미막하출혈 수술',
+  MKioskTy4: '뇌출혈 수술',
+  MKioskTy5: '대동맥응급(흉부)',
+  MKioskTy6: '대동맥응급(복부)',
+  MKioskTy7: '담낭질환',
+  MKioskTy8: '담도질환',
+  MKioskTy9: '복부응급수술(비외상)',
+  MKioskTy10: '장중첩·폐색(영유아)',
+  MKioskTy11: '응급내시경(성인 위장관)',
+  MKioskTy12: '응급내시경(영유아 위장관)',
+  MKioskTy13: '응급내시경(성인 기관지)',
+  MKioskTy14: '응급내시경(영유아 기관지)',
+  MKioskTy15: '저출생체중아 집중치료',
+  MKioskTy16: '산부인과(분만)',
+  MKioskTy17: '산부인과(산과수술)',
+  MKioskTy18: '산부인과(부인과수술)',
+  MKioskTy19: '중증화상',
+  MKioskTy20: '사지접합(수족지)',
+  MKioskTy21: '사지접합(수족지 외)',
+  MKioskTy22: '응급투석(HD)',
+  MKioskTy23: '응급투석(CRRT)',
+  MKioskTy24: '정신과 응급(폐쇄병동)',
+  MKioskTy25: '안과 응급수술',
+  MKioskTy26: '영상의학 혈관중재(성인)',
+  MKioskTy27: '영상의학 혈관중재(영유아)',
+};
+
+exports.egenSevere = onRequest(
+  { region: 'asia-northeast3', memory: '256MiB', timeoutSeconds: 20, maxInstances: 5 },
+  async (req, res) => {
+    const q = req.query || {};
+    const stage1 = String(q.stage1 || '').slice(0, 20).trim(); // 시도명 (필수)
+    const stage2 = String(q.stage2 || '').slice(0, 20).trim(); // 시군구명 (선택)
+    const numOfRows = Math.min(parseInt(q.rows, 10) || 100, 200);
+    if (!stage1) {
+      res.status(400).json({ ok: false, error: 'stage1(시도명) 필수' });
+      return;
+    }
+    const key = process.env.EGEN_SERVICE_KEY;
+    if (!key) {
+      res.status(500).json({ ok: false, error: 'EGEN_SERVICE_KEY 미설정' });
+      return;
+    }
+    const params = new URLSearchParams({
+      serviceKey: key,
+      STAGE1: stage1,
+      pageNo: '1',
+      numOfRows: String(numOfRows),
+      _type: 'json',
+    });
+    if (stage2) params.set('STAGE2', stage2);
+    try {
+      const r = await fetch(`${EGEN_SEVERE_BASE}?${params.toString()}`);
+      const raw = await r.text();
+      let json;
+      try { json = JSON.parse(raw); }
+      catch { res.status(502).json({ ok: false, error: 'upstream_non_json', detail: raw.slice(0, 120) }); return; }
+      const body = json.response && json.response.body;
+      let items = (body && body.items && body.items.item) || [];
+      if (!Array.isArray(items)) items = items ? [items] : [];
+      const isYes = (v) => String(v == null ? '' : v).trim().toUpperCase().startsWith('Y');
+      const hospitals = items.map((it) => {
+        const available = [];
+        for (const code of Object.keys(SEVERE_LABELS)) {
+          if (isYes(it[code])) available.push({ code, label: SEVERE_LABELS[code] });
+        }
+        return { hpid: it.hpid || '', name: it.dutyName || '', acceptCount: available.length, available };
+      });
+      res.json({ ok: true, total: (body && body.totalCount) || hospitals.length, hospitals });
+    } catch (e) {
+      console.error('egenSevere error:', e && (e.message || e));
+      res.status(502).json({ ok: false, error: String((e && e.message) || e).slice(0, 150) });
+    }
+  }
+);
+
+// ─────────────────────────────────────────────────────────────
+// E-Gen 권역외상센터 목록 프록시 (공공데이터포털 국립중앙의료원)
+//  - 오퍼레이션: getStrmListInfoInqire (전국 권역외상센터 ~20개, STAGE1 없이 전국 조회)
+//  - 같은 EGEN_SERVICE_KEY로 조회됨(별도 서비스 신청 불필요 — 실호출 resultCode "00" 확인).
+//  - rewrite(/api/egen-trauma)로 동일 출처. 호출 예: GET /api/egen-trauma
+//  - 반환: { ok, total, centers:[{hpid,name,addr,tel,erTel,lat,lon,emcls}] }
+// ─────────────────────────────────────────────────────────────
+const EGEN_TRAUMA_BASE = 'http://apis.data.go.kr/B552657/ErmctInfoInqireService/getStrmListInfoInqire';
+
+exports.egenTrauma = onRequest(
+  { region: 'asia-northeast3', memory: '256MiB', timeoutSeconds: 20, maxInstances: 5 },
+  async (req, res) => {
+    const q = req.query || {};
+    const stage1 = String(q.stage1 || '').slice(0, 20).trim(); // 시도명(선택) — 미지정 시 전국
+    const key = process.env.EGEN_SERVICE_KEY;
+    if (!key) {
+      res.status(500).json({ ok: false, error: 'EGEN_SERVICE_KEY 미설정' });
+      return;
+    }
+    const params = new URLSearchParams({
+      serviceKey: key,
+      pageNo: '1',
+      numOfRows: '100',
+      _type: 'json',
+    });
+    if (stage1) params.set('STAGE1', stage1);
+    try {
+      const r = await fetch(`${EGEN_TRAUMA_BASE}?${params.toString()}`);
+      const raw = await r.text();
+      let json;
+      try { json = JSON.parse(raw); }
+      catch { res.status(502).json({ ok: false, error: 'upstream_non_json', detail: raw.slice(0, 120) }); return; }
+      const body = json.response && json.response.body;
+      let items = (body && body.items && body.items.item) || [];
+      if (!Array.isArray(items)) items = items ? [items] : [];
+      const num = (v) => (v == null || v === '' ? null : Number(v));
+      const centers = items.map((it) => ({
+        hpid: it.hpid || '',
+        name: it.dutyName || '',
+        addr: it.dutyAddr || '',
+        tel: it.dutyTel1 || '', // 대표전화
+        erTel: it.dutyTel3 || '', // 응급실 전화
+        lat: num(it.wgs84Lat),
+        lon: num(it.wgs84Lon),
+        emcls: it.dutyEmclsName || '',
+      }));
+      res.json({ ok: true, total: (body && body.totalCount) || centers.length, centers });
+    } catch (e) {
+      console.error('egenTrauma error:', e && (e.message || e));
+      res.status(502).json({ ok: false, error: String((e && e.message) || e).slice(0, 150) });
+    }
+  }
+);
