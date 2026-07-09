@@ -103,9 +103,16 @@ export function HomeScreen({ navigation }: Props) {
               {isWork ? t('tagline_work') : t('tagline_general')}
             </Text>
           </View>
-          {/* 라이트·다크 전환 (누구나 원탭) */}
-          <Pressable onPress={toggleTheme} hitSlop={10} accessibilityRole="button" accessibilityLabel="라이트·다크 전환" style={{ padding: 6, marginLeft: 6 }}>
-            <Text style={{ fontSize: 20 }}>{themeMode === 'dark' ? '☀️' : '🌙'}</Text>
+          {/* 라이트·다크 전환 — 전환될 모드를 라벨로 표시 (라이트→"다크모드", 다크→"라이트모드") */}
+          <Pressable
+            onPress={toggleTheme}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={themeMode === 'dark' ? '라이트모드로 전환' : '다크모드로 전환'}
+            style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 10, marginLeft: 6, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.card }}
+          >
+            <Text style={{ fontSize: 15 }}>{themeMode === 'dark' ? '☀️' : '🌙'}</Text>
+            <Text style={[typography.small, { color: colors.textMuted, marginLeft: 5 }]}>{themeMode === 'dark' ? '라이트모드' : '다크모드'}</Text>
           </Pressable>
         </View>
 
