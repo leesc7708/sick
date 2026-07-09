@@ -100,23 +100,22 @@ export function HomeScreen({ navigation }: Props) {
               {isWork ? t('tagline_work') : t('tagline_general')}
             </Text>
           </View>
-          {/* 우상단 상시 계정 진입점 (미승인 시 주황 점) */}
-          {account && (
-            <Pressable onPress={() => navigation.navigate('Account')} hitSlop={10} accessibilityRole="button" accessibilityLabel={account.name} style={styles.acctBtn}>
-              <Icon name="user" size={22} color={colors.g700} />
-              {account.status !== 'active' && <View style={styles.acctDot} />}
-            </Pressable>
-          )}
         </View>
 
+        {/* 계정 진입: 이름·역할 표시 + 탭하면 내 계정(로그아웃 등). 미승인 시 아바타에 주황 점 */}
         {account && (
-          <View style={styles.greet}>
-            <Icon name="user" size={17} color={colors.g600} />
-            <Text style={[typography.bodyBold, { color: colors.text, marginLeft: 6 }]}>{account.name}님</Text>
+          <Pressable style={styles.acctRow} onPress={() => navigation.navigate('Account')} accessibilityRole="button" accessibilityLabel={account.name}>
+            <View style={styles.acctAvatar}>
+              <Icon name="user" size={18} color={colors.g600} />
+              {account.status !== 'active' && <View style={styles.acctDot} />}
+            </View>
+            <Text style={[typography.bodyBold, { color: colors.text, marginLeft: 10 }]}>{account.name}님</Text>
             <Text style={[typography.small, { color: account.status === 'active' ? colors.primary : colors.warning, marginLeft: 8 }]}>
               {ROLE_LABEL[account.role]}{account.status !== 'active' ? ' · 승인대기' : ''}
             </Text>
-          </View>
+            <View style={{ flex: 1 }} />
+            <Icon name="chevron" size={18} color={colors.textMuted} />
+          </Pressable>
         )}
 
         <LangSwitcher style={{ marginBottom: spacing.sm }} />
@@ -224,9 +223,9 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: 96 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md, marginTop: spacing.xs },
-  acctBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.g100, alignItems: 'center', justifyContent: 'center' },
-  acctDot: { position: 'absolute', top: 7, right: 7, width: 9, height: 9, borderRadius: 5, backgroundColor: colors.warning, borderWidth: 1.5, borderColor: colors.card },
-  greet: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
+  acctRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, paddingVertical: 10, paddingHorizontal: 12, marginBottom: spacing.sm },
+  acctAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: colors.g100, alignItems: 'center', justifyContent: 'center' },
+  acctDot: { position: 'absolute', top: 4, right: 4, width: 9, height: 9, borderRadius: 5, backgroundColor: colors.warning, borderWidth: 1.5, borderColor: colors.card },
   crewBanner: { backgroundColor: colors.workLight, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm },
   segment: { flexDirection: 'row', backgroundColor: colors.g200, borderRadius: radius.md, padding: 4, marginTop: spacing.md, marginBottom: spacing.md },
   segItem: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: radius.sm },
