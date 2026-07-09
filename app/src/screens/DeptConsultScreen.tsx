@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Linking, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Linking, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ScreenScroll as ScrollView } from '../components/ScreenScroll';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppBar } from '../components/AppBar';
@@ -129,6 +129,13 @@ export function DeptConsultScreen({ navigation }: Props) {
     const consented = await storage.getAiConsent();
     if (consented) {
       execute(true);
+      return;
+    }
+    // ⚠️ 웹에서는 RN Alert.alert가 동작 안 함 → window.confirm으로 처리(2026-07-09 버그픽스)
+    if (Platform.OS === 'web') {
+      const ok = typeof window !== 'undefined' && window.confirm(`${C('title')}\n\n${C('body')}`);
+      if (ok) { await storage.setAiConsent(true); execute(true); }
+      else execute(false);
       return;
     }
     Alert.alert(C('title'), C('body'), [
