@@ -64,7 +64,11 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
     .sort((a, b) => a.distanceKm - b.distanceKm);
 
   const call = (h: Hospital) => Linking.openURL(`tel:${h.phone}`);
-  const route2 = (h: Hospital) => Linking.openURL(`https://map.kakao.com/?q=${encodeURIComponent(h.name)}`);
+  // 카카오맵 검색어 정제: 괄호 설명·응급실 접미사 제거 → 실제 장소명으로 검색
+  //  (2026-07-09 길찾기 버그픽스: '울산제일병원 응급실 (화상·외상)' 등 이름 전체로 검색해 미매칭되던 문제)
+  const mapQuery = (name: string) =>
+    name.replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s*(권역응급의료센터|지역응급의료기관|응급의료센터|응급실)\s*$/, '').replace(/\s+/g, ' ').trim() || name;
+  const route2 = (h: Hospital) => Linking.openURL(`https://map.kakao.com/?q=${encodeURIComponent(mapQuery(h.name))}`);
 
   return (
     <View style={styles.wrap}>
@@ -159,7 +163,7 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
                     )}
                     <View style={{ width: spacing.sm }} />
                     <View style={{ flex: 1 }}>
-                      <PrimaryButton title={t('hf_route')} icon="🗺️" variant="outline" size="sm" onPress={() => Linking.openURL(`https://map.kakao.com/?q=${encodeURIComponent(c.name)}`)} />
+                      <PrimaryButton title={t('hf_route')} icon="🗺️" variant="outline" size="sm" onPress={() => Linking.openURL(`https://map.kakao.com/?q=${encodeURIComponent(mapQuery(c.name))}`)} />
                     </View>
                   </View>
                 </View>
