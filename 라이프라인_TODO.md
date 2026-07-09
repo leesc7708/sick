@@ -7,6 +7,17 @@
 
 ---
 
+### 2026-07-09 | E-Gen 실시간 응급실 API 프록시 작성 (키 발급됨, 활성화 대기)
+- **키 발급 완료**: 공공데이터포털 국립중앙의료원 "전국 응급의료기관 정보 조회 서비스" 자동승인. 일반인증키(Decoding)를 `app/functions/.env`의 `EGEN_SERVICE_KEY`에 저장(git 제외). 승인일로부터 24개월.
+- **프록시 함수 작성**: `functions/index.js`에 `egenBeds`(onRequest, asia-northeast3) 추가 — `getEmrrmRltmUsefulSckbdInfoInqire`(시도/시군구 실시간 응급실 가용병상) 호출, 키는 서버에서만. 반환 `{ok,updatedAt,total,hospitals:[{hpid,name,tel,erBeds,at}]}`. `firebase.json` rewrite `/api/egen-beds` 추가. node 문법·JSON 검증 통과.
+- ⚠️ **키 활성화 대기**: 발급 직후라 upstream이 `Unauthorized` 반환(http·https 동일). 공공데이터포털 키는 발급 후 수분~1시간 뒤 활성화되는 게 일반적 → **코드/키 문제 아님, 시간 경과 후 정상화 예상**.
+- 🔜 **다음(키 활성화 후, 순서대로)**:
+  1. `curl` 재테스트로 키 활성화 확인 + 실응답 필드 검증(hvec=응급실 가용병상 등 실제 값·이름 매핑 확인)
+  2. `firebase deploy --only functions:egenBeds,hosting`(Blaze, 기존 deptConsult와 동일 리전)
+  3. **앱 연동**: `src/data/egen.ts`(클라이언트 헬퍼: `/api/egen-beds?stage1=&stage2=` 호출) + HospitalFinder에 실시간 가용병상 배지 연결(기존 색배지 UI에 실데이터). 사용자 지역→시도/시군구 매핑 필요(GPS 또는 선택)
+  4. 실브라우저 검증(병원찾기 → 실시간 병상 표시) + 실패 시 "데모 데이터" 정직 라벨 폴백 유지
+- ⚠️ 미검증: 프록시는 작성·문법검증만 됨. **키 활성화 전이라 end-to-end 미확인** — 배포·연동은 활성화 확인 후 진행(추측 배포 금지).
+
 ### 2026-07-08 | P0 2건: 부적합 자가체크 로그 재설계 + 민감정보 동의·개인정보 처리방침
 - **[P0] 부적합 자가체크→작업진행 로그 재설계**(중처법 역효과 해소): 기존엔 음주·수면부족·어지럼이어도 무조건 "체크 완료"로 저장 → '사업주가 부적합 알고도 투입' 증거화 위험. WorkHealthCheck에 result('ok'/'caution'/'unfit')·advisedStop 추가. **위험작업(밀폐·화학·고소)+부적합=unfit**→"작업 보류·관리자 즉시 보고" 강경 배너+빨강 버튼, 일반작업+부적합=caution(주의), 그 외 ok. 부적합도 정직하게 result로 기록(감사추적). 판정 로직 6케이스 검증 통과
 - **[P0] 민감정보 수집·이용 동의**(Play Store 필수/개인정보보호법): 온보딩에서 기저질환·알레르기·복용약을 무동의 수집하던 것 → 체크박스 동의 신설. 미동의+민감정보 입력 시 저장 차단·안내, 미동의 시 해당 필드 저장 안 함(빈 배열). storage.get/setHealthConsent(동의 시각 ISO 기록). 게이팅 로직 4케이스 검증 통과

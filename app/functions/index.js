@@ -97,3 +97,63 @@ exports.deptConsult = onRequest(
     }
   }
 );
+
+// ─────────────────────────────────────────────────────────────
+// E-Gen 응급실 실시간 가용병상 프록시 (공공데이터포털 국립중앙의료원)
+//  - 오퍼레이션: getEmrrmRltmUsefulSckbdInfoInqire (시도/시군구 단위 실시간 응급실 병상)
+//  - 서비스키는 앱이 아니라 서버(.env의 EGEN_SERVICE_KEY)에만 둔다(보안).
+//  - 호스팅 rewrite(/api/egen-beds)로 동일 출처 호출 → CORS 불필요.
+//  - 호출 예: GET /api/egen-beds?stage1=서울특별시&stage2=중구
+//  - 반환: { ok, updatedAt, total, hospitals:[{hpid,name,tel,erBeds,at}] }
+//  ⚠️ 발급 직후엔 키 활성화(수분~1시간) 전까지 upstream이 "Unauthorized" 반환할 수 있음.
+// ─────────────────────────────────────────────────────────────
+const EGEN_BASE = 'http://apis.data.go.kr/B552657/ErmctInfoInqireService/getEmrrmRltmUsefulSckbdInfoInqire';
+
+exports.egenBeds = onRequest(
+  { region: 'asia-northeast3', memory: '256MiB', timeoutSeconds: 20, maxInstances: 5 },
+  async (req, res) => {
+    const q = req.query || {};
+    const stage1 = String(q.stage1 || '').slice(0, 20).trim(); // 시도명 (필수)
+    const stage2 = String(q.stage2 || '').slice(0, 20).trim(); // 시군구명 (선택)
+    const numOfRows = Math.min(parseInt(q.rows, 10) || 20, 100);
+    if (!stage1) {
+      res.status(400).json({ ok: false, error: 'stage1(시도명) 필수' });
+      return;
+    }
+    const key = process.env.EGEN_SERVICE_KEY;
+    if (!key) {
+      res.status(500).json({ ok: false, error: 'EGEN_SERVICE_KEY 미설정' });
+      return;
+    }
+    const params = new URLSearchParams({
+      serviceKey: key,
+      STAGE1: stage1,
+      pageNo: '1',
+      numOfRows: String(numOfRows),
+      _type: 'json',
+    });
+    if (stage2) params.set('STAGE2', stage2);
+    try {
+      const r = await fetch(`${EGEN_BASE}?${params.toString()}`);
+      const raw = await r.text();
+      // 키 미활성/오류 시 공공API는 평문 "Unauthorized" 또는 XML 에러를 반환
+      let json;
+      try { json = JSON.parse(raw); }
+      catch { res.status(502).json({ ok: false, error: 'upstream_non_json', detail: raw.slice(0, 120) }); return; }
+      const body = json.response && json.response.body;
+      let items = (body && body.items && body.items.item) || [];
+      if (!Array.isArray(items)) items = items ? [items] : [];
+      const hospitals = items.map((it) => ({
+        hpid: it.hpid || '',
+        name: it.dutyName || '',
+        tel: it.dutyTel3 || '', // 응급실 전화
+        erBeds: it.hvec != null ? Number(it.hvec) : null, // 응급실 일반 가용병상
+        at: it.hvidate || '', // 정보 갱신 시각
+      }));
+      res.json({ ok: true, updatedAt: (hospitals[0] && hospitals[0].at) || '', total: (body && body.totalCount) || hospitals.length, hospitals });
+    } catch (e) {
+      console.error('egenBeds error:', e && (e.message || e));
+      res.status(502).json({ ok: false, error: String((e && e.message) || e).slice(0, 150) });
+    }
+  }
+);
