@@ -144,6 +144,7 @@ export type RootStackParamList = {
   DeptConsult: undefined;
   Phrasebook: undefined;
   HospitalFinder: { kind?: FacilityKind; department?: string } | undefined;
+  AedFinder: undefined;
   HealthRecords: undefined;
   HealthRecordShare: { recordId: string };
   WorkCheck: undefined;

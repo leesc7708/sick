@@ -304,3 +304,58 @@ exports.egenTrauma = onRequest(
     }
   }
 );
+
+// ─────────────────────────────────────────────────────────────
+// AED(자동심장충격기) 위치 프록시 (공공데이터포털 국립중앙의료원)
+//  - 오퍼레이션: getEgytAedManageInfoInqire (Q0=시도, Q1=시군구). 같은 EGEN_SERVICE_KEY 사용.
+//  - 응답 필드: buildPlace(설치위치)·buildAddress(주소)·org(관리기관)·clerkTel(연락처)·요일별 운영시간.
+//    ⚠️ 위경도(좌표) 없음 → "GPS 최단거리" 불가, 지역(시도/시군구) 기준 목록만 제공.
+//  - rewrite(/api/egen-aed)로 동일 출처. 호출 예: GET /api/egen-aed?stage1=서울특별시&stage2=중구
+//  - 반환: { ok, total, aeds:[{place,addr,org,tel,is24h}] }
+// ─────────────────────────────────────────────────────────────
+const AED_BASE = 'http://apis.data.go.kr/B552657/AEDInfoInqireService/getEgytAedManageInfoInqire';
+
+exports.egenAed = onRequest(
+  { region: 'asia-northeast3', memory: '256MiB', timeoutSeconds: 20, maxInstances: 5 },
+  async (req, res) => {
+    const q = req.query || {};
+    const q0 = String(q.stage1 || q.q0 || '').slice(0, 20).trim(); // 시도 (필수)
+    const q1 = String(q.stage2 || q.q1 || '').slice(0, 20).trim(); // 시군구 (선택)
+    const numOfRows = Math.min(parseInt(q.rows, 10) || 30, 100);
+    if (!q0) {
+      res.status(400).json({ ok: false, error: 'stage1(시도명) 필수' });
+      return;
+    }
+    const key = process.env.EGEN_SERVICE_KEY;
+    if (!key) {
+      res.status(500).json({ ok: false, error: 'EGEN_SERVICE_KEY 미설정' });
+      return;
+    }
+    const params = new URLSearchParams({ serviceKey: key, Q0: q0, pageNo: '1', numOfRows: String(numOfRows), _type: 'json' });
+    if (q1) params.set('Q1', q1);
+    try {
+      const r = await fetch(`${AED_BASE}?${params.toString()}`);
+      const raw = await r.text();
+      let json;
+      try { json = JSON.parse(raw); }
+      catch { res.status(502).json({ ok: false, error: 'upstream_non_json', detail: raw.slice(0, 120) }); return; }
+      const body = json.response && json.response.body;
+      let items = (body && body.items && body.items.item) || [];
+      if (!Array.isArray(items)) items = items ? [items] : [];
+      // 요일별 운영시간이 전부 0000~2400 이면 24시간
+      const is24h = (it) => ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].every((d) =>
+        String(it[`${d}SttTme`] == null ? '' : it[`${d}SttTme`]).replace(/^0+/, '') === '' && Number(it[`${d}EndTme`]) === 2400);
+      const aeds = items.map((it) => ({
+        place: it.buildPlace || '',   // 설치 위치(건물 내 상세)
+        addr: it.buildAddress || '',  // 주소
+        org: it.org || '',            // 관리기관
+        tel: it.clerkTel || it.managerTel || '', // 관리자 연락처
+        is24h: is24h(it),
+      }));
+      res.json({ ok: true, total: (body && body.totalCount) || aeds.length, aeds });
+    } catch (e) {
+      console.error('egenAed error:', e && (e.message || e));
+      res.status(502).json({ ok: false, error: String((e && e.message) || e).slice(0, 150) });
+    }
+  }
+);

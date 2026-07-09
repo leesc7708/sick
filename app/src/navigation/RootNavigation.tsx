@@ -18,6 +18,7 @@ import { SymptomSummaryScreen } from '../screens/SymptomSummaryScreen';
 import { DeptConsultScreen } from '../screens/DeptConsultScreen';
 import { PhrasebookScreen } from '../screens/PhrasebookScreen';
 import { HospitalFinderScreen } from '../screens/HospitalFinderScreen';
+import { AedFinderScreen } from '../screens/AedFinderScreen';
 import { HealthRecordsScreen } from '../screens/HealthRecordsScreen';
 import { HealthRecordShareScreen } from '../screens/HealthRecordShareScreen';
 import { WorkCheckScreen } from '../screens/WorkCheckScreen';
@@ -50,6 +51,7 @@ const linking = {
       DeptConsult: 'dept-consult',
       Phrasebook: 'speak',
       HospitalFinder: 'hospitals',
+      AedFinder: 'aed',
       HealthRecords: 'health-records',
       HealthRecordShare: 'health-records/share/:recordId',
       WorkCheck: 'work-check',
@@ -104,6 +106,7 @@ export function RootNavigation() {
         <Stack.Screen name="DeptConsult" component={DeptConsultScreen} />
         <Stack.Screen name="Phrasebook" component={PhrasebookScreen} />
         <Stack.Screen name="HospitalFinder" component={HospitalFinderScreen} />
+        <Stack.Screen name="AedFinder" component={AedFinderScreen} />
         <Stack.Screen name="HealthRecords" component={HealthRecordsScreen} />
         <Stack.Screen name="HealthRecordShare" component={HealthRecordShareScreen} />
         <Stack.Screen name="WorkCheck" component={WorkCheckScreen} />

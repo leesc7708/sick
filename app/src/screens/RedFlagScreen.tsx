@@ -170,6 +170,8 @@ export function RedFlagScreen({ navigation }: Props) {
               <View style={{ flex: 1 }}><PrimaryButton title={t('ef_find_er')} icon="🏥" variant="primary" onPress={findER} /></View>
             </View>
             <PrimaryButton title={t('ef_send_info')} variant="work" onPress={share} style={{ marginTop: spacing.sm }} />
+            {/* 심정지 대응: 가까운 AED + 다국어 사용법 (2026-07-09) */}
+            <PrimaryButton title={t('aed_title')} icon="🫀" variant="outline" onPress={() => navigation.navigate('AedFinder')} style={{ marginTop: spacing.sm }} />
           </>
         ) : result.level === 'yellow' ? (
           <>

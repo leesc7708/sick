@@ -145,6 +145,9 @@ export function HomeScreen({ navigation }: Props) {
         <PrimaryButton title="119 즉시 전화" icon="📞" variant="emergency" size="lg" style={styles.call119} onPress={() => Linking.openURL('tel:119')} />
         <View style={{ height: spacing.sm }} />
         <PrimaryButton title={t('emergency_check')} icon="🚨" variant="outline" size="md" onPress={() => navigation.navigate('RedFlag')} />
+        <View style={{ height: spacing.sm }} />
+        {/* 심정지 대응: 가까운 AED(자동심장충격기) 위치 + 다국어 사용법 (2026-07-09) */}
+        <PrimaryButton title={t('aed_title')} icon="🫀" variant="outline" size="md" onPress={() => navigation.navigate('AedFinder')} />
 
         {/* 모드 토글 — 세그먼트 컨트롤(회색 트랙 + 흰 선택칩). 주황 solid 막대 제거 */}
         <View style={styles.segment}>

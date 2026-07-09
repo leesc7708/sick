@@ -65,3 +65,20 @@ export async function fetchTrauma(): Promise<TraumaCenter[]> {
   }
   return [];
 }
+
+// AED(자동심장충격기) 위치. buildPlace/주소/관리기관/연락처/24시간여부.
+//  ⚠️ 좌표 없음 → 지역(시도/시군구) 기준 목록. 실패 시 빈 배열(화면 폴백).
+export type AedItem = { place: string; addr: string; org: string; tel: string; is24h: boolean };
+
+export async function fetchAed(stage1: string, stage2?: string): Promise<AedItem[]> {
+  try {
+    const qs = new URLSearchParams({ stage1 });
+    if (stage2) qs.set('stage2', stage2);
+    const res = await fetch(`/api/egen-aed?${qs.toString()}`);
+    const j = await res.json();
+    if (j?.ok && Array.isArray(j.aeds)) return j.aeds as AedItem[];
+  } catch {
+    // 무시 — 호출부에서 빈 결과로 안내
+  }
+  return [];
+}

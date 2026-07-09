@@ -8,6 +8,7 @@
       { "source": "/api/egen-beds", "function": { "functionId": "egenBeds", "region": "asia-northeast3" } },
       { "source": "/api/egen-severe", "function": { "functionId": "egenSevere", "region": "asia-northeast3" } },
       { "source": "/api/egen-trauma", "function": { "functionId": "egenTrauma", "region": "asia-northeast3" } },
+      { "source": "/api/egen-aed", "function": { "functionId": "egenAed", "region": "asia-northeast3" } },
       { "source": "**", "destination": "/index.html" }
     ]
   },
