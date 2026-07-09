@@ -11,7 +11,7 @@ import { typography } from '../theme/typography';
 import { FACILITIES } from '../data/facilities';
 import { FacilityKind, Hospital, RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
-import { SIDO_LIST, fetchSevere, fetchTrauma, fetchBeds, detectSido, SevereHospital, TraumaCenter, BedHospital } from '../data/egen';
+import { SIDO_LIST, fetchSevere, fetchTrauma, fetchBeds, fetchHospitals, fetchPharmacy, detectSido, SevereHospital, TraumaCenter, BedHospital, HospitalItem, PharmacyItem } from '../data/egen';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HospitalFinder'>;
 
@@ -38,6 +38,11 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
   const [beds, setBeds] = useState<BedHospital[]>([]);
   const [bedsLoading, setBedsLoading] = useState(false);
   const [bedsLoaded, setBedsLoaded] = useState(false);
+  // ── 병원/약국 탭: E-Gen 실데이터(전국 지역 단위) ──
+  const [hosp, setHosp] = useState<HospitalItem[]>([]);
+  const [pharm, setPharm] = useState<PharmacyItem[]>([]);
+  const [hpLoading, setHpLoading] = useState(false);
+  const [hpLoaded, setHpLoaded] = useState(false);
 
   // 진입 시 GPS로 내 지역 자동선택 (응급실·중증 공용 sido, 실패/거부 시 기본값 유지)
   useEffect(() => {
@@ -86,6 +91,22 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
     };
   }, [severeMode, kind, sido]);
 
+  // 병원/약국 탭(실데이터): 지역·탭 변경마다 조회
+  useEffect(() => {
+    if (severeMode || (kind !== 'hospital' && kind !== 'pharmacy')) return;
+    let alive = true;
+    setHpLoading(true);
+    setHpLoaded(false);
+    const p = kind === 'hospital' ? fetchHospitals(sido) : fetchPharmacy(sido);
+    p.then((r) => {
+      if (!alive) return;
+      if (kind === 'hospital') setHosp(r as HospitalItem[]);
+      else setPharm(r as PharmacyItem[]);
+      setHpLoaded(true);
+    }).finally(() => alive && setHpLoading(false));
+    return () => { alive = false; };
+  }, [severeMode, kind, sido]);
+
   const list = FACILITIES.filter((f) => f.kind === kind)
     .filter((f) => (dept ? f.departments.includes(dept) : true))
     .filter((f) => (openOnly ? f.isOpenNow : true))
@@ -119,12 +140,10 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
           <Text style={[styles.segTxt, { color: colors.textMuted }, severeMode && { color: colors.text }]}>{t('hf_severe')}</Text>
         </Pressable>
       </View>
-      {!severeMode && (
+      {!severeMode && kind === 'er' && (
         <View style={styles.filters}>
-          {/* 응급실 탭은 E-Gen 실데이터(24시간)라 개점/야간 필터 무의미 → 병상 필터만 */}
-          {kind !== 'er' && <Chip label={t('hf_open')} selected={openOnly} onPress={() => setOpenOnly((v) => !v)} />}
-          {kind !== 'er' && <Chip label={t('hf_night')} selected={nightOnly} onPress={() => setNightOnly((v) => !v)} />}
-          {kind === 'er' && <Chip label={t('hf_beds_f')} tone="primary" selected={bedsOnly} onPress={() => setBedsOnly((v) => !v)} />}
+          {/* 전 탭 E-Gen 실데이터 → 개점/야간 필터 제거. 응급실만 가용병상 필터 유지 */}
+          <Chip label={t('hf_beds_f')} tone="primary" selected={bedsOnly} onPress={() => setBedsOnly((v) => !v)} />
         </View>
       )}
       {!severeMode && dept && (
@@ -257,37 +276,52 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
           <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.md, textAlign: 'center' }]}>{t('sev_source')}</Text>
         </ScrollView>
       ) : (
-      <ScrollView contentContainerStyle={styles.content}>
-        {list.length === 0 && (
-          <Text style={[typography.body, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.xl }]}>{t('hf_empty')}</Text>
-        )}
-        {list.map((h) => (
-          <View key={h.id} style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={[typography.bodyBold, { color: colors.text, flex: 1 }]}>{h.name}</Text>
-              <Text style={[typography.caption, { color: colors.textMuted }]}>{h.distanceKm}km</Text>
-            </View>
-
-            {/* [주석보존] 응급실 병상 배지는 E-Gen 실데이터 분기(위 kind==='er')로 이동 →
-                데모(병원/약국) 분기에선 도달 불가라 비활성화 (2026-07-09):
-                {kind === 'er' && typeof h.availableBeds === 'number' && (
-                  bedRow: availableBeds>0 ? hf_beds+수 : hf_full, +hf_realtime)} */}
-            {h.departments.length > 0 && (
-              <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 4 }]}>{h.departments.join(' · ')}{h.isOpenNow ? ` · ${t('hf_open_now')}` : ''}</Text>
-            )}
-
-            <View style={styles.rowBtns}>
-              <View style={{ flex: 1 }}><PrimaryButton title={t('hf_call')} icon="📞" variant="primary" size="sm" onPress={() => call(h)} /></View>
-              <View style={{ width: spacing.sm }} />
-              <View style={{ flex: 1 }}><PrimaryButton title={t('hf_route')} icon="🗺️" variant="outline" size="sm" onPress={() => route2(h)} /></View>
-            </View>
+        // ── 병원 / 약국: E-Gen 실데이터 (전국 지역 선택 · GPS 자동) ──
+        <ScrollView contentContainerStyle={styles.content}>
+          <Text style={[typography.captionBold, { color: colors.textMuted, marginBottom: 6 }]}>{t('sev_region')}</Text>
+          <View style={[styles.filters, { paddingHorizontal: 0 }]}>
+            {SIDO_LIST.map((s) => (
+              <Chip key={s} label={s} tone="primary" selected={sido === s} onPress={() => setSido(s)} />
+            ))}
           </View>
-        ))}
 
-        <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.md, textAlign: 'center' }]}>
-          {t('hf_source')}
-        </Text>
-      </ScrollView>
+          {hpLoading && (
+            <View style={{ paddingVertical: spacing.lg, alignItems: 'center' }}>
+              <ActivityIndicator color={colors.primary} />
+              <Text style={[typography.caption, { color: colors.textMuted, marginTop: 8 }]}>{t('sev_loading')}</Text>
+            </View>
+          )}
+
+          {(() => {
+            const items: (HospitalItem | PharmacyItem)[] = kind === 'hospital' ? hosp : pharm;
+            if (hpLoading) return null;
+            if (hpLoaded && items.length === 0) {
+              return <Text style={[typography.body, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.lg }]}>{t('hf_empty')}</Text>;
+            }
+            return items.map((h, i) => (
+              <View key={h.hpid || `${h.name}-${i}`} style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={[typography.bodyBold, { color: colors.text, flex: 1 }]}>{h.name}</Text>
+                  {'div' in h && !!h.div && <Text style={[typography.caption, { color: colors.textMuted }]}>{h.div}</Text>}
+                </View>
+                {!!h.addr && <Text style={[typography.small, { color: colors.textSecondary, marginTop: 2 }]}>{h.addr}</Text>}
+                <View style={styles.rowBtns}>
+                  {!!h.tel && (
+                    <View style={{ flex: 1 }}>
+                      <PrimaryButton title={t('hf_call')} icon="📞" variant="primary" size="sm" onPress={() => Linking.openURL(`tel:${h.tel}`)} />
+                    </View>
+                  )}
+                  {!!h.tel && <View style={{ width: spacing.sm }} />}
+                  <View style={{ flex: 1 }}>
+                    <PrimaryButton title={t('hf_route')} icon="🗺️" variant="outline" size="sm" onPress={() => Linking.openURL(`https://map.kakao.com/?q=${encodeURIComponent(mapQuery(h.name))}`)} />
+                  </View>
+                </View>
+              </View>
+            ));
+          })()}
+
+          <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.md, textAlign: 'center' }]}>{t('sev_source')}</Text>
+        </ScrollView>
       )}
     </View>
   );

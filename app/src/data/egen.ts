@@ -96,6 +96,32 @@ export function detectSido(timeoutMs = 6000): Promise<string | null> {
   });
 }
 
+// 병·의원 / 약국 (지역 단위 실데이터). 좌표 포함(길찾기).
+export type HospitalItem = { hpid: string; name: string; addr: string; tel: string; div: string; lat: number | null; lon: number | null };
+export type PharmacyItem = { hpid: string; name: string; addr: string; tel: string; lat: number | null; lon: number | null };
+
+export async function fetchHospitals(stage1: string, stage2?: string): Promise<HospitalItem[]> {
+  try {
+    const qs = new URLSearchParams({ stage1 });
+    if (stage2) qs.set('stage2', stage2);
+    const res = await fetch(`/api/egen-hospitals?${qs.toString()}`);
+    const j = await res.json();
+    if (j?.ok && Array.isArray(j.hospitals)) return j.hospitals as HospitalItem[];
+  } catch { /* 폴백: 빈 결과 */ }
+  return [];
+}
+
+export async function fetchPharmacy(stage1: string, stage2?: string): Promise<PharmacyItem[]> {
+  try {
+    const qs = new URLSearchParams({ stage1 });
+    if (stage2) qs.set('stage2', stage2);
+    const res = await fetch(`/api/egen-pharmacy?${qs.toString()}`);
+    const j = await res.json();
+    if (j?.ok && Array.isArray(j.pharmacies)) return j.pharmacies as PharmacyItem[];
+  } catch { /* 폴백: 빈 결과 */ }
+  return [];
+}
+
 export type SevereItem = { code: string; label: string };
 export type SevereHospital = { hpid: string; name: string; acceptCount: number; available: SevereItem[] };
 export type TraumaCenter = {

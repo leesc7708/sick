@@ -359,3 +359,57 @@ exports.egenAed = onRequest(
     }
   }
 );
+
+// ─────────────────────────────────────────────────────────────
+// 병·의원 목록 프록시 (공공데이터포털 국립중앙의료원, 같은 EGEN_SERVICE_KEY)
+//  - 오퍼레이션: HsptlAsembySearchService/getHsptlMdcncListInfoInqire (Q0=시도, Q1=시군구)
+//  - 응답: dutyName·dutyAddr·dutyTel1·dutyDivNam(종별)·wgs84Lat/Lon. rewrite(/api/egen-hospitals)
+//  - 반환: { ok, total, hospitals:[{hpid,name,addr,tel,div,lat,lon}] }
+// ─────────────────────────────────────────────────────────────
+const HOSP_BASE = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire';
+const PHARM_BASE = 'http://apis.data.go.kr/B552657/ErmctInsttInfoInqireService/getParmacyListInfoInqire';
+
+function egenRegionHandler(base, mapItem, key) {
+  return async (req, res) => {
+    const q = req.query || {};
+    const q0 = String(q.stage1 || q.q0 || '').slice(0, 20).trim();
+    const q1 = String(q.stage2 || q.q1 || '').slice(0, 20).trim();
+    const numOfRows = Math.min(parseInt(q.rows, 10) || 30, 100);
+    if (!q0) { res.status(400).json({ ok: false, error: 'stage1(시도명) 필수' }); return; }
+    const svc = process.env.EGEN_SERVICE_KEY;
+    if (!svc) { res.status(500).json({ ok: false, error: 'EGEN_SERVICE_KEY 미설정' }); return; }
+    const params = new URLSearchParams({ serviceKey: svc, Q0: q0, pageNo: '1', numOfRows: String(numOfRows), _type: 'json' });
+    if (q1) params.set('Q1', q1);
+    try {
+      const r = await fetch(`${base}?${params.toString()}`);
+      const raw = await r.text();
+      let json;
+      try { json = JSON.parse(raw); }
+      catch { res.status(502).json({ ok: false, error: 'upstream_non_json', detail: raw.slice(0, 120) }); return; }
+      const body = json.response && json.response.body;
+      let items = (body && body.items && body.items.item) || [];
+      if (!Array.isArray(items)) items = items ? [items] : [];
+      const num = (v) => (v == null || v === '' ? null : Number(v));
+      res.json({ ok: true, total: (body && body.totalCount) || items.length, [key]: items.map((it) => mapItem(it, num)) });
+    } catch (e) {
+      console.error(`${key} error:`, e && (e.message || e));
+      res.status(502).json({ ok: false, error: String((e && e.message) || e).slice(0, 150) });
+    }
+  };
+}
+
+exports.egenHospitals = onRequest(
+  { region: 'asia-northeast3', memory: '256MiB', timeoutSeconds: 20, maxInstances: 5 },
+  egenRegionHandler(HOSP_BASE, (it, num) => ({
+    hpid: it.hpid || '', name: it.dutyName || '', addr: it.dutyAddr || '',
+    tel: it.dutyTel1 || '', div: it.dutyDivNam || '', lat: num(it.wgs84Lat), lon: num(it.wgs84Lon),
+  }), 'hospitals'),
+);
+
+exports.egenPharmacy = onRequest(
+  { region: 'asia-northeast3', memory: '256MiB', timeoutSeconds: 20, maxInstances: 5 },
+  egenRegionHandler(PHARM_BASE, (it, num) => ({
+    hpid: it.hpid || '', name: it.dutyName || '', addr: it.dutyAddr || '',
+    tel: it.dutyTel1 || '', lat: num(it.wgs84Lat), lon: num(it.wgs84Lon),
+  }), 'pharmacies'),
+);
