@@ -9,7 +9,7 @@ import { colors, radius, spacing, shadow } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
-import { SIDO_LIST, fetchAed, AedItem } from '../data/egen';
+import { SIDO_LIST, fetchAed, detectSido, AedItem } from '../data/egen';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AedFinder'>;
 
@@ -19,6 +19,13 @@ export function AedFinderScreen({ navigation }: Props) {
   const [list, setList] = useState<AedItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+
+  // 진입 시 GPS로 내 지역 자동선택 (실패/거부 시 기본값 유지)
+  useEffect(() => {
+    let alive = true;
+    detectSido().then((s) => { if (alive && s) setSido(s); });
+    return () => { alive = false; };
+  }, []);
 
   useEffect(() => {
     let alive = true;

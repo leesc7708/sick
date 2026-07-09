@@ -10,7 +10,7 @@ import { typography } from '../theme/typography';
 import { FACILITIES } from '../data/facilities';
 import { FacilityKind, Hospital, RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
-import { SIDO_LIST, fetchSevere, fetchTrauma, fetchBeds, SevereHospital, TraumaCenter, BedHospital } from '../data/egen';
+import { SIDO_LIST, fetchSevere, fetchTrauma, fetchBeds, detectSido, SevereHospital, TraumaCenter, BedHospital } from '../data/egen';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HospitalFinder'>;
 
@@ -36,6 +36,13 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
   const [beds, setBeds] = useState<BedHospital[]>([]);
   const [bedsLoading, setBedsLoading] = useState(false);
   const [bedsLoaded, setBedsLoaded] = useState(false);
+
+  // 진입 시 GPS로 내 지역 자동선택 (응급실·중증 공용 sido, 실패/거부 시 기본값 유지)
+  useEffect(() => {
+    let alive = true;
+    detectSido().then((s) => { if (alive && s) setSido(s); });
+    return () => { alive = false; };
+  }, []);
   const [severeList, setSevereList] = useState<SevereHospital[]>([]);
   const [trauma, setTrauma] = useState<TraumaCenter[]>([]);
   const [sevLoading, setSevLoading] = useState(false);

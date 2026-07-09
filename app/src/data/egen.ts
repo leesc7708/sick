@@ -44,6 +44,58 @@ export async function fetchBeds(stage1: string, stage2?: string): Promise<BedHos
   return [];
 }
 
+// ── GPS 자동 지역선택 (A: 가장 가까운 시도 중심점 · 키 불필요) ──
+// 17개 시도 대략 중심좌표. name은 SIDO_LIST 명칭과 정확히 일치해야 함.
+const SIDO_CENTROIDS: { name: string; lat: number; lon: number }[] = [
+  { name: '서울특별시', lat: 37.5665, lon: 126.978 },
+  { name: '부산광역시', lat: 35.1796, lon: 129.0756 },
+  { name: '대구광역시', lat: 35.8714, lon: 128.6014 },
+  { name: '인천광역시', lat: 37.4563, lon: 126.7052 },
+  { name: '광주광역시', lat: 35.1595, lon: 126.8526 },
+  { name: '대전광역시', lat: 36.3504, lon: 127.3845 },
+  { name: '울산광역시', lat: 35.5384, lon: 129.3114 },
+  { name: '세종특별자치시', lat: 36.4801, lon: 127.289 },
+  { name: '경기도', lat: 37.3, lon: 127.05 }, // 인구중심(수원·성남·용인축)으로 조정 — 서울 흡수 방지
+  { name: '강원특별자치도', lat: 37.8228, lon: 128.1555 },
+  { name: '충청북도', lat: 36.8, lon: 127.7 },
+  { name: '충청남도', lat: 36.5184, lon: 126.8 },
+  { name: '전북특별자치도', lat: 35.7175, lon: 127.153 },
+  { name: '전라남도', lat: 34.8679, lon: 126.991 },
+  { name: '경상북도', lat: 36.4919, lon: 128.8889 },
+  { name: '경상남도', lat: 35.4606, lon: 128.2132 },
+  { name: '제주특별자치도', lat: 33.489, lon: 126.4983 },
+];
+
+export function nearestSido(lat: number, lon: number): string {
+  let best = SIDO_LIST[0];
+  let bestD = Infinity;
+  for (const c of SIDO_CENTROIDS) {
+    const d = (c.lat - lat) ** 2 + (c.lon - lon) ** 2;
+    if (d < bestD) { bestD = d; best = c.name; }
+  }
+  return best;
+}
+
+// 브라우저 위치 → 가장 가까운 시도명. 권한거부/미지원/타임아웃 시 null(폴백).
+export function detectSido(timeoutMs = 6000): Promise<string | null> {
+  return new Promise((resolve) => {
+    const geo: any = typeof navigator !== 'undefined' ? (navigator as any).geolocation : null;
+    if (!geo || typeof geo.getCurrentPosition !== 'function') return resolve(null);
+    let done = false;
+    const finish = (v: string | null) => { if (!done) { done = true; resolve(v); } };
+    try {
+      geo.getCurrentPosition(
+        (pos: any) => finish(nearestSido(pos.coords.latitude, pos.coords.longitude)),
+        () => finish(null),
+        { enableHighAccuracy: false, timeout: timeoutMs, maximumAge: 300000 }
+      );
+    } catch {
+      finish(null);
+    }
+    setTimeout(() => finish(null), timeoutMs + 500);
+  });
+}
+
 export type SevereItem = { code: string; label: string };
 export type SevereHospital = { hpid: string; name: string; acceptCount: number; available: SevereItem[] };
 export type TraumaCenter = {
