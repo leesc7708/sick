@@ -27,6 +27,23 @@ export const SIDO_LIST: string[] = [
   '제주특별자치도',
 ];
 
+// 응급실 실시간 가용병상 (egenBeds 프록시)
+export type BedHospital = { hpid: string; name: string; tel: string; erBeds: number | null; at: string };
+
+// 시도(선택적 시군구) 응급실 실시간 가용병상 조회. 실패 시 빈 배열(화면 폴백).
+export async function fetchBeds(stage1: string, stage2?: string): Promise<BedHospital[]> {
+  try {
+    const qs = new URLSearchParams({ stage1 });
+    if (stage2) qs.set('stage2', stage2);
+    const res = await fetch(`/api/egen-beds?${qs.toString()}`);
+    const j = await res.json();
+    if (j?.ok && Array.isArray(j.hospitals)) return j.hospitals as BedHospital[];
+  } catch {
+    // 무시 — 호출부에서 빈 결과로 안내
+  }
+  return [];
+}
+
 export type SevereItem = { code: string; label: string };
 export type SevereHospital = { hpid: string; name: string; acceptCount: number; available: SevereItem[] };
 export type TraumaCenter = {

@@ -10,7 +10,7 @@ import { typography } from '../theme/typography';
 import { FACILITIES } from '../data/facilities';
 import { FacilityKind, Hospital, RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
-import { SIDO_LIST, fetchSevere, fetchTrauma, SevereHospital, TraumaCenter } from '../data/egen';
+import { SIDO_LIST, fetchSevere, fetchTrauma, fetchBeds, SevereHospital, TraumaCenter, BedHospital } from '../data/egen';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HospitalFinder'>;
 
@@ -32,6 +32,10 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
   // ── 중증질환 수용 가능 정보(E-Gen 실데이터) — 기존 탭과 분리된 추가 뷰 ──
   const [severeMode, setSevereMode] = useState(false);
   const [sido, setSido] = useState<string>('서울특별시');
+  // ── 응급실 탭: E-Gen 실시간 가용병상 실데이터(전국 지역 단위, 2026-07-09) ──
+  const [beds, setBeds] = useState<BedHospital[]>([]);
+  const [bedsLoading, setBedsLoading] = useState(false);
+  const [bedsLoaded, setBedsLoaded] = useState(false);
   const [severeList, setSevereList] = useState<SevereHospital[]>([]);
   const [trauma, setTrauma] = useState<TraumaCenter[]>([]);
   const [sevLoading, setSevLoading] = useState(false);
@@ -55,6 +59,23 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [severeMode, sido]);
+
+  // 응급실 탭(실데이터): 지역 변경마다 실시간 가용병상 조회
+  useEffect(() => {
+    if (severeMode || kind !== 'er') return;
+    let alive = true;
+    setBedsLoading(true);
+    fetchBeds(sido)
+      .then((r) => {
+        if (!alive) return;
+        setBeds(r);
+        setBedsLoaded(true);
+      })
+      .finally(() => alive && setBedsLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [severeMode, kind, sido]);
 
   const list = FACILITIES.filter((f) => f.kind === kind)
     .filter((f) => (dept ? f.departments.includes(dept) : true))
@@ -91,8 +112,9 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
       </View>
       {!severeMode && (
         <View style={styles.filters}>
-          <Chip label={t('hf_open')} selected={openOnly} onPress={() => setOpenOnly((v) => !v)} />
-          <Chip label={t('hf_night')} selected={nightOnly} onPress={() => setNightOnly((v) => !v)} />
+          {/* 응급실 탭은 E-Gen 실데이터(24시간)라 개점/야간 필터 무의미 → 병상 필터만 */}
+          {kind !== 'er' && <Chip label={t('hf_open')} selected={openOnly} onPress={() => setOpenOnly((v) => !v)} />}
+          {kind !== 'er' && <Chip label={t('hf_night')} selected={nightOnly} onPress={() => setNightOnly((v) => !v)} />}
           {kind === 'er' && <Chip label={t('hf_beds_f')} tone="primary" selected={bedsOnly} onPress={() => setBedsOnly((v) => !v)} />}
         </View>
       )}
@@ -174,6 +196,57 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
           <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.md, textAlign: 'center' }]}>{t('sev_notel')}</Text>
           <Text style={[typography.small, { color: colors.textMuted, marginTop: 4, textAlign: 'center' }]}>{t('sev_source')}</Text>
         </ScrollView>
+      ) : kind === 'er' ? (
+        // ── 응급실: E-Gen 실시간 가용병상 실데이터 (전국 지역 선택) ──
+        <ScrollView contentContainerStyle={styles.content}>
+          <Text style={[typography.captionBold, { color: colors.textMuted, marginBottom: 6 }]}>{t('sev_region')}</Text>
+          <View style={[styles.filters, { paddingHorizontal: 0 }]}>
+            {SIDO_LIST.map((s) => (
+              <Chip key={s} label={s} tone="primary" selected={sido === s} onPress={() => setSido(s)} />
+            ))}
+          </View>
+
+          {bedsLoading && (
+            <View style={{ paddingVertical: spacing.lg, alignItems: 'center' }}>
+              <ActivityIndicator color={colors.primary} />
+              <Text style={[typography.caption, { color: colors.textMuted, marginTop: 8 }]}>{t('sev_loading')}</Text>
+            </View>
+          )}
+
+          {(() => {
+            const shown = bedsOnly ? beds.filter((h) => (h.erBeds ?? 0) > 0) : beds;
+            if (bedsLoading) return null;
+            if (bedsLoaded && shown.length === 0) {
+              return <Text style={[typography.body, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.lg }]}>{t('hf_empty')}</Text>;
+            }
+            return shown.map((h) => (
+              <View key={h.hpid || h.name} style={[styles.card, shadow.card]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={[typography.bodyBold, { color: colors.text, flex: 1 }]}>{h.name}</Text>
+                  {typeof h.erBeds === 'number' && (
+                    <View style={[styles.bedBadge, { backgroundColor: h.erBeds > 0 ? colors.success : colors.emergency }]}>
+                      <Text style={styles.bedBadgeTxt}>{h.erBeds > 0 ? `${t('hf_beds')} ${h.erBeds}` : t('hf_full')}</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={[typography.small, { color: colors.textMuted, marginTop: 4 }]}>{t('hf_realtime')}</Text>
+                <View style={styles.rowBtns}>
+                  {!!h.tel && (
+                    <View style={{ flex: 1 }}>
+                      <PrimaryButton title={t('hf_call')} icon="📞" variant="primary" size="sm" onPress={() => Linking.openURL(`tel:${h.tel}`)} />
+                    </View>
+                  )}
+                  {!!h.tel && <View style={{ width: spacing.sm }} />}
+                  <View style={{ flex: 1 }}>
+                    <PrimaryButton title={t('hf_route')} icon="🗺️" variant="outline" size="sm" onPress={() => Linking.openURL(`https://map.kakao.com/?q=${encodeURIComponent(mapQuery(h.name))}`)} />
+                  </View>
+                </View>
+              </View>
+            ));
+          })()}
+
+          <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.md, textAlign: 'center' }]}>{t('sev_source')}</Text>
+        </ScrollView>
       ) : (
       <ScrollView contentContainerStyle={styles.content}>
         {list.length === 0 && (
@@ -186,18 +259,10 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
               <Text style={[typography.caption, { color: colors.textMuted }]}>{h.distanceKm}km</Text>
             </View>
 
-            {kind === 'er' && typeof h.availableBeds === 'number' && (
-              <View style={styles.bedRow}>
-                <View style={[styles.bedBadge, { backgroundColor: h.availableBeds > 0 ? colors.success : colors.emergency }]}>
-                  <Text style={styles.bedBadgeTxt}>
-                    {h.availableBeds > 0 ? `${t('hf_beds')} ${h.availableBeds}` : t('hf_full')}
-                  </Text>
-                </View>
-                {h.availableBeds > 0 && (
-                  <Text style={[typography.small, { color: colors.textMuted }]}>{t('hf_realtime')}</Text>
-                )}
-              </View>
-            )}
+            {/* [주석보존] 응급실 병상 배지는 E-Gen 실데이터 분기(위 kind==='er')로 이동 →
+                데모(병원/약국) 분기에선 도달 불가라 비활성화 (2026-07-09):
+                {kind === 'er' && typeof h.availableBeds === 'number' && (
+                  bedRow: availableBeds>0 ? hf_beds+수 : hf_full, +hf_realtime)} */}
             {h.departments.length > 0 && (
               <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 4 }]}>{h.departments.join(' · ')}{h.isOpenNow ? ` · ${t('hf_open_now')}` : ''}</Text>
             )}
