@@ -62,7 +62,7 @@
 ## 🟠 P1 — 완성도·차별점·발표 신뢰
 
 - [ ] **E-Gen 실시간 응급실 API 1건 실연동** — 공공데이터포털 무료 키 발급 → 1개 지역 실시간 가용병상. 차별점 2번을 "사실"로. 못 붙이면 전 화면 "데모 데이터" 정직 라벨링. (심사)
-- [ ] **AI 키 Cloud Functions 프록시 이전** — 디와이온 기존 Firebase Functions 재활용. 보안 + "기존 인프라 재활용" 주장 동시 실현. (심사·보안)
+- [ ] **AI 키 Cloud Functions 프록시 이전** — 회사 기존 Firebase Functions 재활용. 보안 + "기존 인프라 재활용" 주장 동시 실현. (심사·보안)
 - [ ] **홈 상시 119 직통 버튼** — 응급신호 체크 없이 1탭 `tel:119`. 현재 최소 4탭. (UX)
 - [ ] **ScrollTopFab footer 겹침 수정** — footer 있는 화면에서 FAB 위치 상향 또는 숨김. (개발·UX)
 - [ ] **개인정보 동의 플로우 + 처리방침/약관 화면** — 온보딩 민감정보(기저질환·알레르기·복용약) 수집 별도 동의. Play Store 등록 필수 요건. (의료규제)
@@ -102,7 +102,7 @@
 
 ### 2026-07-07 | 진료과 상담 AI 연결 완료 (Claude Haiku, 자유문장 상담 라이브)
 - Firebase Blaze 전환(형님) 완료 → Cloud Functions v2 `deptConsult`(asia-northeast3) 배포. Claude Haiku(claude-haiku-4-5)로 자유문장→진료과 안내
-- 키는 DY ON functions/.env의 CLAUDE_API_KEY 재사용, lifeline functions/.env에만 저장(git 제외, 앱 미노출). 호스팅 rewrite /api/dept-consult(동일출처, CORS 불필요) + gcf-artifacts cleanup 정책(1일)
+- AI 키는 서버 functions/.env에만 저장(git 제외, 앱 미노출). 호스팅 rewrite /api/dept-consult(동일출처, CORS 불필요) + gcf-artifacts cleanup 정책(1일)
 - 프롬프트: 진단·처방 금지·진료과 안내만, dept/alt는 한국 진료과 한글명, reason/tip은 사용자 언어로. 실테스트 ko/es/en 통과("발목 삠→정형외과", "용접 후 눈→안과" 정확)
 - 프론트: 자유문장→AI 함수, 빠른칩→무료 규칙기반, 실패시 규칙기반 폴백. 화면 async+로딩. dc_ai_note 7개언어 "AI 작동"으로 갱신
 - ⚠️ 비용: Haiku 상담 1건 ~1원, maxInstances:5로 폭주 방지. 결제 예산알림 권장
