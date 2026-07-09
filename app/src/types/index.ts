@@ -156,4 +156,5 @@ export type RootStackParamList = {
   MyMedicines: undefined;
   History: undefined;
   Settings: undefined;
+  Account: undefined;
 };

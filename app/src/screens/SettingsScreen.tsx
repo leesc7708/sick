@@ -111,16 +111,12 @@ export function SettingsScreen({ navigation }: Props) {
           </Text>
         </View>
 
+        {/* [주석보존] 계정 표시·로그아웃은 '내 계정' 화면(우상단 아이콘)으로 이관 (2026-07-09):
+            {account && (<View>계정 카드: name(username) · ROLE_LABEL · status</View>)}
+            <PrimaryButton title="로그아웃" onPress={() => logout()} /> */}
         {account && (
-          <View style={[styles.card, shadow.card, { marginTop: spacing.lg }]}>
-            <Text style={[typography.captionBold, { color: colors.textSecondary }]}>계정</Text>
-            <Text style={[typography.body, { color: colors.text, marginTop: 4 }]}>{account.name} ({account.username})</Text>
-            <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>
-              {ROLE_LABEL[account.role]} · {account.status === 'active' ? '승인됨' : account.status === 'pending' ? '승인 대기' : '거부됨'}
-            </Text>
-          </View>
+          <PrimaryButton title="내 계정 · 로그아웃" variant="outline" onPress={() => navigation.navigate('Account')} style={{ marginTop: spacing.lg }} />
         )}
-        <PrimaryButton title="로그아웃" variant="outline" onPress={() => logout()} style={{ marginTop: spacing.md }} />
 
         <PrimaryButton title="🎬 데모 데이터 채우기" variant="secondary" onPress={fillDemo} style={{ marginTop: spacing.lg }} />
         <PrimaryButton title="모든 데이터 삭제" variant="outline" onPress={clearAll} style={{ marginTop: spacing.sm }} />

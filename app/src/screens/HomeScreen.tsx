@@ -92,7 +92,7 @@ export function HomeScreen({ navigation }: Props) {
       >
         <View style={styles.header}>
           <LogoMark size={38} />
-          <View style={{ marginLeft: 10 }}>
+          <View style={{ marginLeft: 10, flex: 1 }}>
             <Text style={[typography.h1, { color: colors.text }]}>
               라이프라인 {isWork && <Text style={{ color: colors.work }}>@work</Text>}
             </Text>
@@ -100,6 +100,13 @@ export function HomeScreen({ navigation }: Props) {
               {isWork ? t('tagline_work') : t('tagline_general')}
             </Text>
           </View>
+          {/* 우상단 상시 계정 진입점 (미승인 시 주황 점) */}
+          {account && (
+            <Pressable onPress={() => navigation.navigate('Account')} hitSlop={10} accessibilityRole="button" accessibilityLabel={account.name} style={styles.acctBtn}>
+              <Icon name="user" size={22} color={colors.g700} />
+              {account.status !== 'active' && <View style={styles.acctDot} />}
+            </Pressable>
+          )}
         </View>
 
         {account && (
@@ -217,6 +224,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: 96 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md, marginTop: spacing.xs },
+  acctBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.g100, alignItems: 'center', justifyContent: 'center' },
+  acctDot: { position: 'absolute', top: 7, right: 7, width: 9, height: 9, borderRadius: 5, backgroundColor: colors.warning, borderWidth: 1.5, borderColor: colors.card },
   greet: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
   crewBanner: { backgroundColor: colors.workLight, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.sm },
   segment: { flexDirection: 'row', backgroundColor: colors.g200, borderRadius: radius.md, padding: 4, marginTop: spacing.md, marginBottom: spacing.md },

@@ -27,6 +27,7 @@ import { ManagerDashboardScreen } from '../screens/ManagerDashboardScreen';
 import { MyMedicinesScreen } from '../screens/MyMedicinesScreen';
 import { HistoryScreen } from '../screens/HistoryScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+import { AccountScreen } from '../screens/AccountScreen';
 
 // 구 버전(일반 헬스케어) 화면은 보존하되 네비에서는 제외:
 // import { SymptomResultScreen } from '../screens/SymptomResultScreen';
@@ -61,6 +62,7 @@ const linking = {
       MyMedicines: 'medicines',
       History: 'history',
       Settings: 'settings',
+      Account: 'account',
     },
   },
 };
@@ -118,6 +120,7 @@ export function RootNavigation() {
         <Stack.Screen name="MyMedicines" component={MyMedicinesScreen} />
         <Stack.Screen name="History" component={HistoryScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="Account" component={AccountScreen} />
           </>
         )}
       </Stack.Navigator>
