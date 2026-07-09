@@ -97,6 +97,7 @@ export interface MyMedicine {
   id: string;
   name: string;
   doseTime?: string;
+  times?: string[]; // 복약 알림 시간(HH:MM) 목록. 앱 열림 시 브라우저 알림 + 오늘 복용 체크용
   note?: string;
 }
 

@@ -6,6 +6,7 @@ import { ScrollTopFab } from './src/components/ScrollTopFab';
 import { LanguageProvider } from './src/i18n/LanguageContext';
 import { AuthProvider } from './src/auth/AuthContext';
 import { ThemeProvider, useThemeMode } from './src/theme/theme';
+import { MedReminder } from './src/components/MedReminder';
 
 // 상태바 아이콘 색을 테마에 맞춤 (다크 배경 → 밝은 아이콘)
 function ThemedStatusBar() {
@@ -29,6 +30,7 @@ export default function App() {
             <ThemedStatusBar />
             <RootNavigation />
             <ScrollTopFab />
+            <MedReminder />
           </SafeAreaProvider>
         </LanguageProvider>
       </AuthProvider>

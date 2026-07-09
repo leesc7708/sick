@@ -24,6 +24,7 @@ const KEYS = {
   onboardedPrefix: 'lifeline:onboarded:', // + uid → 'yes'. 계정별 온보딩 완료. (기존 profile.onboardingDone은 기기공유라 라우팅 부적합 → 대체)
   phraseFaves: 'lifeline:phraseFaves', // 표현집 즐겨찾기 문장 id
   phraseRecents: 'lifeline:phraseRecents', // 표현집 최근 사용 문장 id
+  medTaken: 'lifeline:medTaken', // 오늘 복약 체크 { date, taken:{ 'medId@HH:MM':true } } — 날짜 바뀌면 초기화
 };
 
 async function getList<T>(key: string): Promise<T[]> {
@@ -32,6 +33,11 @@ async function getList<T>(key: string): Promise<T[]> {
 }
 async function saveList<T>(key: string, list: T[]): Promise<void> {
   await AsyncStorage.setItem(key, JSON.stringify(list));
+}
+// 오늘 날짜 (복약 체크 일자 비교용)
+function todayStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 export const storage = {
@@ -178,6 +184,18 @@ export const storage = {
   async deleteMyMedicine(id: string): Promise<void> {
     const list = await getList<MyMedicine>(KEYS.myMedicines);
     await saveList(KEYS.myMedicines, list.filter((m) => m.id !== id));
+  },
+
+  // ── 오늘 복약 체크 (날짜 바뀌면 자동 초기화) ──
+  async getMedTakenToday(): Promise<Record<string, boolean>> {
+    const raw = await AsyncStorage.getItem(KEYS.medTaken);
+    if (!raw) return {};
+    try { const o = JSON.parse(raw); return o.date === todayStr() ? (o.taken || {}) : {}; } catch { return {}; }
+  },
+  async setMedTaken(key: string, val: boolean): Promise<void> {
+    const cur = await this.getMedTakenToday();
+    const taken = { ...cur, [key]: val };
+    await AsyncStorage.setItem(KEYS.medTaken, JSON.stringify({ date: todayStr(), taken }));
   },
 
   async clearAll(): Promise<void> {
