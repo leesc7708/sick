@@ -10,10 +10,12 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { colors as _staticColors, radius, spacing, shadow } from '../theme/colors';
 import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
-import { DOC_INFO, HEALTH_CHECK_TYPES } from '../data/options';
+import { HEALTH_CHECK_TYPES } from '../data/options';
 import { HealthCheckRecord, HealthCheckType, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
 import { useRegisterScrollTop } from '../utils/scrollTop';
+import { useLang } from '../i18n/LanguageContext';
+import { healthTypeLabel, docInfoLabel, resultLabel } from '../i18n/healthDocs';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HealthRecords'>;
 
@@ -25,6 +27,7 @@ function daysLeft(expire?: string): number | null {
 
 export function HealthRecordsScreen({ navigation }: Props) {
   const colors = useTheme();
+  const { t, lang } = useLang();
   const [records, setRecords] = useState<HealthCheckRecord[]>([]);
   const [pickType, setPickType] = useState<HealthCheckType>('특수건강진단');
   const scrollRef = useRef<ScrollView>(null);
@@ -59,60 +62,60 @@ export function HealthRecordsScreen({ navigation }: Props) {
     const res = await DocumentPicker.getDocumentAsync({ type: ['application/pdf', 'image/*'], copyToCacheDirectory: true });
     if (res.canceled || !res.assets?.[0]) return;
     const a = res.assets[0];
-    await addRecord(a.name || '검진결과', a.mimeType?.includes('pdf') ? 'pdf' : 'image', a.uri);
+    await addRecord(a.name || t('hr_default_doc'), a.mimeType?.includes('pdf') ? 'pdf' : 'image', a.uri);
   };
 
   const addPhoto = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) { Alert.alert('권한 필요', '사진 접근 권한을 허용해 주세요.'); return; }
+    if (!perm.granted) { Alert.alert(t('hr_perm_title'), t('hr_perm_photo')); return; }
     const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7 });
     if (res.canceled || !res.assets?.[0]) return;
-    await addRecord('검진결과 사진', 'image', res.assets[0].uri);
+    await addRecord(t('hr_default_photo'), 'image', res.assets[0].uri);
   };
 
   const addCamera = async () => {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
-    if (!perm.granted) { Alert.alert('권한 필요', '카메라 권한을 허용해 주세요.'); return; }
+    if (!perm.granted) { Alert.alert(t('hr_perm_title'), t('hr_perm_camera')); return; }
     const res = await ImagePicker.launchCameraAsync({ quality: 0.7 });
     if (res.canceled || !res.assets?.[0]) return;
-    await addRecord('검진결과 촬영', 'image', res.assets[0].uri);
+    await addRecord(t('hr_default_shot'), 'image', res.assets[0].uri);
   };
 
   const onAdd = () =>
-    Alert.alert(`'${pickType}' 추가`, '추가할 방법을 선택하세요', [
-      { text: '카메라 촬영', onPress: addCamera },
-      { text: 'PDF·파일 선택', onPress: addFile },
-      { text: '사진 보관함', onPress: addPhoto },
-      { text: '취소', style: 'cancel' },
+    Alert.alert(t('hr_add_fmt').replace('{t}', healthTypeLabel(pickType, lang)), t('hr_add_method_body'), [
+      { text: t('hr_m_camera'), onPress: addCamera },
+      { text: t('hr_m_file'), onPress: addFile },
+      { text: t('hr_m_photo'), onPress: addPhoto },
+      { text: t('hr_cancel'), style: 'cancel' },
     ]);
 
   const remove = (id: string) =>
-    Alert.alert('삭제', '이 기록을 삭제할까요?', [
-      { text: '취소', style: 'cancel' },
-      { text: '삭제', style: 'destructive', onPress: async () => { await storage.deleteHealthRecord(id); reload(); } },
+    Alert.alert(t('hr_delete'), t('hr_del_body'), [
+      { text: t('hr_cancel'), style: 'cancel' },
+      { text: t('hr_delete'), style: 'destructive', onPress: async () => { await storage.deleteHealthRecord(id); reload(); } },
     ]);
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
-      <AppBar title="현장 서류함" onBack={() => navigation.goBack()} />
+      <AppBar title={t('hr_appbar')} onBack={() => navigation.goBack()} />
       <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
-        <Text style={[typography.h2, { color: colors.text }]}>한 번 올려두면{'\n'}어디서든 제출</Text>
+        <Text style={[typography.h2, { color: colors.text }]}>{t('hr_hero')}</Text>
         <Text style={[typography.caption, { color: colors.textMuted, marginTop: 6 }]}>
-          현장 입구에서 QR로 바로 보여줄 수 있어요. 민감 정보라 기기에 안전하게 보관됩니다.
+          {t('hr_hero_desc')}
         </Text>
 
-        <Text style={[styles.label, { color: colors.textSecondary }]}>추가할 분류</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('hr_add_category')}</Text>
         <View style={styles.chips}>
-          {HEALTH_CHECK_TYPES.map((t) => (
-            <Chip key={t} label={t} tone="work" selected={pickType === t} onPress={() => setPickType(t as HealthCheckType)} />
+          {HEALTH_CHECK_TYPES.map((ht) => (
+            <Chip key={ht} label={healthTypeLabel(ht, lang)} tone="work" selected={pickType === ht} onPress={() => setPickType(ht as HealthCheckType)} />
           ))}
         </View>
-        <Text style={[typography.small, { color: colors.textSecondary, marginTop: 2, lineHeight: 18 }]}>ℹ️ {DOC_INFO[pickType]}</Text>
+        <Text style={[typography.small, { color: colors.textSecondary, marginTop: 2, lineHeight: 18 }]}>ℹ️ {docInfoLabel(pickType, lang)}</Text>
 
         {records.length === 0 && (
           <View style={[styles.empty, shadow.card, { backgroundColor: colors.card }]}>
             <Text style={{ fontSize: 32 }}>📋</Text>
-            <Text style={[typography.body, { color: colors.textMuted, marginTop: 8, textAlign: 'center' }]}>아직 등록된 검진기록이 없어요.{'\n'}아래에서 추가해 보세요.</Text>
+            <Text style={[typography.body, { color: colors.textMuted, marginTop: 8, textAlign: 'center' }]}>{t('hr_empty')}</Text>
           </View>
         )}
 
@@ -127,26 +130,26 @@ export function HealthRecordsScreen({ navigation }: Props) {
                   <Text style={{ fontSize: 22, marginRight: 10 }}>{r.fileType === 'pdf' ? '📄' : '🖼️'}</Text>
                 )}
                 <View style={{ flex: 1 }}>
-                  <Text style={[typography.bodyBold, { color: colors.text }]}>{r.type}</Text>
+                  <Text style={[typography.bodyBold, { color: colors.text }]}>{healthTypeLabel(r.type, lang)}</Text>
                   <Text style={[typography.small, { color: colors.textMuted }]} numberOfLines={1}>{r.title}</Text>
                 </View>
                 <Text style={[typography.small, { color: colors.textMuted }]}>{r.fileType.toUpperCase()}</Text>
               </View>
 
               <View style={{ flexDirection: 'row', marginTop: 8, flexWrap: 'wrap' }}>
-                {r.examDate && <Text style={[typography.small, { color: colors.textSecondary, marginRight: 10 }]}>검진일 {r.examDate}</Text>}
-                {r.result && <Text style={[typography.small, { color: colors.success }]}>{r.result}</Text>}
+                {r.examDate && <Text style={[typography.small, { color: colors.textSecondary, marginRight: 10 }]}>{t('hr_exam_date')} {r.examDate}</Text>}
+                {r.result && <Text style={[typography.small, { color: colors.success }]}>{resultLabel(r.result, lang)}</Text>}
               </View>
               {left !== null && (
                 <Text style={[typography.small, { marginTop: 4, color: left <= 30 ? colors.warning : colors.textMuted }]}>
-                  {left <= 0 ? '⚠️ 유효기간 만료됨' : `유효기간 ${left}일 남음 (~${r.expireDate})`}
+                  {left <= 0 ? t('hr_expired') : `${t('hr_valid_days').replace('{d}', String(left))} (~${r.expireDate})`}
                 </Text>
               )}
 
               <View style={styles.rowBtns}>
-                <View style={{ flex: 1 }}><PrimaryButton title="QR 공유" icon="📤" variant="work" size="sm" onPress={() => navigation.navigate('HealthRecordShare', { recordId: r.id })} /></View>
+                <View style={{ flex: 1 }}><PrimaryButton title={t('hr_qr_share')} icon="📤" variant="work" size="sm" onPress={() => navigation.navigate('HealthRecordShare', { recordId: r.id })} /></View>
                 <View style={{ width: spacing.sm }} />
-                <View style={{ flex: 1 }}><PrimaryButton title="삭제" variant="ghost" size="sm" onPress={() => remove(r.id)} /></View>
+                <View style={{ flex: 1 }}><PrimaryButton title={t('hr_delete')} variant="ghost" size="sm" onPress={() => remove(r.id)} /></View>
               </View>
             </View>
           );
@@ -154,7 +157,7 @@ export function HealthRecordsScreen({ navigation }: Props) {
       </ScrollView>
 
       <View style={[styles.footer, { borderTopColor: colors.divider }]}>
-        <PrimaryButton title={`${pickType} 추가`} icon="＋" variant="work" size="lg" onPress={onAdd} />
+        <PrimaryButton title={t('hr_add_fmt').replace('{t}', healthTypeLabel(pickType, lang))} icon="＋" variant="work" size="lg" onPress={onAdd} />
       </View>
     </View>
   );
