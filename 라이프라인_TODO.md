@@ -13,9 +13,9 @@
 - **P0-1 정직화 배지**: 프론트가 AI 실패 시 조용히 규칙폴백하던 것 → `ConsultResult.source('ai'|'rule')` + DeptConsultScreen 첫 결과에 "🤖 AI 안내 / 📋 간이(규칙) 안내" 배지(7개언어 dc_src_*). "AI가 이해한 것" 오인 방지.
 - **P0-3 검진 QR·서류함 7개 언어화**: HealthRecordShareScreen(QR공유)·HealthRecordsScreen(목록/업로드) 전체 t()화. `i18n/healthDocs.ts` 신설=검진분류8종·법령안내(DOC_INFO)·결과(적합) 7개언어 라벨맵(저장값은 한국어 canonical 유지=기존기록 호환). translations에 hrs_*/hr_* 키. 번들 신규문자열 포함 확인. ⚠️ th/vi UI문구는 클로드 번역=데모 전 원어민 검수 권장(응급/투약 아님, 위험 낮음).
 - **P1 관리자 대시보드 정직화**: `TOTAL_WORKERS=12` 하드코딩에 "예시" Tag 부착 + 작업전체크에 "실집계" 표기 → 표본값 오인 방지(심사 red flag).
-- **P1 사업성 정량화**(문서): `라이프라인_사업성_정량화_워크시트_2026-07-10.md` — 형님 실수치([[ ]]) 넣으면 행정비 절감액 원화·SOM 자동산출(P=30%·침투율20% 보수 고정). "절감액 미산출·TAM/SAM/SOM 없음" 지적 대응.
-- **P0-4 시연 대본**(문서): `라이프라인_2계정_긴급알림_시연대본_2026-07-10.md` — 워커 🆘→관리자 실시간 수신 머니샷, 형님이 순서대로 녹화만 하면 됨.
-- 🔑 **형님 잔여**: ① 2계정 긴급알림 실클릭 녹화(대본대로) ② 사업성 워크시트 [[ ]] 디와이 실수치 입력 ③ th/vi 원어민 검수(선택) ④ E-Gen 키 활성화 후 egenBeds 배포·연동(별건) ⑤ KIPRIS 상표·도메인
+- **P1 사업성 정량화**(문서): `라이프라인_사업성_정량화_워크시트_2026-07-10.md` — 실수치([[ ]]) 넣으면 행정비 절감액 원화·SOM 자동산출(P=30%·침투율20% 보수 고정). "절감액 미산출·TAM/SAM/SOM 없음" 지적 대응.
+- **P0-4 시연 대본**(문서): `라이프라인_2계정_긴급알림_시연대본_2026-07-10.md` — 워커 🆘→관리자 실시간 수신 머니샷, 순서대로 녹화만 하면 됨.
+- 🔑 **잔여(사용자)**: ① 2계정 긴급알림 실클릭 녹화(대본대로) ② 사업성 워크시트 [[ ]] 디와이 실수치 입력 ③ th/vi 원어민 검수(선택) ④ E-Gen 키 활성화 후 egenBeds 배포·연동(별건) ⑤ KIPRIS 상표·도메인
 - 검증: 매 변경 tsc·빌드·배포·라이브 확인. 자산 wheresick-5617a.web.app
 
 ---
@@ -36,7 +36,7 @@
 - **[P0] 민감정보 수집·이용 동의**(Play Store 필수/개인정보보호법): 온보딩에서 기저질환·알레르기·복용약을 무동의 수집하던 것 → 체크박스 동의 신설. 미동의+민감정보 입력 시 저장 차단·안내, 미동의 시 해당 필드 저장 안 함(빈 배열). storage.get/setHealthConsent(동의 시각 ISO 기록). 게이팅 로직 4케이스 검증 통과
 - **개인정보 처리방침 화면 신설**: PrivacyPolicyScreen + data/privacyPolicy.ts(ko/en 정식 7절: 수집항목·목적·저장위치·국외이전·보유파기·이용자권리·문의, 나머지 5개 언어 en 폴백). 실제 구조 정직 고지(민감정보=기기 로컬, 계정=Firebase 서울, AI상담 시만 국외이전). 온보딩 동의카드+설정에서 진입
 - 신규 t() 키 9개 7개 언어 전체 번역(wc_unfit_*·consent_*·privacy_*). tsc 통과·빌드·audio 복사·배포 완료
-- ⏳ 남은 P0: DeptConsult 결과화면 다국어(KB 언어필드화)·특수건진 유효기간 유해인자별 / P2: Cloud Functions·FCM·오프라인큐잉 / E-Gen키·KIPRIS(형님)
+- ⏳ 남은 P0: DeptConsult 결과화면 다국어(KB 언어필드화)·특수건진 유효기간 유해인자별 / P2: Cloud Functions·FCM·오프라인큐잉 / E-Gen키·KIPRIS(외부)
 
 ### 2026-07-08 | P0 5건 구현 완료 + 외부 디자인팀 점검 반영(UI/UX 개선)
 - **P0 5건 전부 구현·배포·e2e**(계획: 라이프라인_P0실행계획_아키텍처): #5 위치정보 처리방침 / #1 온보딩 도달경로 복구 / #4 WorkCheck 기본값 미선택+tookMeds 참고분리 / #3 최고권한 변경 확인 다이얼로그 / #2 관리자 읽기범위 축소(rules). #2 e2e 14/0(svisor 전사 덤프 차단·usernames get·신 watchMembers·긴급 라우팅)
@@ -61,7 +61,7 @@
 - **UserAdminScreen 신설**(ssvisor 전용): listUsers()로 전체회원(승인대기 우선정렬) + 역할버튼(근로자/에스바이저/떠블에스바이저) 원터치 승인=active 승격 + 거부. auth.ts에 listUsers()·setUserRoleStatus() 추가. 홈에 ssvisor용 "회원 승인·역할 관리" 진입버튼. 본인 총괄권한 자가해제 방지
 - **2계정 e2e 실백엔드 검증 14/0 통과**(실 Firebase SDK+실 firestore.rules 관통, tools 스크립트 scratchpad): 가입→ssvisor승격(gcloud REST)→회원목록조회→워커승인→**워커 자가 권한상승 시도 거부(rules 차단 확인)**→크루생성→아이디검색→워커추가→소속조회→긴급알림생성→관리자 라우팅수신→ack→자기이탈. 테스트데이터 자동정리
 - tsc 통과·빌드·audio-ko 102개 복사·hosting 배포 완료(wheresick-5617a.web.app)
-- ⏳ 남은것 그대로: P2 Cloud Functions(멤버십 하드닝·미응답3분 확산)·FCM 웹푸시·오프라인큐잉 / 남은 P0(DeptConsult 결과 다국어·민감정보 동의·부적합자가체크 로그·특수건진 유효기간) / E-Gen키·KIPRIS(형님). ⚠️브라우저 UI 픽셀 실테스트는 별도(로직·규칙 e2e는 통과)
+- ⏳ 남은것 그대로: P2 Cloud Functions(멤버십 하드닝·미응답3분 확산)·FCM 웹푸시·오프라인큐잉 / 남은 P0(DeptConsult 결과 다국어·민감정보 동의·부적합자가체크 로그·특수건진 유효기간) / E-Gen키·KIPRIS(외부). ⚠️브라우저 UI 픽셀 실테스트는 별도(로직·규칙 e2e는 통과)
 
 ---
 
@@ -111,10 +111,10 @@
 7. `_legacy` 내부 import 깨짐(재활성화 불가) — 보존 의도면 내부경로 `./`로 수정
 
 **⏳ 남은 P2**: 개인정보 동의화면 · 인라인컴포넌트 · ImagePicker · History 날짜정렬 · 출처표기 · LanguageContext useMemo
-**🔑 외부(형님)**: E-Gen키 · ~~AI프록시~~(2026-07-07 완료) · 멀티유저 · KIPRIS 상표·도메인
+**🔑 외부(사용자)**: E-Gen키 · ~~AI프록시~~(2026-07-07 완료) · 멀티유저 · KIPRIS 상표·도메인
 
 ### 2026-07-07 | 진료과 상담 AI 연결 완료 (Claude Haiku, 자유문장 상담 라이브)
-- Firebase Blaze 전환(형님) 완료 → Cloud Functions v2 `deptConsult`(asia-northeast3) 배포. Claude Haiku(claude-haiku-4-5)로 자유문장→진료과 안내
+- Firebase Blaze 전환(사용자) 완료 → Cloud Functions v2 `deptConsult`(asia-northeast3) 배포. Claude Haiku(claude-haiku-4-5)로 자유문장→진료과 안내
 - AI 키는 서버 functions/.env에만 저장(git 제외, 앱 미노출). 호스팅 rewrite /api/dept-consult(동일출처, CORS 불필요) + gcf-artifacts cleanup 정책(1일)
 - 프롬프트: 진단·처방 금지·진료과 안내만, dept/alt는 한국 진료과 한글명, reason/tip은 사용자 언어로. 실테스트 ko/es/en 통과("발목 삠→정형외과", "용접 후 눈→안과" 정확)
 - 프론트: 자유문장→AI 함수, 빠른칩→무료 규칙기반, 실패시 규칙기반 폴백. 화면 async+로딩. dc_ai_note 7개언어 "AI 작동"으로 갱신
