@@ -7,6 +7,19 @@
 
 ---
 
+### 2026-07-10 | 심사위원단 지적 P0 4건 처리 (모의심사 2026-07-09 후속)
+- **P0-2 오디오 배포 영구화**: `app/audio-ko`(102개) → `app/public/audio-ko`로 이전 → `expo export`가 dist에 자동복사(수동복사 의존 제거). 라이브 mp3 audio/mpeg 200 검증(a1/b1/e10/w12/y5/s5). "오프라인 음성 미배포" 해소.
+- **P0-1 AI 진료과 상담 한국어 복구**: 근본원인=프롬프트가 lang=ko에도 "reason/tip 한국어 금지" 하드코딩 → "답변언어=한국어인데 한국어 쓰지마" 자기모순으로 `data:null`. 한국어 상담이면 한국어로 작성하도록 조건분기 + 파싱 강건화(코드펜스 제거)+1회 재시도 + max_tokens 400→700. deptConsult 배포. **라이브 UTF-8 검증 정상**(눈아파요→안과 normal, 아랫배+열→응급의학과 emergency). ⚠️ Windows Git Bash curl은 한글을 CP949로 깨뜨리니 UTF-8 파일본문(`--data-binary @`)으로 테스트할 것.
+- **P0-1 정직화 배지**: 프론트가 AI 실패 시 조용히 규칙폴백하던 것 → `ConsultResult.source('ai'|'rule')` + DeptConsultScreen 첫 결과에 "🤖 AI 안내 / 📋 간이(규칙) 안내" 배지(7개언어 dc_src_*). "AI가 이해한 것" 오인 방지.
+- **P0-3 검진 QR·서류함 7개 언어화**: HealthRecordShareScreen(QR공유)·HealthRecordsScreen(목록/업로드) 전체 t()화. `i18n/healthDocs.ts` 신설=검진분류8종·법령안내(DOC_INFO)·결과(적합) 7개언어 라벨맵(저장값은 한국어 canonical 유지=기존기록 호환). translations에 hrs_*/hr_* 키. 번들 신규문자열 포함 확인. ⚠️ th/vi UI문구는 클로드 번역=데모 전 원어민 검수 권장(응급/투약 아님, 위험 낮음).
+- **P1 관리자 대시보드 정직화**: `TOTAL_WORKERS=12` 하드코딩에 "예시" Tag 부착 + 작업전체크에 "실집계" 표기 → 표본값 오인 방지(심사 red flag).
+- **P1 사업성 정량화**(문서): `라이프라인_사업성_정량화_워크시트_2026-07-10.md` — 형님 실수치([[ ]]) 넣으면 행정비 절감액 원화·SOM 자동산출(P=30%·침투율20% 보수 고정). "절감액 미산출·TAM/SAM/SOM 없음" 지적 대응.
+- **P0-4 시연 대본**(문서): `라이프라인_2계정_긴급알림_시연대본_2026-07-10.md` — 워커 🆘→관리자 실시간 수신 머니샷, 형님이 순서대로 녹화만 하면 됨.
+- 🔑 **형님 잔여**: ① 2계정 긴급알림 실클릭 녹화(대본대로) ② 사업성 워크시트 [[ ]] 디와이 실수치 입력 ③ th/vi 원어민 검수(선택) ④ E-Gen 키 활성화 후 egenBeds 배포·연동(별건) ⑤ KIPRIS 상표·도메인
+- 검증: 매 변경 tsc·빌드·배포·라이브 확인. 자산 wheresick-5617a.web.app
+
+---
+
 ### 2026-07-09 | E-Gen 실시간 응급실 API 프록시 작성 (키 발급됨, 활성화 대기)
 - **키 발급 완료**: 공공데이터포털 국립중앙의료원 "전국 응급의료기관 정보 조회 서비스" 자동승인. 일반인증키(Decoding)를 `app/functions/.env`의 `EGEN_SERVICE_KEY`에 저장(git 제외). 승인일로부터 24개월.
 - **프록시 함수 작성**: `functions/index.js`에 `egenBeds`(onRequest, asia-northeast3) 추가 — `getEmrrmRltmUsefulSckbdInfoInqire`(시도/시군구 실시간 응급실 가용병상) 호출, 키는 서버에서만. 반환 `{ok,updatedAt,total,hospitals:[{hpid,name,tel,erBeds,at}]}`. `firebase.json` rewrite `/api/egen-beds` 추가. node 문법·JSON 검증 통과.

@@ -13,7 +13,9 @@ import { storage } from '../services/storage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ManagerDashboard'>;
 
-const TOTAL_WORKERS = 12; // 데모: 현장 배정 인원
+// ⚠️ 데모 표본값 — 실서비스에서는 크루(멤버십) 소속 인원으로 자동 집계.
+// 지금은 로컬 데모라 실인원 소스가 없어 예시 숫자를 쓰며, 화면에 "예시"로 명시함(오인 방지).
+const TOTAL_WORKERS = 12; // 데모 표본: 현장 배정 인원(예시)
 
 export function ManagerDashboardScreen({ navigation }: Props) {
   const colors = useTheme();
@@ -46,13 +48,16 @@ export function ManagerDashboardScreen({ navigation }: Props) {
 
         <View style={styles.statsRow}>
           <View style={[styles.stat, shadow.card, { backgroundColor: colors.card }]}>
-            <Text style={[styles.statNum, { color: colors.text }]}>{TOTAL_WORKERS}</Text>
+            <Text style={[styles.statNum, { color: colors.textMuted }]}>{TOTAL_WORKERS}</Text>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>작업 인원</Text>
+            {/* 정직화: 하드코딩 표본값임을 숫자 옆에 명시 → 실데이터 오인 방지(심사 지적) */}
+            <Tag label="예시" tone="new" />
           </View>
           <View style={{ width: spacing.sm }} />
           <View style={[styles.stat, shadow.card, { backgroundColor: colors.card }]}>
             <Text style={[styles.statNum, { color: colors.success }]}>{checks.length}</Text>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>작업 전 체크 완료</Text>
+            <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>실집계</Text>
           </View>
         </View>
 
