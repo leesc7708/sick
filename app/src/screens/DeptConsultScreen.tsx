@@ -198,11 +198,19 @@ export function DeptConsultScreen({ navigation }: Props) {
               </View>
             )}
             <Text style={[styles.label, { color: colors.textSecondary }, { marginTop: spacing.xl }]}>{t('dc_result_label')}</Text>
-            {results.map(({ guide }, idx) => {
+            {results.map(({ guide, source }, idx) => {
               const u = URGENCY_STYLE[guide.urgency];
               return (
                 <View key={guide.id} style={[styles.card, shadow.card, { backgroundColor: colors.card }, { borderLeftWidth: 5, borderLeftColor: u.fg }]}>
-                  {idx === 0 && <Text style={[typography.small, { color: colors.primary, marginBottom: 4 }]}>{t('dc_best')}</Text>}
+                  {idx === 0 && (
+                    <View style={styles.srcRow}>
+                      <Text style={[typography.small, { color: colors.primary }]}>{t('dc_best')}</Text>
+                      {/* 정직화: 이 안내가 AI인지 규칙기반(폴백)인지 명시 → "AI가 이해했다"는 오인 방지 */}
+                      <Text style={[typography.small, { color: source === 'ai' ? colors.primary : colors.textMuted }]}>
+                        {source === 'ai' ? t('dc_src_ai') : t('dc_src_rule')}
+                      </Text>
+                    </View>
+                  )}
                   <Text style={[typography.bodyBold, { color: colors.text }]}>{guide.symptom}</Text>
 
                   <View style={styles.deptRow}>
@@ -253,6 +261,7 @@ const styles = StyleSheet.create({
   label: { ...typography.captionBold, color: _staticColors.textSecondary, marginTop: spacing.lg, marginBottom: spacing.sm },
   input: { backgroundColor: _staticColors.card, borderWidth: 1, borderColor: _staticColors.border, borderRadius: radius.lg, padding: spacing.md, ...typography.body, color: _staticColors.text },
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
+  srcRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   card: { backgroundColor: _staticColors.card, borderRadius: radius.xl, padding: spacing.md, marginBottom: spacing.sm },
   deptRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm },
   deptBadge: { backgroundColor: _staticColors.primary, borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 6 },

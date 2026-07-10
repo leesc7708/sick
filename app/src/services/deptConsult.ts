@@ -9,6 +9,9 @@ import { DEPT_GUIDES, DeptGuide, GENERIC_GUIDE } from '../data/departmentGuide';
 export interface ConsultResult {
   guide: DeptGuide;
   score: number;
+  // 이 결과가 어디서 나왔는지: 'ai'=Claude 자유상담, 'rule'=규칙기반(간이 안내).
+  // AI 실패로 조용히 규칙폴백 → 사용자가 "AI가 이해한 것"으로 오인하던 문제 방지(화면 배지).
+  source?: 'ai' | 'rule';
 }
 
 // ── 응급 백스톱 스캔 ──
@@ -56,11 +59,11 @@ export function consultRuleBased(text: string, quickIds: string[] = []): Consult
       if (q && q.includes(k)) score += 10;
     }
 
-    if (score > 0) results.push({ guide, score });
+    if (score > 0) results.push({ guide, score, source: 'rule' });
   }
 
   // 아무 것도 못 찾으면 "못 찾았어요"로 막지 않고 1차 진료과(가정의학과/내과) 안내
-  if (results.length === 0) return [{ guide: GENERIC_GUIDE, score: 1 }];
+  if (results.length === 0) return [{ guide: GENERIC_GUIDE, score: 1, source: 'rule' }];
 
   return results.sort((a, b) => b.score - a.score);
 }
@@ -112,7 +115,7 @@ export async function consultAI(
         urgency,
         work: false,
       };
-      return [{ guide, score: 100 }];
+      return [{ guide, score: 100, source: 'ai' }];
     }
   } catch (e) {
     // 무시하고 규칙기반 폴백

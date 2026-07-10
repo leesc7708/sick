@@ -48,8 +48,23 @@ const SYSTEM = [
   '■ 출력 형식 — 반드시 아래 JSON 객체 하나만(다른 말 금지):',
   '{"dept":"1순위 진료과(한국 진료과 한글명)","alt":"대안 진료과 한글명 또는 빈 문자열","reason":"왜 그 과인지 한 문장","tip":"헷갈림 해소 또는 응급 주의 한 문장","urgency":"emergency|soon|normal"}',
   '- dept/alt는 항상 한국 진료과 한글명(예: 안과, 정형외과, 이비인후과, 내과, 피부과, 응급의학과, 비뇨의학과, 치과, 신경외과). 응급이면 dept="응급의학과". 번역하지 마세요.',
-  '- reason/tip은 반드시 지정된 "답변 언어"로 작성(한국어 아님). urgency=emergency면 tip에 "즉시 119"를 반드시 포함.',
+  '- reason/tip은 반드시 지정된 "답변 언어"로 작성하세요. urgency=emergency면 tip에 해당 언어로 "즉시 119"를 반드시 포함.',
+  '- JSON 외 다른 말(설명·머리말·코드펜스)을 절대 붙이지 마세요. 오직 JSON 객체 하나만.',
 ].join('\n');
+
+// 모델 원문에서 JSON 객체를 최대한 관대하게 파싱(코드펜스 제거 후 첫 완결 객체 시도)
+function parseDept(raw) {
+  if (!raw) return null;
+  const cleaned = String(raw).replace(/```(?:json)?/gi, '').trim();
+  const m = cleaned.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const data = JSON.parse(m[0]);
+    return data && data.dept ? data : null;
+  } catch {
+    return null;
+  }
+}
 
 exports.deptConsult = onRequest(
   { region: 'asia-northeast3', memory: '256MiB', timeoutSeconds: 30, maxInstances: 5 },
@@ -72,24 +87,29 @@ exports.deptConsult = onRequest(
       res.json({ ok: false });
       return;
     }
+    // 답변 언어 지시 — 한국어 상담이면 reason/tip도 한국어(과거 "한국어 금지" 하드코딩이
+    // lang=ko에서 "답변 언어=한국어인데 한국어 쓰지마"라는 자기모순 → data:null 유발했음).
+    const isKo = lang === 'ko';
+    const langNote = isKo
+      ? '→ "reason"과 "tip"은 한국어로 작성하세요. "dept"와 "alt"도 한국 진료과 한글명입니다.'
+      : '→ "reason"과 "tip"은 위 답변 언어로만 작성하세요(한국어로 쓰지 마세요). "dept"와 "alt"는 한국 진료과 한글명 그대로 두세요(번역 금지).';
+    const userContent =
+      `증상: ${text}${ctx}\n\n` +
+      `답변 언어: ${LANG_NAMES[lang] || lang}\n` +
+      langNote;
     try {
-      const msg = await anthropic().messages.create({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 400,
-        system: SYSTEM,
-        messages: [
-          {
-            role: 'user',
-            content:
-              `증상: ${text}${ctx}\n\n` +
-              `답변 언어: ${LANG_NAMES[lang] || lang}\n` +
-              `→ "reason"과 "tip"은 위 답변 언어로만 작성하세요(한국어로 쓰지 마세요). "dept"와 "alt"는 한국 진료과 한글명 그대로 두세요.`,
-          },
-        ],
-      });
-      const raw = (msg.content && msg.content[0] && msg.content[0].text) || '';
-      const m = raw.match(/\{[\s\S]*\}/);
-      const data = m ? JSON.parse(m[0]) : null;
+      // 파싱 실패 시 1회 재시도(총 2회). 한국어는 토큰이 더 들어 max_tokens 여유 확보.
+      let data = null;
+      for (let attempt = 0; attempt < 2 && !data; attempt++) {
+        const msg = await anthropic().messages.create({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 700,
+          system: SYSTEM,
+          messages: [{ role: 'user', content: userContent }],
+        });
+        const raw = (msg.content && msg.content[0] && msg.content[0].text) || '';
+        data = parseDept(raw);
+      }
       res.json({ ok: !!(data && data.dept), data });
     } catch (e) {
       console.error('deptConsult error:', e && (e.message || e));
