@@ -40,3 +40,8 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# 관리자 도구 산출물 — 서비스 계정 키, 삭제 계정 백업(이름·연락처 포함)
+*serviceAccount*.json
+*-adminsdk-*.json
+deleted-*.json

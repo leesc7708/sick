@@ -31,7 +31,8 @@ const TEST_PATTERNS = [
   /^probe_/,    // 접속 확인 probe
 ];
 // 패턴에 걸려도 절대 지우지 않을 계정 (안전장치)
-const NEVER_DELETE = new Set(['mmersum', 'busanqlcsk']);
+// 2026-08-14: 총괄이 mmersum → dy17715 로 이관되고 mmersum 계정은 삭제됨
+const NEVER_DELETE = new Set(['dy17715', 'busanqlcsk']);
 
 const localPart = (email) => String(email || '').split('@')[0];
 const isTest = (email) => {
