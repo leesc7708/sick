@@ -7,6 +7,29 @@
 
 ---
 
+### 2026-08-14 | [P0] 응급실 실시간 병상 먹통 수정 — 07-09 "키 활성화 대기" 항목 종결
+
+- **증상**: 웹에서 **응급실 검색 → 빈 화면**. `/api/egen-beds`·`/api/egen-trauma`가 **5/5 결정적 실패**, 매번 정확히 **10.6초** 후 `{"ok":false,"error":"fetch failed"}`. 나머지 E-Gen 4개(severe/aed/hospitals/pharmacy)는 정상.
+- **진단 경로**(같은 증상 재발 시 이 순서로):
+  1. `firebase functions:log --only egenBeds` → 실패까지 걸린 **시간**을 본다. **10초대면 undici(Node fetch)의 기본 connect 타임아웃** = 연결 자체가 안 맺어진 것. DNS 실패면 즉시(`ENOTFOUND`) 떨어지므로 구분된다.
+  2. 로컬에서 **동일 upstream URL을 직접 호출**해 키·API를 분리 검증 → 68ms `resultCode=00`(정상). ⇒ 키·URL·코드 문제 아님.
+  3. 성공하는 함수와 코드 비교 → 동일 구조. ⇒ **함수별로 Cloud Run 서비스가 분리돼 외부 IP가 다르다**는 점이 남는 차이. 해당 IP가 data.go.kr 쪽에서 막힌 것으로 추정.
+- **조치**: `fetchUpstream()` 공통 헬퍼(8초 명시 타임아웃 + 1회 재시도) / **`e.cause` 로깅**(기존엔 `fetch failed`만 남아 원인 확인 불가였던 게 진단을 막은 핵심) / 실패 응답에 `code`·사유 포함(`upstreamErrorPayload`) / `timeoutSeconds` 20→30. `egenBeds`·`egenTrauma`만 재배포(정상 4개 미변경).
+- **결과**: 6/6 성공, 210~521ms. 병상 55건·외상센터 20건 실데이터. 커밋 `f2679e6`.
+- ⚠️ **근본원인 미확정**: 재배포(새 리비전→인스턴스 교체)로 증상이 사라졌을 뿐, IP 차단이라는 확증은 없다. 이번에 넣은 `e.cause` 로깅으로 **재발 시에는 정확한 오류코드가 남는다**.
+
+#### 🚫 같은 실수 반복 금지 — 운영 규칙
+1. **`.env` 없이 `deploy --only functions` 절대 금지.** `app/functions/.env`(`CLAUDE_API_KEY`·`EGEN_SERVICE_KEY`)는 gitignore라 **새로 클론하면 없다.** 이 상태로 배포하면 AI 상담·E-Gen 실데이터가 **전부** 죽는다. 배포 전 `Test-Path app/functions/.env` 확인.
+2. **새 프록시 함수에서 맨 `fetch()` 쓰지 말 것.** 반드시 `fetchUpstream()` 사용 — 타임아웃 없는 fetch는 10초를 그냥 버리고, `e.cause`를 안 남기면 원인 추적이 불가능해진다.
+3. **`catch (e)`에서 `e.message`만 로깅 금지.** `fetch failed`는 undici의 껍데기 메시지다. 진짜 원인은 항상 `e.cause.code`에 있다.
+4. **라이브 검증은 1회로 끝내지 말 것.** 이번 건은 5회 반복해서야 "간헐적 아님, 결정적 실패"가 확정됐다. 성공/실패 횟수와 응답시간을 같이 기록한다.
+5. **UI는 빈 화면으로 두지 말 것.** API 실패 시 사유를 노출한다. 심사 시연 중 빈 화면은 "정직화"라는 이 프로젝트 성격 자체를 무너뜨린다.
+6. **작업 시작 전 반드시 `git pull`.** 로컬이 80커밋 뒤처진 채로 작업해 중복 구현을 만든 사고가 실제로 있었다(2026-08-14).
+
+- ✅ **07-09 잔여항목 ④ "E-Gen 키 활성화 후 egenBeds 배포·연동" 종결.** 키는 활성 상태이며(24개월, ~2028-07), 6개 엔드포인트 전부 실데이터 수신 중.
+
+---
+
 ### 2026-07-10 | 심사위원단 지적 P0 4건 처리 (모의심사 2026-07-09 후속)
 - **P0-2 오디오 배포 영구화**: `app/audio-ko`(102개) → `app/public/audio-ko`로 이전 → `expo export`가 dist에 자동복사(수동복사 의존 제거). 라이브 mp3 audio/mpeg 200 검증(a1/b1/e10/w12/y5/s5). "오프라인 음성 미배포" 해소.
 - **P0-1 AI 진료과 상담 한국어 복구**: 근본원인=프롬프트가 lang=ko에도 "reason/tip 한국어 금지" 하드코딩 → "답변언어=한국어인데 한국어 쓰지마" 자기모순으로 `data:null`. 한국어 상담이면 한국어로 작성하도록 조건분기 + 파싱 강건화(코드펜스 제거)+1회 재시도 + max_tokens 400→700. deptConsult 배포. **라이브 UTF-8 검증 정상**(눈아파요→안과 normal, 아랫배+열→응급의학과 emergency). ⚠️ Windows Git Bash curl은 한글을 CP949로 깨뜨리니 UTF-8 파일본문(`--data-binary @`)으로 테스트할 것.
