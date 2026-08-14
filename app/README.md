@@ -1,7 +1,7 @@
 # 라이프라인 Lifeline (Expo + React Native)
 
 > 📌 이름 최종 확정: 어디아파 → 세이프콜 → **라이프라인 (Lifeline)** (2026-06-08). 산업현장 근로자 안전·응급(@work) 앱.
-> 외부 데모: **https://lifeline-safety.web.app**
+> 외부 데모: **https://wheresick-5617a.web.app**
 
 산업현장 근로자 안전·응급 + 병원 연결 도우미 앱. (구 "어디아파"·"세이프콜")
 
