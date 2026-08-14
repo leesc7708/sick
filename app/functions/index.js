@@ -127,10 +127,58 @@ exports.deptConsult = onRequest(
 //  - 반환: { ok, updatedAt, total, hospitals:[{hpid,name,tel,erBeds,at}] }
 //  ⚠️ 발급 직후엔 키 활성화(수분~1시간) 전까지 upstream이 "Unauthorized" 반환할 수 있음.
 // ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// 상류(공공데이터포털) 호출 공통 헬퍼
+//  - 2026-08-14: egenBeds/egenTrauma가 매번 정확히 10.6초에 `fetch failed`로 죽는 장애.
+//    10초는 undici의 기본 connect 타임아웃 → 연결 자체가 안 맺어짐(상대 방화벽 차단 의심).
+//    같은 호스트를 쓰는 severe/aed/hospitals/pharmacy는 정상이라 코드·키 문제는 아님.
+//  - fetch는 실패 원인을 e.message에 'fetch failed'로만 담고 진짜 이유는 e.cause에 둔다.
+//    원인 확정을 위해 cause를 반드시 로그에 남긴다.
+//  - 기본 10초를 기다리다 함수 타임아웃에 쫓기지 않도록 8초로 끊고 1회 재시도.
+// ─────────────────────────────────────────────────────────────
+async function fetchUpstream(url, label, { timeoutMs = 8000, retries = 1 } = {}) {
+  let lastErr;
+  for (let attempt = 1; attempt <= retries + 1; attempt += 1) {
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), timeoutMs);
+    try {
+      const r = await fetch(url, { signal: ac.signal, headers: { accept: 'application/json' } });
+      return await r.text();
+    } catch (e) {
+      lastErr = e;
+      const cause = e && e.cause;
+      console.error(
+        `${label} upstream 실패 (${attempt}/${retries + 1}):`,
+        'name=', (e && e.name) || '-',
+        'message=', (e && e.message) || '-',
+        'cause.code=', (cause && cause.code) || '-',
+        'cause.message=', (cause && cause.message) || '-',
+      );
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  throw lastErr;
+}
+
+/** 상류 오류를 사용자에게 보여줄 수 있는 형태로 변환 (빈 화면 대신 사유 노출) */
+function upstreamErrorPayload(e) {
+  const cause = e && e.cause;
+  const code = (cause && cause.code) || (e && e.name) || 'UNKNOWN';
+  return {
+    ok: false,
+    error: 'upstream_unreachable',
+    code,
+    message: '실시간 정보 제공처(공공데이터포털)에 연결하지 못했습니다.',
+    detail: String((e && e.message) || e).slice(0, 150),
+  };
+}
+
 const EGEN_BASE = 'http://apis.data.go.kr/B552657/ErmctInfoInqireService/getEmrrmRltmUsefulSckbdInfoInqire';
 
 exports.egenBeds = onRequest(
-  { region: 'asia-northeast3', memory: '256MiB', timeoutSeconds: 20, maxInstances: 5 },
+  // 8초 타임아웃 × 최대 2회 시도 = 16초. 함수 타임아웃은 여유를 둬 30초.
+  { region: 'asia-northeast3', memory: '256MiB', timeoutSeconds: 30, maxInstances: 5 },
   async (req, res) => {
     const q = req.query || {};
     const stage1 = String(q.stage1 || '').slice(0, 20).trim(); // 시도명 (필수)
@@ -154,8 +202,7 @@ exports.egenBeds = onRequest(
     });
     if (stage2) params.set('STAGE2', stage2);
     try {
-      const r = await fetch(`${EGEN_BASE}?${params.toString()}`);
-      const raw = await r.text();
+      const raw = await fetchUpstream(`${EGEN_BASE}?${params.toString()}`, 'egenBeds');
       // 키 미활성/오류 시 공공API는 평문 "Unauthorized" 또는 XML 에러를 반환
       let json;
       try { json = JSON.parse(raw); }
@@ -172,8 +219,7 @@ exports.egenBeds = onRequest(
       }));
       res.json({ ok: true, updatedAt: (hospitals[0] && hospitals[0].at) || '', total: (body && body.totalCount) || hospitals.length, hospitals });
     } catch (e) {
-      console.error('egenBeds error:', e && (e.message || e));
-      res.status(502).json({ ok: false, error: String((e && e.message) || e).slice(0, 150) });
+      res.status(502).json(upstreamErrorPayload(e));
     }
   }
 );
@@ -281,7 +327,8 @@ exports.egenSevere = onRequest(
 const EGEN_TRAUMA_BASE = 'http://apis.data.go.kr/B552657/ErmctInfoInqireService/getStrmListInfoInqire';
 
 exports.egenTrauma = onRequest(
-  { region: 'asia-northeast3', memory: '256MiB', timeoutSeconds: 20, maxInstances: 5 },
+  // 8초 타임아웃 × 최대 2회 시도 = 16초. 함수 타임아웃은 여유를 둬 30초.
+  { region: 'asia-northeast3', memory: '256MiB', timeoutSeconds: 30, maxInstances: 5 },
   async (req, res) => {
     const q = req.query || {};
     const stage1 = String(q.stage1 || '').slice(0, 20).trim(); // 시도명(선택) — 미지정 시 전국
@@ -298,8 +345,7 @@ exports.egenTrauma = onRequest(
     });
     if (stage1) params.set('STAGE1', stage1);
     try {
-      const r = await fetch(`${EGEN_TRAUMA_BASE}?${params.toString()}`);
-      const raw = await r.text();
+      const raw = await fetchUpstream(`${EGEN_TRAUMA_BASE}?${params.toString()}`, 'egenTrauma');
       let json;
       try { json = JSON.parse(raw); }
       catch { res.status(502).json({ ok: false, error: 'upstream_non_json', detail: raw.slice(0, 120) }); return; }
@@ -319,8 +365,7 @@ exports.egenTrauma = onRequest(
       }));
       res.json({ ok: true, total: (body && body.totalCount) || centers.length, centers });
     } catch (e) {
-      console.error('egenTrauma error:', e && (e.message || e));
-      res.status(502).json({ ok: false, error: String((e && e.message) || e).slice(0, 150) });
+      res.status(502).json(upstreamErrorPayload(e));
     }
   }
 );
