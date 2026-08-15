@@ -10,6 +10,7 @@ import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { MyMedicine, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
+import { useLang } from '../i18n/LanguageContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'MyMedicines'>;
 
@@ -32,6 +33,7 @@ const notifSupported = Platform.OS === 'web' && typeof window !== 'undefined' &&
 
 export function MyMedicinesScreen({ navigation }: Props) {
   const colors = useTheme();
+  const { t } = useLang();
   const [list, setList] = useState<MyMedicine[]>([]);
   const [name, setName] = useState('');
   const [time, setTime] = useState('');
@@ -64,35 +66,35 @@ export function MyMedicinesScreen({ navigation }: Props) {
   };
 
   const enableNotif = async () => {
-    if (!notifSupported) { Alert.alert('알림', '이 환경은 브라우저 알림을 지원하지 않아요.'); return; }
+    if (!notifSupported) { Alert.alert(t('common_notice'), t('mm_notif_unsup_m')); return; }
     const perm = await Notification.requestPermission();
     setNotif(perm);
-    if (perm === 'granted') Alert.alert('알림 켜짐', '앱이 열려 있을 때 복약 시간에 알려드려요.\n(앱을 닫으면 알림은 오지 않아요.)');
+    if (perm === 'granted') Alert.alert(t('mm_notif_on_t'), t('mm_notif_on_m'));
   };
 
   const saveAllergies = async () => {
     const p = await storage.getProfile();
     if (!p) return;
     await storage.setProfile({ ...p, allergies: allergies.split(',').map((x) => x.trim()).filter(Boolean) });
-    Alert.alert('저장됨', '알레르기 정보가 저장되었습니다.');
+    Alert.alert(t('mm_saved_t'), t('mm_saved_m'));
   };
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
-      <AppBar title="내 복용약" onBack={() => navigation.goBack()} />
+      <AppBar title={t('mm_title')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[typography.caption, { color: colors.textMuted }]}>처방·추천이 아니라 기록 도구예요. 병원·약국에서 보여주세요.</Text>
+        <Text style={[typography.caption, { color: colors.textMuted }]}>{t('mm_note')}</Text>
 
         {/* 복약 알림 켜기 (앱 열려 있을 때) */}
         <View style={[styles.card, shadow.card, { backgroundColor: colors.card, flexDirection: 'column', alignItems: 'stretch' }]}>
-          <Text style={[typography.bodyBold, { color: colors.text }]}>🔔 복약 알림</Text>
+          <Text style={[typography.bodyBold, { color: colors.text }]}>{t('mm_notif_t')}</Text>
           <Text style={[typography.small, { color: colors.textMuted, marginTop: 4 }]}>
-            {notif === 'granted' ? '켜짐 — 앱이 열려 있을 때 복약 시간에 알려드려요.'
-              : notif === 'unsupported' ? '이 환경은 브라우저 알림 미지원.'
-              : '앱이 열려 있을 때 복약 시간에 알려드려요. (앱을 닫으면 알림은 오지 않아요.)'}
+            {notif === 'granted' ? t('mm_notif_on')
+              : notif === 'unsupported' ? t('mm_notif_unsup')
+              : t('mm_notif_off')}
           </Text>
           {notif !== 'granted' && notif !== 'unsupported' && (
-            <PrimaryButton title="알림 켜기" icon="🔔" variant="outline" size="sm" onPress={enableNotif} style={{ marginTop: spacing.sm, alignSelf: 'flex-start' }} />
+            <PrimaryButton title={t('mm_notif_btn')} icon="🔔" variant="outline" size="sm" onPress={enableNotif} style={{ marginTop: spacing.sm, alignSelf: 'flex-start' }} />
           )}
         </View>
 
@@ -101,11 +103,11 @@ export function MyMedicinesScreen({ navigation }: Props) {
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={{ fontSize: 20, marginRight: 10 }}>💊</Text>
               <Text style={[typography.bodyBold, { color: colors.text, flex: 1 }]}>{m.name}</Text>
-              <Text onPress={() => remove(m.id)} style={[typography.caption, { color: colors.emergency }]}>삭제</Text>
+              <Text onPress={() => remove(m.id)} style={[typography.caption, { color: colors.emergency }]}>{t('common_del')}</Text>
             </View>
             {m.times && m.times.length > 0 ? (
               <>
-                <Text style={[typography.small, { color: colors.textMuted, marginTop: 8 }]}>오늘 복용 체크</Text>
+                <Text style={[typography.small, { color: colors.textMuted, marginTop: 8 }]}>{t('mm_today')}</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 6, gap: 8 }}>
                   {m.times.map((tm) => {
                     const done = !!taken[`${m.id}@${tm}`];
@@ -124,32 +126,32 @@ export function MyMedicinesScreen({ navigation }: Props) {
                 </View>
               </>
             ) : m.doseTime ? (
-              <Text style={[typography.caption, { color: colors.textMuted, marginTop: 4 }]}>복용 {m.doseTime}</Text>
+              <Text style={[typography.caption, { color: colors.textMuted, marginTop: 4 }]}>{t('mm_dose_at')} {m.doseTime}</Text>
             ) : null}
           </View>
         ))}
 
         <View style={[styles.addBox, shadow.card, { backgroundColor: colors.card }]}>
-          <Text style={[typography.captionBold, { color: colors.textSecondary, marginBottom: spacing.sm }]}>약 추가</Text>
-          <TextInput value={name} onChangeText={setName} placeholder="약 이름 (예: 혈압약)" placeholderTextColor={colors.g500} style={[styles.input, { backgroundColor: colors.g50, borderColor: colors.border, color: colors.text }]} />
-          <TextInput value={time} onChangeText={setTime} placeholder="복약 시간 HH:MM (여러 개는 쉼표, 예: 08:00, 20:00)" placeholderTextColor={colors.g500} style={[styles.input, { marginTop: spacing.sm, backgroundColor: colors.g50, borderColor: colors.border, color: colors.text }]} />
-          <PrimaryButton title="추가" icon="＋" variant="primary" onPress={add} style={{ marginTop: spacing.sm }} />
+          <Text style={[typography.captionBold, { color: colors.textSecondary, marginBottom: spacing.sm }]}>{t('mm_add_t')}</Text>
+          <TextInput value={name} onChangeText={setName} placeholder={t('mm_name_ph')} placeholderTextColor={colors.g500} style={[styles.input, { backgroundColor: colors.g50, borderColor: colors.border, color: colors.text }]} />
+          <TextInput value={time} onChangeText={setTime} placeholder={t('mm_time_ph')} placeholderTextColor={colors.g500} style={[styles.input, { marginTop: spacing.sm, backgroundColor: colors.g50, borderColor: colors.border, color: colors.text }]} />
+          <PrimaryButton title={t('mm_add')} icon="＋" variant="primary" onPress={add} style={{ marginTop: spacing.sm }} />
         </View>
 
         <View style={[styles.addBox, shadow.card, { backgroundColor: colors.card }]}>
-          <Text style={[typography.captionBold, { color: colors.textSecondary, marginBottom: spacing.sm }]}>알레르기 메모</Text>
-          <TextInput value={allergies} onChangeText={setAllergies} placeholder="예: 페니실린, 아스피린" placeholderTextColor={colors.g500} style={[styles.input, { backgroundColor: colors.g50, borderColor: colors.border, color: colors.text }]} />
-          <PrimaryButton title="알레르기 저장" variant="outline" onPress={saveAllergies} style={{ marginTop: spacing.sm }} />
+          <Text style={[typography.captionBold, { color: colors.textSecondary, marginBottom: spacing.sm }]}>{t('mm_alg_t')}</Text>
+          <TextInput value={allergies} onChangeText={setAllergies} placeholder={t('mm_alg_ph')} placeholderTextColor={colors.g500} style={[styles.input, { backgroundColor: colors.g50, borderColor: colors.border, color: colors.text }]} />
+          <PrimaryButton title={t('mm_alg_save')} variant="outline" onPress={saveAllergies} style={{ marginTop: spacing.sm }} />
         </View>
 
         <View style={[styles.v15, shadow.card, { backgroundColor: colors.primaryLight, borderColor: colors.border }]}>
-          <Text style={[typography.captionBold, { color: colors.primary }]}>v1.5 예정</Text>
-          <Text style={[typography.caption, { color: colors.text, marginTop: 4 }]}>식약처 e약은요로 효능·주의사항·상호작용을 조회합니다. (판정이 아닌 정보 제공, 약사 상담 안내)</Text>
+          <Text style={[typography.captionBold, { color: colors.primary }]}>{t('mm_v15_t')}</Text>
+          <Text style={[typography.caption, { color: colors.text, marginTop: 4 }]}>{t('mm_v15_m')}</Text>
         </View>
       </ScrollView>
 
       <View style={[styles.footer, { borderTopColor: colors.divider, backgroundColor: colors.bg }]}>
-        <PrimaryButton title="병원·약국에 보여줄 목록" icon="🏥" variant="outline" onPress={() => navigation.navigate('HospitalFinder', { kind: 'pharmacy' })} />
+        <PrimaryButton title={t('mm_show')} icon="🏥" variant="outline" onPress={() => navigation.navigate('HospitalFinder', { kind: 'pharmacy' })} />
       </View>
     </View>
   );

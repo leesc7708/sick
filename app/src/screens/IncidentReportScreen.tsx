@@ -13,12 +13,9 @@ import { firstAidFor } from '../data/firstAid';
 import { IncidentType, RootStackParamList } from '../types';
 import { storage } from '../services/storage';
 import { useLang } from '../i18n/LanguageContext';
+import { IT_KEY as TYPE_KEY } from '../i18n/optionKeys';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'IncidentReport'>;
-
-const TYPE_KEY: Record<string, string> = {
-  '질식': 'it_choke', '화상': 'it_burn', '추락': 'it_fall', '중독': 'it_poison', '감전': 'it_shock', '기타': 'it_other',
-};
 
 export function IncidentReportScreen({ navigation }: Props) {
   const { lang, t } = useLang();

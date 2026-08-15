@@ -7,6 +7,26 @@
 
 ---
 
+### 2026-08-15 | 근로자용 미번역 화면 3종 다국어화 + TODO 정합성 정정
+
+- **먼저 발견: 아래 "🔴 P0" 체크리스트가 낡아 실제 코드와 어긋나 있었다.** 체크박스만 보고 착수하면 이미 끝난 일을 다시 하게 된다. 코드 확인 결과:
+  - P0 "구버전 위반 화면 격리" → **완료**. `src/_legacy/`로 이동 + `tsconfig.json` `exclude`에 등록 + `RootNavigation.tsx`에서 import 주석 처리(번들 미포함).
+  - P0 "검진기록 공유 허위 보안 문구" → **완료**(2026-06-08 진행 메모에 기록됨).
+  - P1 "unfit 자가체크 관리자 즉시 보고가 로컬저장만" → **완료**. `crew.ts`의 `reportUnfit`/`watchUnfitReports`/`ackUnfitReport` + `firestore.rules`의 `workCheckReports` 규칙 + WorkCheck(전송)·Crew(수신 카드) 양쪽 UI까지 연결돼 있다.
+  - ⇒ 남아 있던 진짜 구멍은 **다국어 미적용 화면**이었다. 한국어를 못 읽는 외국인 근로자가 핵심 사용자인데 자기 기록·복약·진료요약 화면이 한국어 전용이었다.
+- **대상 3종 다국어화(7개 언어)**:
+  - `MyMedicinesScreen` — 복약 기록·알레르기 메모·알림 문구·Alert 전부 `t()`화(의료 안전 직결인데 전량 한국어였음).
+  - `HistoryScreen` — 목록 라벨 `t()`화. 저장된 한국어 원본(부위·작업종류·사고유형)도 표시 시 번역. **원본을 state에 두고 렌더 시 번역**하도록 바꿔 언어 전환이 목록에 즉시 반영된다(이전 구조는 포커스 시 문자열을 확정해 언어를 바꿔도 안 바뀌었을 것).
+  - `SymptomSummaryScreen` — **모국어+한국어 병기**(TODO의 "보여주기 카드" 원칙 적용). 이 화면은 의료진에게 제시하는 용도라 사용자 언어로만 번역하면 오히려 의료진이 못 읽는다. 라벨·값·응급도 배지를 `모국어 / 한국어`로 병기하고, 공유 텍스트·PDF에도 동일 적용. 한국어 사용자에겐 중복 없이 한 번만 표기.
+- **공용 맵 추출**: `src/i18n/optionKeys.ts` 신설(`BP_KEY`/`AC_KEY`/`WT_KEY`/`IT_KEY` + `label()`/`labelList()`). SymptomInput·IncidentReport에 중복 정의돼 있던 것을 합쳐, 저장값(한국어 canonical)↔표시 라벨이 화면마다 어긋나지 않게 했다. 저장 포맷은 그대로라 **기존 기록 호환**.
+- **검사기 신설 `app/tools/check-i18n.js`**: 7개 언어 키 완전 일치 + 코드의 `t('키')` 정의 여부 검사. 언어 한 곳에만 키를 빠뜨리면 `t()`가 조용히 ko로 폴백해 "번역된 줄 알았는데 한국어"가 되는데, 이건 tsc·빌드로 안 잡힌다.
+- **검증**: `tsc --noEmit` 통과 / `npm run build` 성공(643 모듈) / `check-i18n` 302키 × 7개 언어 전부 일치·t() 255키 전부 정의 / **번들 실물에서 7개 언어 새 문자열 표본 확인**(번들러가 한글·태국어는 `\uXXXX`, é·ú 등 Latin-1은 `\xXX`로 이스케이프하므로 원문 grep만 하면 "없음"으로 오판한다) / `dist/audio-ko` mp3 102개 유지.
+- ⚠️ **미배포**: 빌드까지만. 배포는 사용자 확인 후.
+- ⚠️ **번역 품질**: 클로드 생성 번역(기존 방침과 동일). 응급·투약 지시문이 아니라 화면 라벨·안내 문구라 위험도는 낮으나 th/vi는 데모 전 원어민 검수 권장.
+- ⏳ 남은 다국어: 관리자 전용 화면(`ManagerDashboard`·`Crew`·`UserAdmin`)은 한국인 관리자가 쓰므로 후순위로 남김. `CrewScreen`의 부적합 보고 카드도 한국어 하드코딩 상태.
+
+---
+
 ### 2026-08-14 | [P0] 응급실 실시간 병상 먹통 수정 — 07-09 "키 활성화 대기" 항목 종결
 
 - **증상**: 웹에서 **응급실 검색 → 빈 화면**. `/api/egen-beds`·`/api/egen-trauma`가 **5/5 결정적 실패**, 매번 정확히 **10.6초** 후 `{"ok":false,"error":"fetch failed"}`. 나머지 E-Gen 4개(severe/aed/hospitals/pharmacy)는 정상.
@@ -90,10 +110,14 @@
 
 ## 🔴 P0 — 제출 전 반드시 (말과 실물 일치 회복)
 
-- [ ] **구버전 위반 화면 격리/제거** — `SymptomResultScreen`(병명·확률 배지), `ai.ts`의 `realAnalyze`/`SYSTEM_PROMPT`/`MOCK_PATTERNS`, `MedicineSearch`/`MedicineDetail`/`InteractionCheck`, `mockMedicines.ts`, `redFlagKeywords.ts`, `storage.getApiKey/setApiKey/KEYS.apiKey`, 미사용 `FloatingSOS`.
-      → 코드 보존 규칙상 삭제 대신 **`/legacy` 폴더 격리 + tsconfig/번들 exclude** 권장. (개발·의료·보안·심사 4팀 공통)
-- [ ] **응급 경로 다국어화** — `redFlags.ts` 증상 14종 + 판정 메시지 + `firstAid`/`FIRST_STEPS` + `careGuide`를 `{ko,en,zh,ja,vi,th,es}` 구조로, `RedFlag`/`IncidentReport`/`SymptomSummary`/`HospitalFinder`에 `t()` 적용. "보여주기 카드"는 **모국어+한국어 병기**. (개발·UX 2팀)
-- [ ] **검진기록 공유 허위 보안 문구 수정**(즉시·한 줄) — "30분 만료·다운로드 차단"을 "데모 미리보기 — 실제 만료/접근제어는 서버 연동 후 적용"으로. "만료 링크 공유"≠"관리자 전송" 동작 분리. (UX·의료·보안 3팀)
+> ⚠️ 이 목록은 2026-06-08 최초 작성본이다. **아래 날짜별 기록이 최신이며, 체크박스보다 우선한다.**
+> 2026-08-15 코드 대조로 3건 모두 완료 확인함.
+
+- [x] **구버전 위반 화면 격리/제거** — `SymptomResultScreen`(병명·확률 배지), `ai.ts`의 `realAnalyze`/`SYSTEM_PROMPT`/`MOCK_PATTERNS`, `MedicineSearch`/`MedicineDetail`/`InteractionCheck`, `mockMedicines.ts`, `redFlagKeywords.ts`, `storage.getApiKey/setApiKey/KEYS.apiKey`, 미사용 `FloatingSOS`.
+      → **완료**: `src/_legacy/` 격리 + `tsconfig.json` exclude + `RootNavigation.tsx` import 주석 처리(번들 미포함). (개발·의료·보안·심사 4팀 공통)
+- [x] **응급 경로 다국어화** — `redFlags.ts` 증상 14종 + 판정 메시지 + `firstAid`/`FIRST_STEPS` + `careGuide`를 `{ko,en,zh,ja,vi,th,es}` 구조로, `RedFlag`/`IncidentReport`/`SymptomSummary`/`HospitalFinder`에 `t()` 적용.
+      → **완료**: 데이터·화면은 2026-06-08 배치에서, "보여주기 카드"의 **모국어+한국어 병기**는 2026-08-15 `SymptomSummaryScreen`에서 적용. (개발·UX 2팀)
+- [x] **검진기록 공유 허위 보안 문구 수정** — "30분 만료·다운로드 차단"을 데모 표기로 정정. (2026-06-08 완료, UX·의료·보안 3팀)
 
 ## 🟠 P1 — 완성도·차별점·발표 신뢰
 
@@ -107,7 +131,7 @@
 ## 🟡 P2 — 품질·실서비스 준비
 
 - [ ] **민감정보 암호화 저장** — AsyncStorage → `expo-secure-store` 또는 서버 이전. 건강정보 평문 저장 해소. (보안 HIGH)
-- [ ] **나머지 화면 전체 i18n** — 작업체크·복약·기록·관리자 등 잔여 화면 + `DOC_INFO` 등 데이터.
+- [ ] **나머지 화면 전체 i18n** — 근로자용(작업체크·복약·기록·진료요약)은 2026-08-15로 **완료**. 잔여는 **관리자 전용 화면**(`ManagerDashboard`·`Crew`·`UserAdmin`) + `DOC_INFO` 등 데이터. 관리자는 한국인이라 후순위.
 - [ ] **인라인 컴포넌트 모듈화** — `Row`/`Info`(RedFlag), `Question`(WorkCheck)를 모듈 스코프로. `LanguageContext` value `useMemo`/`useCallback` 안정화. (개발 성능)
 - [ ] **`ImagePicker.MediaTypeOptions` → `mediaTypes:['images']`** (SDK56 deprecated). (개발)
 - [ ] **HistoryScreen 날짜 정렬 표준화** — 비교 키를 통일된 ISO/Date로. (개발)
@@ -127,9 +151,9 @@
 **🔴 외부 테스트 새 발견 (다음 우선)**
 1. [즉시] `src/data/mockHospitals.ts` 고아 파일 → `tsc --noEmit` 8건 실패. `_legacy`로 이동 or 삭제 (격리 누락분, 활성앱엔 무해하나 CI 적신호)
 2. [외국인 치명] **첫 진입 언어 선택 없음 + 언어 토글이 설정 깊숙이** → 한국어 못 읽는 외국인이 번역에 도달 못함. 첫 화면/홈 상단 언어 선택 필요
-3. [핵심] `SymptomInputScreen` 다국어 미적용 → 입력→응급신호→진료요약 흐름의 입력 단계가 막힘. `options.ts` 칩 라벨 `Record<Lang>`화 필요
-4. 사고보고 성공 Alert·공유 메시지·`HealthRecords/History/Manager`의 Alert·저장 enum이 한국어 잔존
-5. 미적용 6화면: SymptomInput · MyMedicines · History · HealthRecords · ManagerDashboard · HealthRecordShare
+3. ~~[핵심] `SymptomInputScreen` 다국어 미적용~~ → **해결**. 칩 라벨은 `Record<Lang>`화 대신 **저장은 한국어 canonical 유지 + 표시만 키 매핑**(`i18n/optionKeys.ts`)으로 처리해 기존 기록 호환을 지켰다
+4. 사고보고 성공 Alert·공유 메시지·`HealthRecords/History/Manager`의 Alert·저장 enum이 한국어 잔존 → History·HealthRecords는 해결, **Manager 계열만 남음**
+5. ~~미적용 6화면~~ → SymptomInput·MyMedicines·History·HealthRecords·HealthRecordShare 완료. **남은 것은 ManagerDashboard(+Crew·UserAdmin)**
 6. 번역 경미: th `it_poison`(버튼 모호)·`it_choke`, vi 구어체 → 원어민 검수 권장 (치명 오역은 없음)
 7. `_legacy` 내부 import 깨짐(재활성화 불가) — 보존 의도면 내부경로 `./`로 수정
 

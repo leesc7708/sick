@@ -13,19 +13,9 @@ import { ACCOMPANYING, BODY_PARTS, WORK_TYPES } from '../data/options';
 import { RootStackParamList, SymptomMemo } from '../types';
 import { storage } from '../services/storage';
 import { useLang } from '../i18n/LanguageContext';
+import { AC_KEY, BP_KEY, WT_KEY } from '../i18n/optionKeys';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SymptomInput'>;
-
-// 저장은 한국어 원본으로(데이터 일관성), 화면 표시는 번역 키로 매핑
-const BP_KEY: Record<string, string> = {
-  '머리': 'bp_head', '눈': 'bp_eye', '코/목': 'bp_nose', '가슴': 'bp_chest', '배': 'bp_belly', '등/허리': 'bp_back', '팔': 'bp_arm', '다리': 'bp_leg', '피부': 'bp_skin',
-};
-const AC_KEY: Record<string, string> = {
-  '열': 'ac_fever', '구토': 'ac_vomit', '설사': 'ac_diarrhea', '발진': 'ac_rash', '호흡곤란': 'ac_dyspnea', '어지럼': 'ac_dizzy', '오한': 'ac_chill', '출혈': 'ac_bleed',
-};
-const WT_KEY: Record<string, string> = {
-  '밀폐공간': 'wt_confined', '화학물질 취급': 'wt_chem', '고소작업': 'wt_height', '중장비': 'wt_heavy', '용접·화기': 'wt_weld', '일반작업': 'wt_general',
-};
 
 export function SymptomInputScreen({ navigation }: Props) {
   const { t } = useLang();
