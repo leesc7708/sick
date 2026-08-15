@@ -25,7 +25,22 @@
 - **라이브 검증**(wheresick-5617a.web.app): 번들 200·2.31MB에 7개 언어 새 문자열 표본 12건 전부 확인 / 오프라인 음성 회귀 없음(`/audio-ko/a1.mp3`·`e10.mp3` 200 `audio/mpeg`) / 호스팅 rewrite 회귀 없음(`/api/egen-beds` **3/3 성공 383~443ms 실데이터**, 규칙 #4대로 1회로 끝내지 않음).
 - ⏳ **남은 확인(사용자)**: 브라우저에서 언어를 바꿔가며 실화면 확인. 특히 진료 요약 카드의 **병기로 줄이 길어져 레이아웃이 밀리는지**는 코드·번들 검증으로 잡히지 않는다.
 - ⚠️ **번역 품질**: 클로드 생성 번역(기존 방침과 동일). 응급·투약 지시문이 아니라 화면 라벨·안내 문구라 위험도는 낮으나 th/vi는 데모 전 원어민 검수 권장.
-- ⏳ 남은 다국어: 관리자 전용 화면(`ManagerDashboard`·`Crew`·`UserAdmin`)은 한국인 관리자가 쓰므로 후순위로 남김. `CrewScreen`의 부적합 보고 카드도 한국어 하드코딩 상태.
+- ✅ **관리자 화면도 완료**(같은 날 후속, 아래 항목 참고) — 앱 전체 화면 다국어화 종결.
+
+---
+
+### 2026-08-15 | 관리자 화면 3종 7개 언어화 — 앱 전체 다국어 종결
+
+- 대상: `ManagerDashboardScreen`·`CrewScreen`·`UserAdminScreen` 전량 `t()`화(73키 × 7개 언어, 누계 375키).
+- **개수 표기 규칙 변경**: `긴급 3건` → **`긴급 (3)`**. "N건/N명"은 조사·어순이 언어마다 달라 문자열 이어붙이기로는 자연스러운 문장이 안 나온다. 괄호 표기는 전 언어 공통으로 안전.
+- **치환자 도입**: 이름이 문장 중간에 오는 확인 다이얼로그(거부·총괄권한 부여·역할 변경·접근성 라벨)는 `{who}`/`{from}`/`{to}`/`{role}` + `LanguageContext`의 `fill()`. 영어 "Reject {who}?"처럼 어순이 뒤집히는 언어는 이어붙이기로 해결 불가.
+- `UserAdmin`의 `ROLE_LABEL`/`STATUS_LABEL` 상수 → 키 맵으로 교체. 역할명은 `AccountScreen`의 기존 번역(Site manager/General manager 등)과 같은 표현으로 통일.
+- `Crew`의 `workType`, `ManagerDashboard`의 사고유형은 한국어 canonical 저장값이라 `optionKeys`의 `label()`로 표시할 때만 번역(저장 포맷 불변).
+- **검사기 보강 `tools/check-i18n.js`**: **치환자 일치 검사** 추가. 한 언어에서 `{who}`가 빠지면 이름이 조용히 사라지는데 화면엔 멀쩡한 문장이 나와 **tsc·빌드로 절대 안 잡힌다.** 일부러 깨뜨려 검출·exit 1까지 확인함.
+- ⚠️ **작업 중 사고(기록용)**: 검사기 테스트로 `translations.ts`를 sed로 깨뜨린 뒤 `git checkout -- <file>`로 되돌렸더니 **같은 파일의 미커밋 작업 73키가 통째로 HEAD로 되돌아갔다.** 새 검사기가 즉시 잡아내 전량 재적용. → **규칙: 미커밋 변경이 있는 파일에 `git checkout --`을 쓰지 말 것.** 실험은 커밋 후에 하거나 사본으로 할 것.
+- **배포 완료**(hosting만). functions·rules 변경 없음.
+- **라이브 검증**: 번들 `index-333d4590…js` 200·2.34MB, 7개 언어 표본 17건 확인(치환자 `{who}`·`{role}`도 원문 유지) / `audio-ko` mp3 200 회귀 없음 / `/api/egen-beds` 3/3 성공(2006ms·421ms·360ms — 첫 호출은 콜드스타트).
+- ⏳ 남은 것: 화면 다국어는 종결. 데이터 계열(`options.ts`의 `DOC_INFO` 등)은 미적용으로 남음.
 
 ---
 
@@ -133,7 +148,7 @@
 ## 🟡 P2 — 품질·실서비스 준비
 
 - [ ] **민감정보 암호화 저장** — AsyncStorage → `expo-secure-store` 또는 서버 이전. 건강정보 평문 저장 해소. (보안 HIGH)
-- [ ] **나머지 화면 전체 i18n** — 근로자용(작업체크·복약·기록·진료요약)은 2026-08-15로 **완료**. 잔여는 **관리자 전용 화면**(`ManagerDashboard`·`Crew`·`UserAdmin`) + `DOC_INFO` 등 데이터. 관리자는 한국인이라 후순위.
+- [x] **나머지 화면 전체 i18n** — 2026-08-15 **종결**. 근로자용(복약·기록·진료요약)에 이어 관리자용(`ManagerDashboard`·`Crew`·`UserAdmin`)까지 7개 언어 적용. 잔여는 화면이 아닌 **데이터**(`options.ts`의 `DOC_INFO` 등)뿐.
 - [ ] **인라인 컴포넌트 모듈화** — `Row`/`Info`(RedFlag), `Question`(WorkCheck)를 모듈 스코프로. `LanguageContext` value `useMemo`/`useCallback` 안정화. (개발 성능)
 - [ ] **`ImagePicker.MediaTypeOptions` → `mediaTypes:['images']`** (SDK56 deprecated). (개발)
 - [ ] **HistoryScreen 날짜 정렬 표준화** — 비교 키를 통일된 ISO/Date로. (개발)
@@ -154,8 +169,8 @@
 1. [즉시] `src/data/mockHospitals.ts` 고아 파일 → `tsc --noEmit` 8건 실패. `_legacy`로 이동 or 삭제 (격리 누락분, 활성앱엔 무해하나 CI 적신호)
 2. [외국인 치명] **첫 진입 언어 선택 없음 + 언어 토글이 설정 깊숙이** → 한국어 못 읽는 외국인이 번역에 도달 못함. 첫 화면/홈 상단 언어 선택 필요
 3. ~~[핵심] `SymptomInputScreen` 다국어 미적용~~ → **해결**. 칩 라벨은 `Record<Lang>`화 대신 **저장은 한국어 canonical 유지 + 표시만 키 매핑**(`i18n/optionKeys.ts`)으로 처리해 기존 기록 호환을 지켰다
-4. 사고보고 성공 Alert·공유 메시지·`HealthRecords/History/Manager`의 Alert·저장 enum이 한국어 잔존 → History·HealthRecords는 해결, **Manager 계열만 남음**
-5. ~~미적용 6화면~~ → SymptomInput·MyMedicines·History·HealthRecords·HealthRecordShare 완료. **남은 것은 ManagerDashboard(+Crew·UserAdmin)**
+4. ~~사고보고 성공 Alert·공유 메시지·`HealthRecords/History/Manager`의 Alert·저장 enum이 한국어 잔존~~ → **전부 해결**(Manager 계열 포함, 2026-08-15)
+5. ~~미적용 6화면~~ → **전부 완료**. 화면 단위 다국어 미적용은 더 이상 없음
 6. 번역 경미: th `it_poison`(버튼 모호)·`it_choke`, vi 구어체 → 원어민 검수 권장 (치명 오역은 없음)
 7. `_legacy` 내부 import 깨짐(재활성화 불가) — 보존 의도면 내부경로 `./`로 수정
 
