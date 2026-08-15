@@ -12,29 +12,32 @@ import {
   Role, AccountStatus, UserAccount, isSsvisor, listUsers, setUserRoleStatus,
 } from '../services/auth';
 import { RootStackParamList } from '../types';
+import { fill, useLang } from '../i18n/LanguageContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'UserAdmin'>;
 
-const ROLE_LABEL: Record<Role, string> = {
-  general: '일반', worker: '근로자', svisor: '에스바이저', ssvisor: '떠블에스바이저',
+const ROLE_KEY: Record<Role, string> = {
+  general: 'ua_role_general', worker: 'ua_role_worker', svisor: 'ua_role_svisor', ssvisor: 'ua_role_ssvisor',
 };
-const STATUS_LABEL: Record<AccountStatus, string> = {
-  pending: '승인대기', active: '승인됨', rejected: '거부됨',
+const STATUS_KEY: Record<AccountStatus, string> = {
+  pending: 'ua_st_pending', active: 'ua_st_active', rejected: 'ua_st_rejected',
 };
 // 부여 가능한 역할(일반=미승인 상태로 강등용 제외, 승격 대상만)
 const ASSIGNABLE: Role[] = ['worker', 'svisor', 'ssvisor'];
 
 export function UserAdminScreen({ navigation }: Props) {
   const colors = useTheme();
+  const { t } = useLang();
   const { account } = useAuth();
+  const roleLabel = (r: Role) => t(ROLE_KEY[r]);
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [busy, setBusy] = useState<string | null>(null); // 처리 중 uid
   const [msg, setMsg] = useState('');
 
   const load = useCallback(async () => {
     try { setUsers(await listUsers()); setMsg(''); }
-    catch (e: any) { setMsg('목록 로드 실패: ' + (e?.message || e)); }
-  }, []);
+    catch (e: any) { setMsg(`${t('ua_err_load')}: ` + (e?.message || e)); }
+  }, [t]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
@@ -42,45 +45,46 @@ export function UserAdminScreen({ navigation }: Props) {
   if (!isSsvisor(account)) {
     return (
       <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
-        <AppBar title="회원 관리" onBack={() => navigation.goBack()} />
+        <AppBar title={t('ua_title_short')} onBack={() => navigation.goBack()} />
         <View style={styles.content}>
-          <Text style={[typography.body, { color: colors.textMuted }]}>
-            총괄 관리자(떠블에스바이저)만 접근할 수 있습니다.
-          </Text>
+          <Text style={[typography.body, { color: colors.textMuted }]}>{t('ua_denied')}</Text>
         </View>
       </View>
     );
   }
 
-  const apply = async (u: UserAccount, role: Role, status: AccountStatus, verb: string) => {
+  const apply = async (u: UserAccount, role: Role, status: AccountStatus) => {
     if (u.uid === account!.uid && (role !== 'ssvisor' || status !== 'active')) {
-      return RNAlert.alert('불가', '본인 계정의 총괄 권한은 해제할 수 없습니다.');
+      return RNAlert.alert(t('ua_self_t'), t('ua_self_m'));
     }
     setBusy(u.uid); setMsg('');
     try {
       await setUserRoleStatus(u.uid, role, status);
       await load();
     } catch (e: any) {
-      setMsg(`${verb} 실패: ` + (e?.message || e));
+      setMsg(`${t('ua_err_apply')}: ` + (e?.message || e));
     } finally { setBusy(null); }
   };
 
+  // 이름은 문장 중간에 들어가므로 t()에 이어붙이지 않고 {who} 자리에 채운다(언어별 어순)
+  const who = (u: UserAccount) => `${u.name}(${u.username})`;
+
   const reject = (u: UserAccount) =>
-    RNAlert.alert('거부', `${u.name}(${u.username})님을 거부하시겠습니까?`, [
-      { text: '취소', style: 'cancel' },
-      { text: '거부', style: 'destructive', onPress: () => apply(u, 'general', 'rejected', '거부') },
+    RNAlert.alert(t('ua_reject'), fill(t('ua_reject_m'), { who: who(u) }), [
+      { text: t('ua_cancel'), style: 'cancel' },
+      { text: t('ua_reject'), style: 'destructive', onPress: () => apply(u, 'general', 'rejected') },
     ]);
 
   // 역할 부여 전 확인 게이트 — 오조작(1탭 승격/강등) 방지
   const confirmApply = (u: UserAccount, r: Role) => {
-    const doApply = () => apply(u, r, 'active', '변경');
+    const doApply = () => apply(u, r, 'active');
     // 총괄(떠블에스바이저) 부여: 최고권한 → 2단계 확인
     if (r === 'ssvisor') {
-      return RNAlert.alert('총괄 권한 부여', `${u.name}(${u.username})에게 전체 DB 열람·전 현장 관리 권한을 부여합니다.`, [
-        { text: '취소', style: 'cancel' },
-        { text: '계속', onPress: () => RNAlert.alert('최종 확인', '정말 총괄 권한을 부여하시겠습니까?', [
-          { text: '취소', style: 'cancel' },
-          { text: '부여', style: 'destructive', onPress: doApply },
+      return RNAlert.alert(t('ua_grant_t'), fill(t('ua_grant_m'), { who: who(u) }), [
+        { text: t('ua_cancel'), style: 'cancel' },
+        { text: t('ua_continue'), onPress: () => RNAlert.alert(t('ua_final_t'), t('ua_final_m'), [
+          { text: t('ua_cancel'), style: 'cancel' },
+          { text: t('ua_grant'), style: 'destructive', onPress: doApply },
         ]) },
       ]);
     }
@@ -88,11 +92,11 @@ export function UserAdminScreen({ navigation }: Props) {
     if (u.status === 'active' && u.role !== r) {
       const demoting = u.role === 'ssvisor';
       return RNAlert.alert(
-        demoting ? '총괄 권한 해제' : '역할 변경',
-        `${u.name}님의 역할을 ${ROLE_LABEL[u.role]} → ${ROLE_LABEL[r]}(으)로 변경합니다.`,
+        demoting ? t('ua_demote_t') : t('ua_change_t'),
+        fill(t('ua_change_m'), { who: u.name, from: roleLabel(u.role), to: roleLabel(r) }),
         [
-          { text: '취소', style: 'cancel' },
-          { text: '변경', style: 'destructive', onPress: doApply },
+          { text: t('ua_cancel'), style: 'cancel' },
+          { text: t('ua_change'), style: 'destructive', onPress: doApply },
         ],
       );
     }
@@ -111,10 +115,10 @@ export function UserAdminScreen({ navigation }: Props) {
             {u.name} <Text style={[typography.small, { color: colors.textMuted }]}>@{u.username}</Text>
           </Text>
           <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>
-            {u.phone || '연락처 없음'} · {ROLE_LABEL[u.role]} · {STATUS_LABEL[u.status]}
+            {u.phone || t('ua_no_phone')} · {roleLabel(u.role)} · {t(STATUS_KEY[u.status])}
           </Text>
         </View>
-        {busy === u.uid && <Text style={[typography.small, { color: colors.primary }]}>처리중…</Text>}
+        {busy === u.uid && <Text style={[typography.small, { color: colors.primary }]}>{t('ua_busy')}</Text>}
       </View>
 
       {/* 역할 부여(=승인) 버튼 */}
@@ -127,12 +131,12 @@ export function UserAdminScreen({ navigation }: Props) {
               disabled={!!busy || activeNow}
               onPress={() => confirmApply(u, r)}
               accessibilityRole="button"
-              accessibilityLabel={`${u.name}을(를) ${ROLE_LABEL[r]}로 승인`}
+              accessibilityLabel={fill(t('ua_a11y_approve'), { who: u.name, role: roleLabel(r) })}
               accessibilityState={{ disabled: !!busy || activeNow, selected: activeNow }}
               style={[styles.roleBtn, { backgroundColor: colors.bg, borderColor: colors.border }, activeNow && [styles.roleBtnOn, { backgroundColor: colors.primary, borderColor: colors.primary }]]}
             >
               <Text style={[styles.roleTxt, { color: colors.textSecondary }, activeNow && styles.roleTxtOn]}>
-                {activeNow ? '✓ ' : ''}{ROLE_LABEL[r]}
+                {activeNow ? '✓ ' : ''}{roleLabel(r)}
               </Text>
             </Pressable>
           );
@@ -141,7 +145,7 @@ export function UserAdminScreen({ navigation }: Props) {
 
       {u.status !== 'rejected' && (
         <Pressable disabled={!!busy} onPress={() => reject(u)} hitSlop={6} style={styles.rejectBtn}>
-          <Text style={{ color: colors.emergency, ...typography.small }}>거부</Text>
+          <Text style={{ color: colors.emergency, ...typography.small }}>{t('ua_reject')}</Text>
         </Pressable>
       )}
     </View>
@@ -149,21 +153,19 @@ export function UserAdminScreen({ navigation }: Props) {
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
-      <AppBar title="회원 승인 · 역할 관리" onBack={() => navigation.goBack()} />
+      <AppBar title={t('ua_title')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[styles.h, { color: colors.textSecondary }]}>승인 대기 ({pending.length})</Text>
+        <Text style={[styles.h, { color: colors.textSecondary }]}>{t('ua_pending')} ({pending.length})</Text>
         {pending.length === 0
-          ? <Text style={[typography.caption, { color: colors.textMuted }]}>대기 중인 가입자가 없습니다.</Text>
+          ? <Text style={[typography.caption, { color: colors.textMuted }]}>{t('ua_pending_none')}</Text>
           : pending.map((u) => <Card key={u.uid} u={u} />)}
 
-        <Text style={[styles.h, { color: colors.textSecondary }]}>전체 회원 ({others.length})</Text>
+        <Text style={[styles.h, { color: colors.textSecondary }]}>{t('ua_all')} ({others.length})</Text>
         {others.map((u) => <Card key={u.uid} u={u} />)}
 
         {msg ? <Text style={[typography.caption, { color: colors.emergency, marginTop: spacing.md }]}>{msg}</Text> : null}
 
-        <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.lg }]}>
-          ※ 역할 버튼을 누르면 해당 역할로 즉시 승인(활성)됩니다. 근로자=긴급알림·AI 사용, 에스바이저=현장그룹 관리, 떠블에스바이저=전체 관리.
-        </Text>
+        <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.lg }]}>{t('ua_foot')}</Text>
       </ScrollView>
     </View>
   );

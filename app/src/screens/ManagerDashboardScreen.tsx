@@ -10,6 +10,8 @@ import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { HealthCheckRecord, IncidentReport, RootStackParamList, WorkHealthCheck } from '../types';
 import { storage } from '../services/storage';
+import { useLang } from '../i18n/LanguageContext';
+import { IT_KEY, label } from '../i18n/optionKeys';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ManagerDashboard'>;
 
@@ -19,6 +21,7 @@ const TOTAL_WORKERS = 12; // 데모 표본: 현장 배정 인원(예시)
 
 export function ManagerDashboardScreen({ navigation }: Props) {
   const colors = useTheme();
+  const { t } = useLang();
   const [checks, setChecks] = useState<WorkHealthCheck[]>([]);
   const [incidents, setIncidents] = useState<IncidentReport[]>([]);
   const [records, setRecords] = useState<HealthCheckRecord[]>([]);
@@ -42,56 +45,55 @@ export function ManagerDashboardScreen({ navigation }: Props) {
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
-      <AppBar title="관리자 대시보드" onBack={() => navigation.goBack()} />
+      <AppBar title={t('md_title')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[typography.h2, { color: colors.text }]}>온산 현장 · 오늘</Text>
+        <Text style={[typography.h2, { color: colors.text }]}>{t('md_head')}</Text>
 
         <View style={styles.statsRow}>
           <View style={[styles.stat, shadow.card, { backgroundColor: colors.card }]}>
             <Text style={[styles.statNum, { color: colors.textMuted }]}>{TOTAL_WORKERS}</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>작업 인원</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('md_workers')}</Text>
             {/* 정직화: 하드코딩 표본값임을 숫자 옆에 명시 → 실데이터 오인 방지(심사 지적) */}
-            <Tag label="예시" tone="new" />
+            <Tag label={t('md_sample')} tone="new" />
           </View>
           <View style={{ width: spacing.sm }} />
           <View style={[styles.stat, shadow.card, { backgroundColor: colors.card }]}>
             <Text style={[styles.statNum, { color: colors.success }]}>{checks.length}</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>작업 전 체크 완료</Text>
-            <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>실집계</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('md_checks')}</Text>
+            <Text style={[typography.small, { color: colors.textMuted, marginTop: 2 }]}>{t('md_real')}</Text>
           </View>
         </View>
 
         {incidents.length > 0 ? (
           <View style={[styles.incident, shadow.card, { backgroundColor: colors.emergencyLight, borderColor: colors.emergency }]}>
-            <Text style={[typography.bodyBold, { color: colors.emergency }]}>🚨 실시간 사고 보고 {incidents.length}건</Text>
+            {/* 개수는 괄호로 뒤에 붙인다 — "N건"처럼 조사·어순이 언어마다 달라지는 형태를 피하려고 */}
+            <Text style={[typography.bodyBold, { color: colors.emergency }]}>{t('md_inc_t')} ({incidents.length})</Text>
             <Text style={[typography.caption, { color: colors.text, marginTop: 4 }]}>
-              최근: {incidents[0].type} · {incidents[0].reportedAt} · {incidents[0].locationText ?? '위치 첨부'}
+              {t('md_inc_recent')}: {label(IT_KEY, incidents[0].type, t)} · {incidents[0].reportedAt} · {incidents[0].locationText ?? t('md_loc_attached')}
             </Text>
           </View>
         ) : (
           <View style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
-            <Text style={[typography.bodyBold, { color: colors.success }]}>🟢 보고된 사고 없음</Text>
+            <Text style={[typography.bodyBold, { color: colors.success }]}>{t('md_no_inc')}</Text>
           </View>
         )}
 
         <View style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={[typography.bodyBold, { color: colors.text }]}>검진 유효성</Text>
+            <Text style={[typography.bodyBold, { color: colors.text }]}>{t('md_exam_t')}</Text>
             <View style={{ marginLeft: 8 }}><Tag label="v1.5" tone="new" /></View>
           </View>
-          <Text style={[typography.body, { color: colors.success, marginTop: 6 }]}>🟢 유효 {valid < 0 ? 0 : valid}명</Text>
-          {expiringSoon > 0 && <Text style={[typography.body, { color: colors.warning, marginTop: 2 }]}>⚠️ 만료 임박 {expiringSoon}건</Text>}
-          {records.length === 0 && <Text style={[typography.caption, { color: colors.textMuted, marginTop: 4 }]}>등록된 검진기록이 없습니다.</Text>}
+          <Text style={[typography.body, { color: colors.success, marginTop: 6 }]}>{t('md_valid')} ({valid < 0 ? 0 : valid})</Text>
+          {expiringSoon > 0 && <Text style={[typography.body, { color: colors.warning, marginTop: 2 }]}>{t('md_expiring')} ({expiringSoon})</Text>}
+          {records.length === 0 && <Text style={[typography.caption, { color: colors.textMuted, marginTop: 4 }]}>{t('md_no_rec')}</Text>}
         </View>
 
         <View style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
-          <Text style={[typography.bodyBold, { color: colors.text }]}>사전 등록</Text>
-          <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 4 }]}>산재지정병원 · 권역응급의료센터 · 중독관리센터 목록(데모)</Text>
+          <Text style={[typography.bodyBold, { color: colors.text }]}>{t('md_pre_t')}</Text>
+          <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 4 }]}>{t('md_pre_m')}</Text>
         </View>
 
-        <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.md }]}>
-          ※ 데모 화면입니다. 실제 서비스에서는 웹 관리자 콘솔로 제공되며 인원·동의 기반으로 집계됩니다.
-        </Text>
+        <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.md }]}>{t('md_foot')}</Text>
       </ScrollView>
     </View>
   );

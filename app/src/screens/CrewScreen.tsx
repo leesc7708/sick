@@ -14,6 +14,8 @@ import {
   UnfitReport, watchUnfitReports, ackUnfitReport,
 } from '../services/crew';
 import { RootStackParamList } from '../types';
+import { useLang } from '../i18n/LanguageContext';
+import { WT_KEY, label as trLabel } from '../i18n/optionKeys';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Crew'>;
 
@@ -33,6 +35,7 @@ function beep() {
 
 export function CrewScreen({ navigation }: Props) {
   const colors = useTheme();
+  const { t } = useLang();
   const { account } = useAuth();
   const [crews, setCrews] = useState<Crew[]>([]);
   const [sel, setSel] = useState<Crew | null>(null);
@@ -66,20 +69,20 @@ export function CrewScreen({ navigation }: Props) {
   if (!account) return null;
 
   const make = async () => {
-    if (!label.trim()) return setMsg('작업 그룹 이름을 입력하세요.');
+    if (!label.trim()) return setMsg(t('cw_err_label'));
     setMsg('');
     try { await createCrew(account, label.trim(), endTime.trim()); setLabel(''); setEndTime(''); }
-    catch (e: any) { setMsg('생성 실패: ' + (e?.message || e)); }
+    catch (e: any) { setMsg(`${t('cw_err_create')}: ` + (e?.message || e)); }
   };
   const add = async () => {
     if (!sel || !uname.trim()) return;
     setMsg('');
     try {
       const w = await findWorkerByUsername(uname);
-      if (!w) return setMsg('해당 아이디의 워커를 찾을 수 없습니다.');
+      if (!w) return setMsg(t('cw_err_nouser'));
       await addWorker(sel, w);
       setUname('');
-    } catch (e: any) { setMsg('추가 실패: ' + (e?.message || e)); }
+    } catch (e: any) { setMsg(`${t('cw_err_add')}: ` + (e?.message || e)); }
   };
   const ack = (a: CrewAlert) => ackAlert(a.id, account.uid);
 
@@ -87,22 +90,22 @@ export function CrewScreen({ navigation }: Props) {
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.bg }]}>
-      <AppBar title="현장 그룹 · 긴급 관리" onBack={() => navigation.goBack()} />
+      <AppBar title={t('cw_title')} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
-        {/* 긴급 알림 (최상단) */}
+        {/* 긴급 알림 (최상단) — 개수는 괄호로 뒤에 붙인다(언어별 조사·어순 회피) */}
         {newAlerts.length > 0 && (
           <View style={[styles.emCard, { backgroundColor: colors.emergency }]}>
-            <Text style={[typography.h3, { color: '#fff' }]}>🔴 긴급 {newAlerts.length}건</Text>
+            <Text style={[typography.h3, { color: '#fff' }]}>{t('cw_em_t')} ({newAlerts.length})</Text>
             {newAlerts.map((a) => (
               <View key={a.id} style={styles.emRow}>
                 <View style={{ flex: 1 }}>
                   <Text style={[typography.bodyBold, { color: '#fff' }]}>{a.workerName} · {a.label || ''}</Text>
-                  {a.lat != null && <Text style={[typography.small, { color: '#ffe' }]}>위치 {a.lat.toFixed(4)}, {a.lng?.toFixed(4)}</Text>}
+                  {a.lat != null && <Text style={[typography.small, { color: '#ffe' }]}>{t('cw_loc')} {a.lat.toFixed(4)}, {a.lng?.toFixed(4)}</Text>}
                 </View>
                 {a.lat != null && (
                   <Pressable onPress={() => (window as any).open?.(`https://map.kakao.com/?q=${a.lat},${a.lng}`)}><Text style={styles.mapBtn}>🗺️</Text></Pressable>
                 )}
-                <Pressable onPress={() => ack(a)} style={styles.ackBtn}><Text style={styles.ackTxt}>확인</Text></Pressable>
+                <Pressable onPress={() => ack(a)} style={styles.ackBtn}><Text style={styles.ackTxt}>{t('common_ok')}</Text></Pressable>
               </View>
             ))}
           </View>
@@ -111,56 +114,57 @@ export function CrewScreen({ navigation }: Props) {
         {/* 작업 부적합 보고 (워커의 작업 전 건강체크 unfit) */}
         {unfit.filter((u) => u.status === 'new').length > 0 && (
           <View style={[styles.unfitCard, { backgroundColor: colors.warningLight, borderColor: colors.work }]}>
-            <Text style={[typography.h3, { color: colors.workDark }]}>⚠ 작업 부적합 보고 {unfit.filter((u) => u.status === 'new').length}건</Text>
+            <Text style={[typography.h3, { color: colors.workDark }]}>{t('cw_unfit_t')} ({unfit.filter((u) => u.status === 'new').length})</Text>
             {unfit.filter((u) => u.status === 'new').map((u) => (
               <View key={u.id} style={[styles.unfitRow, { borderTopColor: colors.border }]}>
                 <View style={{ flex: 1 }}>
-                  <Text style={[typography.bodyBold, { color: colors.text }]}>{u.workerName} · {u.workType}</Text>
-                  <Text style={[typography.small, { color: colors.textMuted }]}>작업 전 건강체크 부적합 — 작업 보류 권고됨</Text>
+                  {/* workType은 한국어 canonical로 저장되므로 표시할 때 번역 */}
+                  <Text style={[typography.bodyBold, { color: colors.text }]}>{u.workerName} · {trLabel(WT_KEY, u.workType, t)}</Text>
+                  <Text style={[typography.small, { color: colors.textMuted }]}>{t('cw_unfit_m')}</Text>
                 </View>
-                <Pressable onPress={() => ackUnfitReport(u.id, account.uid)} style={[styles.ackBtn2, { backgroundColor: colors.work }]}><Text style={styles.ackTxt2}>확인</Text></Pressable>
+                <Pressable onPress={() => ackUnfitReport(u.id, account.uid)} style={[styles.ackBtn2, { backgroundColor: colors.work }]}><Text style={styles.ackTxt2}>{t('common_ok')}</Text></Pressable>
               </View>
             ))}
           </View>
         )}
 
         {/* 오늘 그룹 만들기 */}
-        <Text style={[styles.h, { color: colors.textSecondary }]}>오늘 그룹 만들기</Text>
-        <TextInput value={label} onChangeText={setLabel} placeholder="작업 그룹 이름 (예: A현장 3층 배관)" placeholderTextColor={colors.textMuted} style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
-        <TextInput value={endTime} onChangeText={setEndTime} placeholder="작업 종료 예정 시각 (예: 오늘 22:00 / 내일 06:00)" placeholderTextColor={colors.textMuted} style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
-        <View style={{ marginTop: spacing.sm }}><PrimaryButton title="그룹 만들기" icon="＋" onPress={make} /></View>
+        <Text style={[styles.h, { color: colors.textSecondary }]}>{t('cw_make_t')}</Text>
+        <TextInput value={label} onChangeText={setLabel} placeholder={t('cw_label_ph')} placeholderTextColor={colors.textMuted} style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
+        <TextInput value={endTime} onChangeText={setEndTime} placeholder={t('cw_end_ph')} placeholderTextColor={colors.textMuted} style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
+        <View style={{ marginTop: spacing.sm }}><PrimaryButton title={t('cw_make')} icon="＋" onPress={make} /></View>
 
         {/* 오늘 내 그룹 */}
-        <Text style={[styles.h, { color: colors.textSecondary }]}>오늘 내 그룹 ({crews.length})</Text>
-        {crews.length === 0 && <Text style={[typography.caption, { color: colors.textMuted }]}>아직 없음</Text>}
+        <Text style={[styles.h, { color: colors.textSecondary }]}>{t('cw_my_t')} ({crews.length})</Text>
+        {crews.length === 0 && <Text style={[typography.caption, { color: colors.textMuted }]}>{t('cw_none')}</Text>}
         {crews.map((c) => (
           <Pressable key={c.id} onPress={() => setSel(c)} style={[styles.crewCard, shadow.card, { backgroundColor: colors.card }, sel?.id === c.id && { borderColor: colors.primary, borderWidth: 1.5 }]}>
             <Text style={[typography.bodyBold, { color: colors.text }]}>{c.label}</Text>
-            <Text style={[typography.small, { color: colors.textMuted }]}>{c.workDate}{c.endTime ? ` · 종료예정 ${c.endTime}` : ''}</Text>
+            <Text style={[typography.small, { color: colors.textMuted }]}>{c.workDate}{c.endTime ? ` · ${t('cw_end_at')} ${c.endTime}` : ''}</Text>
           </Pressable>
         ))}
 
         {/* 선택 그룹: 워커 추가/명단 */}
         {sel && (
           <>
-            <Text style={[styles.h, { color: colors.textSecondary }]}>[{sel.label}] 워커 추가</Text>
+            <Text style={[styles.h, { color: colors.textSecondary }]}>[{sel.label}] {t('cw_add_worker')}</Text>
             <View style={{ flexDirection: 'row' }}>
-              <TextInput value={uname} onChangeText={setUname} placeholder="워커 아이디" placeholderTextColor={colors.textMuted} autoCapitalize="none" style={[styles.input, { flex: 1, marginTop: 0, backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
+              <TextInput value={uname} onChangeText={setUname} placeholder={t('cw_uname_ph')} placeholderTextColor={colors.textMuted} autoCapitalize="none" style={[styles.input, { flex: 1, marginTop: 0, backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} />
               <View style={{ width: 8 }} />
-              <PrimaryButton title="추가" size="sm" onPress={add} style={{ width: 80 }} />
+              <PrimaryButton title={t('cw_add')} size="sm" onPress={add} style={{ width: 80 }} />
             </View>
-            <Text style={[styles.h, { fontSize: 14, color: colors.textSecondary }]}>멤버 {members.length}명</Text>
+            <Text style={[styles.h, { fontSize: 14, color: colors.textSecondary }]}>{t('cw_members')} ({members.length})</Text>
             {members.map((m) => (
               <View key={m.workerUid} style={[styles.memberRow, shadow.card, { backgroundColor: colors.card }]}>
                 <View style={{ flex: 1 }}>
                   <Text style={[typography.bodyBold, { color: colors.text }]}>{m.name}</Text>
                   {m.phone ? <Text style={[typography.small, { color: colors.textMuted }]}>{m.phone}</Text> : null}
                 </View>
-                <Pressable onPress={() => removeWorker(m.workerUid)} hitSlop={8}><Text style={{ color: colors.emergency, fontSize: 13 }}>제외</Text></Pressable>
+                <Pressable onPress={() => removeWorker(m.workerUid)} hitSlop={8}><Text style={{ color: colors.emergency, fontSize: 13 }}>{t('cw_remove')}</Text></Pressable>
               </View>
             ))}
             <View style={{ marginTop: spacing.md }}>
-              <PrimaryButton title="작업 종료 (그룹 닫기)" variant="outline" size="sm" onPress={() => { closeCrew(sel.id); setSel(null); }} />
+              <PrimaryButton title={t('cw_close')} variant="outline" size="sm" onPress={() => { closeCrew(sel.id); setSel(null); }} />
             </View>
           </>
         )}

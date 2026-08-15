@@ -14,10 +14,15 @@ const stripStrings = (s) => s.replace(/'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g, '"
 
 const LANGS = ['ko', 'en', 'zh', 'ja', 'vi', 'th', 'es'];
 const blocks = {};
+const values = {};
 for (const l of LANGS) {
   const m = file.match(new RegExp(`\\n  ${l}: \\{\\n([\\s\\S]*?)\\n  \\},`));
   if (!m) { console.error(`블록 없음: ${l}`); process.exit(1); }
   blocks[l] = new Set([...stripStrings(m[1]).matchAll(/([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g)].map((x) => x[1]));
+  values[l] = new Map(
+    [...m[1].matchAll(/([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g)]
+      .map((x) => [x[1], x[2].slice(1, -1)]),
+  );
 }
 
 let bad = 0;
@@ -30,6 +35,27 @@ for (const l of LANGS.slice(1)) {
   if (extra.length) { console.error(`[${l}] ko에 없음 ${extra.length}: ${extra.join(', ')}`); bad++; }
   if (!missing.length && !extra.length) console.log(`[${l}] OK (${blocks[l].size})`);
 }
+
+// 치환자({who}·{from}·{to}·{role}) 일치 — 번역에서 하나라도 빠지면 이름·역할이 조용히 사라진다.
+// 화면에는 멀쩡한 문장이 나오므로 tsc·빌드로는 절대 안 잡힌다.
+const ph = (s) => new Set([...s.matchAll(/\{(\w+)\}/g)].map((x) => x[1]));
+let phBad = 0;
+for (const [k, koVal] of values.ko) {
+  const want = ph(koVal);
+  for (const l of LANGS.slice(1)) {
+    const v = values[l].get(k);
+    if (v == null) continue; // 키 누락은 위에서 이미 보고됨
+    const got = ph(v);
+    const missing = [...want].filter((x) => !got.has(x));
+    const unknown = [...got].filter((x) => !want.has(x));
+    if (missing.length || unknown.length) {
+      console.error(`[${l}] ${k} 치환자 불일치 — 누락: {${missing.join('},{')}} 불명: {${unknown.join('},{')}}`);
+      phBad++;
+    }
+  }
+}
+if (phBad) bad++;
+else console.log(`\n치환자 일치 확인 ✅ (${[...values.ko].filter(([, v]) => ph(v).size).length}개 키)`);
 
 // 전역 t()를 쓰는 파일만 검사 — 자체 다국어 맵으로 t/tr를 따로 정의한 화면(로그인·가입·표현집)은 제외
 const used = new Map();
