@@ -3,8 +3,38 @@
 //  - 서비스키는 서버(Cloud Functions .env)에만 있고, 앱은 동일 출처 프록시만 호출.
 //  - /api/egen-severe  : 중증질환자 수용가능정보 (시도 단위)
 //  - /api/egen-trauma  : 전국 권역외상센터 목록
-//  ⚠️ 실데이터 API. 실패해도 기존 병원찾기 화면은 그대로 동작하도록 호출부에서 폴백 처리.
+//  ⚠️ 실데이터 API. 실패는 반드시 status:'fail'로 화면까지 올린다(아래 EgenResult 참고).
 // ─────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────
+// 조회 결과 타입 — "결과 0건"과 "조회 실패"를 같은 값으로 돌려주지 않는다.
+//  2026-08-26 장애 교훈: 결제(Blaze) 중단으로 /api/egen-* 프록시가 11일간 503이었는데
+//  모든 fetch가 실패를 []로 삼켜 화면에는 "조건에 맞는 곳이 없어요"만 떴다.
+//  → 장애가 "그 지역엔 원래 없나 보다"로 보여 11일간 발견되지 않았다.
+//  이제 실패는 status:'fail'로 올라가고, 화면은 LoadError(장애 안내 + 재시도)를 띄운다.
+// ─────────────────────────────────────────────────────────────
+export type EgenResult<T> = { status: 'ok' | 'fail'; items: T[] };
+
+async function egenGet<T>(path: string, key: string): Promise<EgenResult<T>> {
+  try {
+    const res = await fetch(path);
+    // 503(결제중단·배포누락) / 500(서버키 미설정) / 4xx — 본문 볼 것도 없이 장애
+    if (!res.ok) return { status: 'fail', items: [] };
+    // 오류 HTML이 오면 여기서 throw → catch로 떨어진다
+    const j = await res.json();
+    if (j?.ok && Array.isArray(j[key])) return { status: 'ok', items: j[key] as T[] };
+    return { status: 'fail', items: [] }; // { ok:false } 또는 형식 불일치
+  } catch {
+    return { status: 'fail', items: [] }; // 네트워크 단절·타임아웃·JSON 파싱 실패
+  }
+}
+
+// 시도(+선택 시군구) 쿼리스트링
+function regionQuery(stage1: string, stage2?: string): string {
+  const qs = new URLSearchParams({ stage1 });
+  if (stage2) qs.set('stage2', stage2);
+  return qs.toString();
+}
 
 // 전국 17개 시도 — STAGE1 값은 E-Gen이 받는 정확한 명칭(신 명칭: 강원특별자치도/전북특별자치도 등)
 export const SIDO_LIST: string[] = [
@@ -30,18 +60,9 @@ export const SIDO_LIST: string[] = [
 // 응급실 실시간 가용병상 (egenBeds 프록시)
 export type BedHospital = { hpid: string; name: string; tel: string; erBeds: number | null; at: string };
 
-// 시도(선택적 시군구) 응급실 실시간 가용병상 조회. 실패 시 빈 배열(화면 폴백).
-export async function fetchBeds(stage1: string, stage2?: string): Promise<BedHospital[]> {
-  try {
-    const qs = new URLSearchParams({ stage1 });
-    if (stage2) qs.set('stage2', stage2);
-    const res = await fetch(`/api/egen-beds?${qs.toString()}`);
-    const j = await res.json();
-    if (j?.ok && Array.isArray(j.hospitals)) return j.hospitals as BedHospital[];
-  } catch {
-    // 무시 — 호출부에서 빈 결과로 안내
-  }
-  return [];
+// 시도(선택적 시군구) 응급실 실시간 가용병상 조회. 실패 시 status:'fail'.
+export function fetchBeds(stage1: string, stage2?: string): Promise<EgenResult<BedHospital>> {
+  return egenGet<BedHospital>(`/api/egen-beds?${regionQuery(stage1, stage2)}`, 'hospitals');
 }
 
 // ── GPS 자동 지역선택 (A: 가장 가까운 시도 중심점 · 키 불필요) ──
@@ -100,26 +121,12 @@ export function detectSido(timeoutMs = 6000): Promise<string | null> {
 export type HospitalItem = { hpid: string; name: string; addr: string; tel: string; div: string; lat: number | null; lon: number | null };
 export type PharmacyItem = { hpid: string; name: string; addr: string; tel: string; lat: number | null; lon: number | null };
 
-export async function fetchHospitals(stage1: string, stage2?: string): Promise<HospitalItem[]> {
-  try {
-    const qs = new URLSearchParams({ stage1 });
-    if (stage2) qs.set('stage2', stage2);
-    const res = await fetch(`/api/egen-hospitals?${qs.toString()}`);
-    const j = await res.json();
-    if (j?.ok && Array.isArray(j.hospitals)) return j.hospitals as HospitalItem[];
-  } catch { /* 폴백: 빈 결과 */ }
-  return [];
+export function fetchHospitals(stage1: string, stage2?: string): Promise<EgenResult<HospitalItem>> {
+  return egenGet<HospitalItem>(`/api/egen-hospitals?${regionQuery(stage1, stage2)}`, 'hospitals');
 }
 
-export async function fetchPharmacy(stage1: string, stage2?: string): Promise<PharmacyItem[]> {
-  try {
-    const qs = new URLSearchParams({ stage1 });
-    if (stage2) qs.set('stage2', stage2);
-    const res = await fetch(`/api/egen-pharmacy?${qs.toString()}`);
-    const j = await res.json();
-    if (j?.ok && Array.isArray(j.pharmacies)) return j.pharmacies as PharmacyItem[];
-  } catch { /* 폴백: 빈 결과 */ }
-  return [];
+export function fetchPharmacy(stage1: string, stage2?: string): Promise<EgenResult<PharmacyItem>> {
+  return egenGet<PharmacyItem>(`/api/egen-pharmacy?${regionQuery(stage1, stage2)}`, 'pharmacies');
 }
 
 export type SevereItem = { code: string; label: string };
@@ -135,45 +142,20 @@ export type TraumaCenter = {
   emcls: string;
 };
 
-// 중증질환 수용가능 병원 조회. 실패 시 빈 배열(화면 폴백).
-export async function fetchSevere(stage1: string, stage2?: string): Promise<SevereHospital[]> {
-  try {
-    const qs = new URLSearchParams({ stage1 });
-    if (stage2) qs.set('stage2', stage2);
-    const res = await fetch(`/api/egen-severe?${qs.toString()}`);
-    const j = await res.json();
-    if (j?.ok && Array.isArray(j.hospitals)) return j.hospitals as SevereHospital[];
-  } catch {
-    // 무시 — 호출부에서 빈 결과로 안내
-  }
-  return [];
+// 중증질환 수용가능 병원 조회. 실패 시 status:'fail'.
+export function fetchSevere(stage1: string, stage2?: string): Promise<EgenResult<SevereHospital>> {
+  return egenGet<SevereHospital>(`/api/egen-severe?${regionQuery(stage1, stage2)}`, 'hospitals');
 }
 
-// 전국 권역외상센터 조회. 실패 시 빈 배열(화면 폴백).
-export async function fetchTrauma(): Promise<TraumaCenter[]> {
-  try {
-    const res = await fetch('/api/egen-trauma');
-    const j = await res.json();
-    if (j?.ok && Array.isArray(j.centers)) return j.centers as TraumaCenter[];
-  } catch {
-    // 무시
-  }
-  return [];
+// 전국 권역외상센터 조회. 실패 시 status:'fail'.
+export function fetchTrauma(): Promise<EgenResult<TraumaCenter>> {
+  return egenGet<TraumaCenter>('/api/egen-trauma', 'centers');
 }
 
 // AED(자동심장충격기) 위치. buildPlace/주소/관리기관/연락처/24시간여부.
-//  ⚠️ 좌표 없음 → 지역(시도/시군구) 기준 목록. 실패 시 빈 배열(화면 폴백).
+//  ⚠️ 좌표 없음 → 지역(시도/시군구) 기준 목록. 실패 시 status:'fail'.
 export type AedItem = { place: string; addr: string; org: string; tel: string; is24h: boolean };
 
-export async function fetchAed(stage1: string, stage2?: string): Promise<AedItem[]> {
-  try {
-    const qs = new URLSearchParams({ stage1 });
-    if (stage2) qs.set('stage2', stage2);
-    const res = await fetch(`/api/egen-aed?${qs.toString()}`);
-    const j = await res.json();
-    if (j?.ok && Array.isArray(j.aeds)) return j.aeds as AedItem[];
-  } catch {
-    // 무시 — 호출부에서 빈 결과로 안내
-  }
-  return [];
+export function fetchAed(stage1: string, stage2?: string): Promise<EgenResult<AedItem>> {
+  return egenGet<AedItem>(`/api/egen-aed?${regionQuery(stage1, stage2)}`, 'aeds');
 }

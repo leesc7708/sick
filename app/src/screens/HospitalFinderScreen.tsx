@@ -11,6 +11,7 @@ import { typography } from '../theme/typography';
 import { FACILITIES } from '../data/facilities';
 import { FacilityKind, Hospital, RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
+import { LoadError } from '../components/LoadError';
 import { SIDO_LIST, fetchSevere, fetchTrauma, fetchBeds, fetchHospitals, fetchPharmacy, detectSido, SevereHospital, TraumaCenter, BedHospital, HospitalItem, PharmacyItem } from '../data/egen';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HospitalFinder'>;
@@ -38,11 +39,16 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
   const [beds, setBeds] = useState<BedHospital[]>([]);
   const [bedsLoading, setBedsLoading] = useState(false);
   const [bedsLoaded, setBedsLoaded] = useState(false);
+  const [bedsError, setBedsError] = useState(false);
   // ── 병원/약국 탭: E-Gen 실데이터(전국 지역 단위) ──
   const [hosp, setHosp] = useState<HospitalItem[]>([]);
   const [pharm, setPharm] = useState<PharmacyItem[]>([]);
   const [hpLoading, setHpLoading] = useState(false);
   const [hpLoaded, setHpLoaded] = useState(false);
+  const [hpError, setHpError] = useState(false);
+  // 조회 실패 시 LoadError의 [다시 시도] → 이 값을 올려 아래 useEffect들을 재실행
+  const [reload, setReload] = useState(0);
+  const retry = () => setReload((n) => n + 1);
 
   // 진입 시 GPS로 내 지역 자동선택 (응급실·중증 공용 sido, 실패/거부 시 기본값 유지)
   useEffect(() => {
@@ -54,17 +60,23 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
   const [trauma, setTrauma] = useState<TraumaCenter[]>([]);
   const [sevLoading, setSevLoading] = useState(false);
   const [sevLoaded, setSevLoaded] = useState(false);
+  const [sevError, setSevError] = useState(false);
+  const [traumaError, setTraumaError] = useState(false);
 
   useEffect(() => {
     if (!severeMode) return;
     let alive = true;
     setSevLoading(true);
     // 중증 수용가능은 시도 변경 시마다, 외상센터는 처음 한 번만 조회
-    Promise.all([fetchSevere(sido), trauma.length ? Promise.resolve(trauma) : fetchTrauma()])
+    const traumaP: Promise<{ status: 'ok' | 'fail'; items: TraumaCenter[] }> =
+      trauma.length ? Promise.resolve({ status: 'ok', items: trauma }) : fetchTrauma();
+    Promise.all([fetchSevere(sido), traumaP])
       .then(([sev, tr]) => {
         if (!alive) return;
-        setSevereList(sev);
-        if (!trauma.length) setTrauma(tr as TraumaCenter[]);
+        setSevereList(sev.items);
+        setSevError(sev.status === 'fail'); // 실패를 "수용 가능 병원 없음"으로 위장하지 않는다
+        setTraumaError(tr.status === 'fail');
+        if (!trauma.length && tr.status === 'ok') setTrauma(tr.items);
         setSevLoaded(true);
       })
       .finally(() => alive && setSevLoading(false));
@@ -72,7 +84,7 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [severeMode, sido]);
+  }, [severeMode, sido, reload]);
 
   // 응급실 탭(실데이터): 지역 변경마다 실시간 가용병상 조회
   useEffect(() => {
@@ -82,14 +94,15 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
     fetchBeds(sido)
       .then((r) => {
         if (!alive) return;
-        setBeds(r);
+        setBeds(r.items);
+        setBedsError(r.status === 'fail');
         setBedsLoaded(true);
       })
       .finally(() => alive && setBedsLoading(false));
     return () => {
       alive = false;
     };
-  }, [severeMode, kind, sido]);
+  }, [severeMode, kind, sido, reload]);
 
   // 병원/약국 탭(실데이터): 지역·탭 변경마다 조회
   useEffect(() => {
@@ -97,15 +110,17 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
     let alive = true;
     setHpLoading(true);
     setHpLoaded(false);
+    setHpError(false);
     const p = kind === 'hospital' ? fetchHospitals(sido) : fetchPharmacy(sido);
     p.then((r) => {
       if (!alive) return;
-      if (kind === 'hospital') setHosp(r as HospitalItem[]);
-      else setPharm(r as PharmacyItem[]);
+      if (kind === 'hospital') setHosp(r.items as HospitalItem[]);
+      else setPharm(r.items as PharmacyItem[]);
+      setHpError(r.status === 'fail');
       setHpLoaded(true);
     }).finally(() => alive && setHpLoading(false));
     return () => { alive = false; };
-  }, [severeMode, kind, sido]);
+  }, [severeMode, kind, sido, reload]);
 
   const list = FACILITIES.filter((f) => f.kind === kind)
     .filter((f) => (dept ? f.departments.includes(dept) : true))
@@ -169,7 +184,9 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
             </View>
           )}
 
-          {!sevLoading && sevLoaded && severeList.length === 0 && (
+          {!sevLoading && sevError && <LoadError onRetry={retry} />}
+
+          {!sevLoading && !sevError && sevLoaded && severeList.length === 0 && (
             <Text style={[typography.body, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.lg }]}>{t('sev_none')}</Text>
           )}
 
@@ -221,6 +238,13 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
             </>
           )}
 
+          {!sevLoading && !sevError && traumaError && trauma.length === 0 && (
+            <>
+              <Text style={[typography.bodyBold, { color: colors.text, marginTop: spacing.lg }]}>{t('sev_trauma_title')}</Text>
+              <LoadError onRetry={retry} />
+            </>
+          )}
+
           <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.md, textAlign: 'center' }]}>{t('sev_notel')}</Text>
           <Text style={[typography.small, { color: colors.textMuted, marginTop: 4, textAlign: 'center' }]}>{t('sev_source')}</Text>
         </ScrollView>
@@ -244,6 +268,7 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
           {(() => {
             const shown = bedsOnly ? beds.filter((h) => (h.erBeds ?? 0) > 0) : beds;
             if (bedsLoading) return null;
+            if (bedsError) return <LoadError onRetry={retry} />;
             if (bedsLoaded && shown.length === 0) {
               return <Text style={[typography.body, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.lg }]}>{t('hf_empty')}</Text>;
             }
@@ -295,6 +320,7 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
           {(() => {
             const items: (HospitalItem | PharmacyItem)[] = kind === 'hospital' ? hosp : pharm;
             if (hpLoading) return null;
+            if (hpError) return <LoadError onRetry={retry} />;
             if (hpLoaded && items.length === 0) {
               return <Text style={[typography.body, { color: colors.textMuted, textAlign: 'center', marginTop: spacing.lg }]}>{t('hf_empty')}</Text>;
             }

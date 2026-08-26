@@ -10,6 +10,7 @@ import { useTheme } from '../theme/theme';
 import { typography } from '../theme/typography';
 import { RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
+import { LoadError } from '../components/LoadError';
 import { SIDO_LIST, fetchAed, detectSido, AedItem } from '../data/egen';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AedFinder'>;
@@ -21,6 +22,10 @@ export function AedFinderScreen({ navigation }: Props) {
   const [list, setList] = useState<AedItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  // 조회 실패를 "이 지역 AED 없음"으로 위장하지 않는다 (2026-08-26 프록시 503 장애 교훈)
+  const [error, setError] = useState(false);
+  const [reload, setReload] = useState(0);
+  const retry = () => setReload((n) => n + 1);
 
   // 진입 시 GPS로 내 지역 자동선택 (실패/거부 시 기본값 유지)
   useEffect(() => {
@@ -35,14 +40,15 @@ export function AedFinderScreen({ navigation }: Props) {
     fetchAed(sido)
       .then((r) => {
         if (!alive) return;
-        setList(r);
+        setList(r.items);
+        setError(r.status === 'fail');
         setLoaded(true);
       })
       .finally(() => alive && setLoading(false));
     return () => {
       alive = false;
     };
-  }, [sido]);
+  }, [sido, reload]);
 
   const call = (tel: string) => tel && Linking.openURL(`tel:${tel.replace(/[^0-9]/g, '')}`);
 
@@ -79,6 +85,8 @@ export function AedFinderScreen({ navigation }: Props) {
         {/* 목록 */}
         {loading ? (
           <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: spacing.lg }} />
+        ) : error ? (
+          <LoadError onRetry={retry} />
         ) : loaded && list.length === 0 ? (
           <Text style={[typography.body, { color: colors.textSecondary, marginTop: spacing.lg, textAlign: 'center' }]}>{t('aed_none')}</Text>
         ) : (
