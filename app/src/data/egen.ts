@@ -13,7 +13,10 @@
 //  → 장애가 "그 지역엔 원래 없나 보다"로 보여 11일간 발견되지 않았다.
 //  이제 실패는 status:'fail'로 올라가고, 화면은 LoadError(장애 안내 + 재시도)를 띄운다.
 // ─────────────────────────────────────────────────────────────
-export type EgenResult<T> = { status: 'ok' | 'fail'; items: T[] };
+//  status: 'ok'   = 상류에서 받은 실시간 값
+//         'fail' = 조회 실패 (화면은 LoadError로 안내 + 재시도)
+//         'stale'= 조회는 실패했지만 앱 동봉 스냅샷으로 대체함 (화면은 기준일 배지 표시)
+export type EgenResult<T> = { status: 'ok' | 'fail' | 'stale'; items: T[] };
 
 async function egenGet<T>(path: string, key: string): Promise<EgenResult<T>> {
   try {
@@ -147,9 +150,15 @@ export function fetchSevere(stage1: string, stage2?: string): Promise<EgenResult
   return egenGet<SevereHospital>(`/api/egen-severe?${regionQuery(stage1, stage2)}`, 'hospitals');
 }
 
-// 전국 권역외상센터 조회. 실패 시 status:'fail'.
-export function fetchTrauma(): Promise<EgenResult<TraumaCenter>> {
-  return egenGet<TraumaCenter>('/api/egen-trauma', 'centers');
+// 전국 권역외상센터 조회.
+//  ⚠️ 이 화면만은 빈 채로 두지 않는다 — 중증외상 환자를 어디로 보낼지 정하는 목록이다.
+//  실패하면 앱에 동봉한 정적 스냅샷(20곳)으로 폴백하고 status:'stale'로 알린다.
+//  화면은 stale일 때 "YYYY-MM-DD 기준" 배지를 띄워 오래된 정보를 최신인 척하지 않는다.
+export async function fetchTrauma(): Promise<EgenResult<TraumaCenter>> {
+  const r = await egenGet<TraumaCenter>('/api/egen-trauma', 'centers');
+  if (r.status === 'ok' && r.items.length > 0) return r;
+  const { TRAUMA_CENTERS_SNAPSHOT } = await import('./traumaCenters');
+  return { status: 'stale', items: TRAUMA_CENTERS_SNAPSHOT };
 }
 
 // AED(자동심장충격기) 위치. buildPlace/주소/관리기관/연락처/24시간여부.

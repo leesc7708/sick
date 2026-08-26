@@ -136,6 +136,28 @@ exports.deptConsult = onRequest(
 //    원인 확정을 위해 cause를 반드시 로그에 남긴다.
 //  - 기본 10초를 기다리다 함수 타임아웃에 쫓기지 않도록 8초로 끊고 1회 재시도.
 // ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// 거의 안 바뀌는 목록용 인스턴스 메모리 캐시.
+//  2026-08-26 교훈: 전국 권역외상센터는 20곳이고 몇 년에 한 번 바뀌는데, 화면을 열 때마다
+//  상류를 때렸다. 그러다 공공데이터포털이 Cloud Run 송신 IP에 대해 그 오퍼레이션만
+//  막아버려 몇 시간 동안 화면이 비었다(재배포로도 안 풀림).
+//  → 성공 응답을 TTL 동안 재사용하고, 상류가 죽으면 **만료된 캐시라도** 내려준다.
+//    이때 stale:true·cachedAt을 함께 보내 화면이 "언제 기준"인지 밝힐 수 있게 한다.
+//  ⚠️ 인스턴스 메모리라 콜드스타트 시 비어 있다. 그 경우의 최후 방어선은 앱에 동봉한
+//    정적 스냅샷(src/data/traumaCenters.ts)이다. 두 겹으로 막는다.
+// ─────────────────────────────────────────────────────────────
+const memCache = new Map(); // key -> { at:number, payload:object }
+
+function cacheGet(key, ttlMs) {
+  const hit = memCache.get(key);
+  if (!hit) return null;
+  return { fresh: Date.now() - hit.at < ttlMs, at: hit.at, payload: hit.payload };
+}
+
+function cacheSet(key, payload) {
+  memCache.set(key, { at: Date.now(), payload });
+}
+
 // 2026-08-26: egenBeds·egenTrauma에만 붙어 있던 것을 E-Gen 프록시 6종 전부로 확대.
 // 나머지 4종은 맨 fetch라 상류가 한 번만 삐끗해도 그대로 502였다(실제로 egenHospitals가
 // "fetch failed"로 연속 실패). 재시도 없는 외부 호출은 프록시에서 만들면 안 된다.
@@ -345,6 +367,14 @@ exports.egenTrauma = onRequest(
       _type: 'json',
     });
     if (stage1) params.set('STAGE1', stage1);
+    // 목록이 거의 안 바뀌므로 6시간 캐시. 신선하면 상류를 아예 안 부른다(차단 예방).
+    const cacheKey = `trauma:${stage1 || 'ALL'}`;
+    const TTL = 6 * 60 * 60 * 1000;
+    const cached = cacheGet(cacheKey, TTL);
+    if (cached && cached.fresh) {
+      res.json({ ...cached.payload, cached: true, cachedAt: new Date(cached.at).toISOString() });
+      return;
+    }
     try {
       const raw = await fetchUpstream(`${EGEN_TRAUMA_BASE}?${params.toString()}`, 'egenTrauma');
       let json;
@@ -364,8 +394,16 @@ exports.egenTrauma = onRequest(
         lon: num(it.wgs84Lon),
         emcls: it.dutyEmclsName || '',
       }));
-      res.json({ ok: true, total: (body && body.totalCount) || centers.length, centers });
+      const payload = { ok: true, total: (body && body.totalCount) || centers.length, centers };
+      cacheSet(cacheKey, payload);
+      res.json(payload);
     } catch (e) {
+      // 상류가 죽어도 만료된 캐시가 있으면 그걸 내려준다 — 빈 화면보다 낫다.
+      // 단 stale:true로 밝혀서 화면이 "언제 기준"인지 표시할 수 있게 한다.
+      if (cached) {
+        res.json({ ...cached.payload, cached: true, stale: true, cachedAt: new Date(cached.at).toISOString() });
+        return;
+      }
       res.status(502).json(upstreamErrorPayload(e));
     }
   }

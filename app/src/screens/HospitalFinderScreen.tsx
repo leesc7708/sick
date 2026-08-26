@@ -12,6 +12,7 @@ import { FACILITIES } from '../data/facilities';
 import { FacilityKind, Hospital, RootStackParamList } from '../types';
 import { useLang } from '../i18n/LanguageContext';
 import { LoadError } from '../components/LoadError';
+import { TRAUMA_SNAPSHOT_DATE } from '../data/traumaCenters';
 import { SIDO_LIST, fetchSevere, fetchTrauma, fetchBeds, fetchHospitals, fetchPharmacy, detectSido, SevereHospital, TraumaCenter, BedHospital, HospitalItem, PharmacyItem } from '../data/egen';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HospitalFinder'>;
@@ -62,13 +63,15 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
   const [sevLoaded, setSevLoaded] = useState(false);
   const [sevError, setSevError] = useState(false);
   const [traumaError, setTraumaError] = useState(false);
+  // 실시간 조회가 죽어 앱 동봉 스냅샷을 쓰는 중인지 (화면에 기준일 배지)
+  const [traumaStale, setTraumaStale] = useState(false);
 
   useEffect(() => {
     if (!severeMode) return;
     let alive = true;
     setSevLoading(true);
     // 중증 수용가능은 시도 변경 시마다, 외상센터는 처음 한 번만 조회
-    const traumaP: Promise<{ status: 'ok' | 'fail'; items: TraumaCenter[] }> =
+    const traumaP: Promise<{ status: 'ok' | 'fail' | 'stale'; items: TraumaCenter[] }> =
       trauma.length ? Promise.resolve({ status: 'ok', items: trauma }) : fetchTrauma();
     Promise.all([fetchSevere(sido), traumaP])
       .then(([sev, tr]) => {
@@ -76,7 +79,9 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
         setSevereList(sev.items);
         setSevError(sev.status === 'fail'); // 실패를 "수용 가능 병원 없음"으로 위장하지 않는다
         setTraumaError(tr.status === 'fail');
-        if (!trauma.length && tr.status === 'ok') setTrauma(tr.items);
+        setTraumaStale(tr.status === 'stale');
+        // 'stale'(정적 스냅샷)도 목록으로 띄운다 — 빈 화면보다 낫다
+        if (!trauma.length && tr.status !== 'fail') setTrauma(tr.items);
         setSevLoaded(true);
       })
       .finally(() => alive && setSevLoading(false));
@@ -217,7 +222,14 @@ export function HospitalFinderScreen({ navigation, route }: Props) {
           {/* 전국 권역외상센터 */}
           {!sevLoading && trauma.length > 0 && (
             <>
-              <Text style={[typography.bodyBold, { color: colors.text, marginTop: spacing.lg, marginBottom: spacing.sm }]}>{t('sev_trauma_title')}</Text>
+              <Text style={[typography.bodyBold, { color: colors.text, marginTop: spacing.lg, marginBottom: traumaStale ? 4 : spacing.sm }]}>{t('sev_trauma_title')}</Text>
+              {traumaStale && (
+                <View style={[styles.staleBadge, { backgroundColor: colors.g100 }]}>
+                  <Text style={[typography.small, { color: colors.textSecondary }]}>
+                    ⚠️ {t('trauma_stale')} · {TRAUMA_SNAPSHOT_DATE} {t('trauma_stale_asof')}
+                  </Text>
+                </View>
+              )}
               {trauma.map((c) => (
                 <View key={c.hpid || c.name} style={[styles.card, shadow.card, { backgroundColor: colors.card }]}>
                   <Text style={[typography.bodyBold, { color: colors.text }]}>{c.name}</Text>
@@ -362,6 +374,7 @@ const styles = StyleSheet.create({
   segTxt: { ...typography.captionBold, color: _staticColors.textMuted },
   segTxtOn: { color: _staticColors.text },
   bedRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 8 },
+  staleBadge: { borderRadius: radius.sm, paddingVertical: 6, paddingHorizontal: 10, marginBottom: spacing.sm },
   bedBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.pill, alignSelf: 'flex-start' },
   bedBadgeTxt: { ...typography.captionBold, color: '#fff' },
   filters: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.md },
