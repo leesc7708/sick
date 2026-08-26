@@ -136,6 +136,9 @@ exports.deptConsult = onRequest(
 //    원인 확정을 위해 cause를 반드시 로그에 남긴다.
 //  - 기본 10초를 기다리다 함수 타임아웃에 쫓기지 않도록 8초로 끊고 1회 재시도.
 // ─────────────────────────────────────────────────────────────
+// 2026-08-26: egenBeds·egenTrauma에만 붙어 있던 것을 E-Gen 프록시 6종 전부로 확대.
+// 나머지 4종은 맨 fetch라 상류가 한 번만 삐끗해도 그대로 502였다(실제로 egenHospitals가
+// "fetch failed"로 연속 실패). 재시도 없는 외부 호출은 프록시에서 만들면 안 된다.
 async function fetchUpstream(url, label, { timeoutMs = 8000, retries = 1 } = {}) {
   let lastErr;
   for (let attempt = 1; attempt <= retries + 1; attempt += 1) {
@@ -293,8 +296,7 @@ exports.egenSevere = onRequest(
     });
     if (stage2) params.set('STAGE2', stage2);
     try {
-      const r = await fetch(`${EGEN_SEVERE_BASE}?${params.toString()}`);
-      const raw = await r.text();
+      const raw = await fetchUpstream(`${EGEN_SEVERE_BASE}?${params.toString()}`, 'egenSevere');
       let json;
       try { json = JSON.parse(raw); }
       catch { res.status(502).json({ ok: false, error: 'upstream_non_json', detail: raw.slice(0, 120) }); return; }
@@ -311,8 +313,7 @@ exports.egenSevere = onRequest(
       });
       res.json({ ok: true, total: (body && body.totalCount) || hospitals.length, hospitals });
     } catch (e) {
-      console.error('egenSevere error:', e && (e.message || e));
-      res.status(502).json({ ok: false, error: String((e && e.message) || e).slice(0, 150) });
+      res.status(502).json(upstreamErrorPayload(e));
     }
   }
 );
@@ -399,8 +400,7 @@ exports.egenAed = onRequest(
     const params = new URLSearchParams({ serviceKey: key, Q0: q0, pageNo: '1', numOfRows: String(numOfRows), _type: 'json' });
     if (q1) params.set('Q1', q1);
     try {
-      const r = await fetch(`${AED_BASE}?${params.toString()}`);
-      const raw = await r.text();
+      const raw = await fetchUpstream(`${AED_BASE}?${params.toString()}`, 'egenAed');
       let json;
       try { json = JSON.parse(raw); }
       catch { res.status(502).json({ ok: false, error: 'upstream_non_json', detail: raw.slice(0, 120) }); return; }
@@ -419,8 +419,7 @@ exports.egenAed = onRequest(
       }));
       res.json({ ok: true, total: (body && body.totalCount) || aeds.length, aeds });
     } catch (e) {
-      console.error('egenAed error:', e && (e.message || e));
-      res.status(502).json({ ok: false, error: String((e && e.message) || e).slice(0, 150) });
+      res.status(502).json(upstreamErrorPayload(e));
     }
   }
 );
@@ -446,8 +445,7 @@ function egenRegionHandler(base, mapItem, key) {
     const params = new URLSearchParams({ serviceKey: svc, Q0: q0, pageNo: '1', numOfRows: String(numOfRows), _type: 'json' });
     if (q1) params.set('Q1', q1);
     try {
-      const r = await fetch(`${base}?${params.toString()}`);
-      const raw = await r.text();
+      const raw = await fetchUpstream(`${base}?${params.toString()}`, key);
       let json;
       try { json = JSON.parse(raw); }
       catch { res.status(502).json({ ok: false, error: 'upstream_non_json', detail: raw.slice(0, 120) }); return; }
@@ -457,8 +455,7 @@ function egenRegionHandler(base, mapItem, key) {
       const num = (v) => (v == null || v === '' ? null : Number(v));
       res.json({ ok: true, total: (body && body.totalCount) || items.length, [key]: items.map((it) => mapItem(it, num)) });
     } catch (e) {
-      console.error(`${key} error:`, e && (e.message || e));
-      res.status(502).json({ ok: false, error: String((e && e.message) || e).slice(0, 150) });
+      res.status(502).json(upstreamErrorPayload(e));
     }
   };
 }
