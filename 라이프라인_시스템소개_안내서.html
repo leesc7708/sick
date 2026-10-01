@@ -96,6 +96,12 @@ h3{margin:0; font-size:15px; font-weight:600; letter-spacing:-.01em}
   padding:20px 20px 22px;
 }
 .card.flat{background:transparent; border:0; border-top:2px solid var(--rule-2); border-radius:0; padding:16px 0 0}
+
+/* 고정 높이 페이지에서 바닥이 비는 시트 — 행이 남는 높이를 나눠 갖는다 */
+.g2.fillrows{align-content:stretch}
+.col{display:flex; flex-direction:column; min-height:0}
+.col > .tw{flex:1}
+.col > .tw > table{height:100%}
 .card.er{background:var(--red-soft); border-color:transparent}
 .card.work{background:var(--amber-soft); border-color:transparent}
 .card.care{background:var(--teal-soft); border-color:transparent}
@@ -164,6 +170,9 @@ tr:last-child td{border-bottom:0}
   border-bottom:1px solid var(--rule); display:flex; gap:9px;
 }
 .cmp p:last-child{border-bottom:0}
+.cmp.tall{flex:1; min-height:0}
+.cmp.tall > div{display:flex; flex-direction:column}
+.cmp.tall p{flex:1; align-items:center}
 .cmp p::before{font-family:var(--mono); font-weight:600; flex:none}
 .cmp .before p::before{content:"\00D7"; color:var(--red)}
 .cmp .after p::before{content:"\2713"; color:var(--green)}
@@ -211,7 +220,9 @@ tr:last-child td{border-bottom:0}
 a{color:var(--teal)}
 a:focus-visible{outline:2px solid var(--teal); outline-offset:3px}
 
-@media (max-width:900px){
+/* screen 한정 — 인쇄에까지 걸리면 용지 폭과 무관하게 1열로 쌓여
+   시트가 페이지보다 커지고 아래가 잘린다 */
+@media screen and (max-width:900px){
   .sheet{padding:36px 24px 40px 28px; min-height:0}
   .g2,.g3,.g4,.cmp{grid-template-columns:1fr}
   .cmp .after{border-left:0; border-top:1px solid var(--rule)}
@@ -222,14 +233,16 @@ a:focus-visible{outline:2px solid var(--teal); outline-offset:3px}
 }
 /* 인쇄: 1시트 = A4 가로 1페이지 정확히 */
 @media print{
-  @page{size:A4 landscape; margin:0}
+  /* 용지와 시트를 같은 mm 값으로 둔다 — px로 적으면 반올림 오차 0.3px에
+     페이지가 한 장 더 쪼개진다(A4 가로 = 793.70px이고 794px는 이미 넘친다). */
+  @page{size:297mm 210mm; margin:0}
   html,body{background:var(--sheet)}
   *{-webkit-print-color-adjust:exact; print-color-adjust:exact}
   .deck{gap:0; padding:0; display:block}
   .sheet{
     box-shadow:none; border:0; border-radius:0;
-    width:1122px; max-width:none; height:794px; min-height:0;
-    padding:46px 52px 44px 56px; overflow:hidden;
+    width:297mm; max-width:none; height:210mm; min-height:0;
+    padding:46px 52px 40px 56px; overflow:visible;
     break-after:page; page-break-after:always;
   }
   .sheet:last-child{break-after:auto; page-break-after:auto}
@@ -625,8 +638,8 @@ a:focus-visible{outline:2px solid var(--teal); outline-offset:3px}
 <section class="sheet" data-lane="sys">
   <div class="head"><span class="lane">보안 및 기술 특징</span><span class="no">Sheet 09</span></div>
   <h2>보안 및 기술 특징</h2>
-  <div class="g2 grow" style="gap:40px">
-    <div>
+  <div class="g2 grow fillrows" style="gap:40px">
+    <div class="col">
       <span class="eyebrow">보안 기능</span>
       <div class="tw">
         <table>
@@ -641,7 +654,7 @@ a:focus-visible{outline:2px solid var(--teal); outline-offset:3px}
         </table>
       </div>
     </div>
-    <div>
+    <div class="col">
       <span class="eyebrow">기술 특징</span>
       <div class="tw">
         <table>
@@ -657,6 +670,10 @@ a:focus-visible{outline:2px solid var(--teal); outline-offset:3px}
       </div>
     </div>
   </div>
+  <p class="note">
+    <b>두 열은 같은 원칙 위에 있습니다</b> &mdash; 권한도 장애도 화면에서 가리지 않고 규칙과 응답값으로 드러냅니다.
+    숨긴 권한은 우회되고, 숨긴 장애는 발견되지 않습니다.
+  </p>
 </section>
 
 <!-- 10 reliability -->
@@ -763,7 +780,7 @@ a:focus-visible{outline:2px solid var(--teal); outline-offset:3px}
   <div class="head"><span class="lane">기대 효과 &middot; Before / After</span><span class="no">Sheet 12</span></div>
   <h2>기대 효과</h2>
   <p class="dek">도입 전과 후에 현장에서 실제로 달라지는 것들입니다.</p>
-  <div class="cmp">
+  <div class="cmp tall">
     <div class="before">
       <div class="ch">도입 전 &mdash; Before</div>
       <p>응급 상황에서 어느 병원이 받아주는지 전화로 확인 &rarr; 골든타임 소진</p>

@@ -43,6 +43,11 @@ const chrome = spawn(CHROME, [
   const { result: { sessionId } } = await send('Target.attachToTarget', { targetId: page.targetId, flatten: true });
 
   await send('Page.enable', {}, sessionId);
+  // 뷰포트를 A4 가로 크기로 고정한다. 지정하지 않으면 헤드리스 기본 창(762px)으로
+  // 레이아웃돼 @media (max-width:900px) 모바일 규칙이 걸리고, 모든 단이 1열로
+  // 쌓여 시트가 페이지보다 커진다 — 화면과 전혀 다른 PDF가 나온다.
+  await send('Emulation.setDeviceMetricsOverride',
+    { width: 1123, height: 794, deviceScaleFactor: 1, mobile: false }, sessionId);
   const url = 'file:///' + SRC.replace(/\\/g, '/').replace(/[^\x00-\x7F]/g, (c) => encodeURIComponent(c));
   await send('Page.navigate', { url }, sessionId);
   await sleep(4500); // 웹폰트(IBM Plex) 로드 대기
@@ -53,6 +58,17 @@ const chrome = spawn(CHROME, [
     returnByValue: true,
   }, sessionId);
   console.log('로드 상태:', check.result.result.value);
+
+  // 인쇄 미디어로 전환해 실제 인쇄 레이아웃의 시트 높이를 확인한다
+  await send('Emulation.setEmulatedMedia', { media: 'print' }, sessionId);
+  await sleep(800);
+  const mm = await send('Runtime.evaluate', {
+    expression: `JSON.stringify({ vw: innerWidth, vh: innerHeight, dpr: devicePixelRatio,
+      font: getComputedStyle(document.body).fontFamily.slice(0, 24),
+      h: [...document.querySelectorAll('.sheet')].map(s => Math.round(s.getBoundingClientRect().height)) })`,
+    returnByValue: true,
+  }, sessionId);
+  console.log('인쇄 레이아웃:', mm.result.result.value);
 
   const { result } = await send('Page.printToPDF', {
     printBackground: true,
