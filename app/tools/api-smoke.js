@@ -118,7 +118,22 @@ async function checkBilling() {
   console.log(billLine + '\n');
 
   const targets = CHECKS.filter((c) => !(has('--no-ai') && c.fn === 'deptConsult'));
-  const results = await Promise.all(targets.map(hit));
+
+  // 순차 호출 + 429 1회 재시도.
+  // 동시에 7종을 때리면 콜드스타트에서 구글 관문이 429(Rate exceeded)를 내서
+  // 멀쩡한 서비스를 장애로 오판한다. 2026-08-26에 조사용 폴링이 그 자체로
+  // 상류 차단을 유발한 적도 있다 — 감시는 조용해야 한다.
+  const results = [];
+  for (const c of targets) {
+    let r = await hit(c);
+    if (!r.ok && /HTTP 429/.test(r.msg)) {
+      await new Promise((s) => setTimeout(s, 3000));
+      r = await hit(c);
+      if (r.ok) r.msg += ' (429 후 재시도 성공)';
+    }
+    results.push(r);
+    await new Promise((s) => setTimeout(s, 400));
+  }
 
   const pad = (s, n) => s + ' '.repeat(Math.max(0, n - [...s].reduce((a, ch) => a + (ch.charCodeAt(0) > 0x2500 ? 2 : 1), 0)));
   for (const r of results) {

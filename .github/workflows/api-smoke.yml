@@ -1,0 +1,89 @@
+# 라이프라인 외부 감시 — Firebase 밖(GitHub Actions)에서 매일 공개 엔드포인트를 두드린다.
+#
+# 왜 여기서 도는가: 2026-08-15와 2026-10-01, 두 번 다 Blaze 결제가 끊겨
+# /api/egen-* 전종이 503이 됐다. 결제가 꺼지면 Firebase 안에서 도는 감시도
+# 같이 죽기 때문에, 감시는 반드시 Firebase 밖에 있어야 한다.
+# 8월 사고 때 "11일" 동안 아무도 몰랐던 것을 "1일"로 줄이는 항목이 이것이다.
+name: API 스모크 (외부 감시)
+
+on:
+  schedule:
+    # 매일 00:10 UTC = 09:10 KST. 사람이 아침에 확인할 수 있는 시각.
+    - cron: '10 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      # secrets 컨텍스트는 step의 if에서 못 쓴다. job env로 올려 두고 env로 분기한다.
+      ADMIN_KEY_JSON: ${{ secrets.LIFELINE_ADMIN_KEY_JSON }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 결제 상태 확인에만 필요하다(google-auth-library는 firebase-functions의 전이 의존).
+      # 실패해도 엔드포인트 검사는 그대로 돌아야 하므로 막지 않는다.
+      - name: functions 의존성 설치 (결제 확인용)
+        working-directory: app/functions
+        run: npm ci --omit=dev --no-audit --no-fund || npm install --omit=dev --no-audit --no-fund
+        continue-on-error: true
+
+      # 선택: 저장소 시크릿 LIFELINE_ADMIN_KEY_JSON 에 서비스계정 키 JSON을 넣으면
+      # "결제 계정 미연결"을 엔드포인트가 죽기 전에 직접 잡는다. 없으면 생략된다.
+      - name: 서비스계정 키 배치 (선택)
+        if: env.ADMIN_KEY_JSON != ''
+        run: |
+          printf '%s' "$ADMIN_KEY_JSON" > "$RUNNER_TEMP/adminsdk.json"
+          echo "LIFELINE_ADMIN_KEY=$RUNNER_TEMP/adminsdk.json" >> "$GITHUB_ENV"
+
+      - name: 스모크 실행
+        working-directory: app
+        run: |
+          set -o pipefail
+          node tools/api-smoke.js 2>&1 | tee "$RUNNER_TEMP/smoke.log"
+
+      - name: 실패 시 이슈 열기 / 갱신
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo '외부 감시(API 스모크)가 실패했습니다.'
+            echo
+            echo '```'
+            cat "$RUNNER_TEMP/smoke.log"
+            echo '```'
+            echo
+            echo '전부 503이면 개별 버그가 아니라 결제/배포 문제입니다.'
+            echo '결제 재연결: https://console.cloud.google.com/billing/linkedaccount?project=wheresick-5617a'
+            echo
+            echo "실행 로그: $RUN_URL"
+          } > "$RUNNER_TEMP/body.md"
+          # 같은 장애로 이슈가 쌓이지 않게, 열려 있으면 댓글만 단다
+          gh label create api-outage --color B60205 --description "공개 API 스모크 실패" 2>/dev/null || true
+          NUM="$(gh issue list --state open --label api-outage --limit 1 --json number --jq '.[0].number // empty')"
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh issue create --title "🚨 라이프라인 API 장애 감지" --body-file "$RUNNER_TEMP/body.md" --label api-outage
+          fi
+
+      - name: 복구 시 이슈 닫기
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NUM="$(gh issue list --state open --label api-outage --limit 1 --json number --jq '.[0].number // empty')"
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body '✅ 스모크 전종 정상 — 자동으로 닫습니다.'
+            gh issue close "$NUM"
+          fi
